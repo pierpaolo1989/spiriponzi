@@ -1,0 +1,9 @@
+package com.soa.spiriponzi.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.soa.spiriponzi.model.Role;
+
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    Role findByName(String name);
+}

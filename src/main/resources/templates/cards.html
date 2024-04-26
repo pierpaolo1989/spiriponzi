@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Mensup - Add Menu</title>
+
+<!-- Custom fonts for this template-->
+<link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
+	type="text/css">
+<link
+	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+	rel="stylesheet">
+
+<!-- Custom styles for this template-->
+<link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+	<!-- Page Wrapper -->
+	<div id="wrapper">
+
+		<!-- Sidebar -->
+		<div th:replace="fragments/sidebar"></div>
+		<!-- End of Sidebar -->
+
+		<!-- Content Wrapper -->
+		<div id="content-wrapper" class="d-flex flex-column">
+
+			<!-- Main Content -->
+			<div id="content">
+
+				<!-- Topbar -->
+				<div th:replace="fragments/navbar"></div>
+				<!-- End of Topbar -->
+
+				<!-- Begin Page Content -->
+				<div class="container-fluid">
+
+					<!-- Page Heading -->
+					<div
+						class="d-sm-flex align-items-center justify-content-between mb-4">
+						<h1 class="h3 mb-0 text-gray-800">Menu</h1>
+					</div>
+
+					<div class="row">
+						<div class="col-xl-3 col-md-6 mb-4">
+							<div class="card border-left-info shadow h-100 py-2">
+								<div class="card-body">
+									<div class="row no-gutters align-items-center">
+										<div class="col mr-2">
+											<div
+												class="text-xs font-weight-bold text-info text-uppercase mb-1">
+												Nome menù</div>
+											<div class="h5 mb-0 font-weight-bold text-gray-800">
+												<input type="text" class="form-control">
+											</div>
+										</div>
+										<div class="col-auto">
+											<i class="fas fa-comments fa-2x text-gray-300"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-3 col-md-6 mb-4">
+							<div class="card border-left-warning shadow h-100 py-2">
+								<div class="card-body">
+									<div class="row no-gutters align-items-center">
+										<div class="col mr-2">
+											<div
+												class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+												Data inizio validità</div>
+											<div class="h5 mb-0 font-weight-bold text-gray-800">
+												<input type="text" class="form-control">
+											</div>
+										</div>
+										<div class="col-auto">
+											<i class="fas fa-calendar fa-2x text-gray-300"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-3 col-md-6 mb-4">
+							<div class="card border-left-danger shadow h-100 py-2">
+								<div class="card-body">
+									<div class="row no-gutters align-items-center">
+										<div class="col mr-2">
+											<div
+												class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+												Data fine validità</div>
+											<div class="h5 mb-0 font-weight-bold text-gray-800">
+												<input type="text" class="form-control">
+											</div>
+										</div>
+										<div class="col-auto">
+											<i class="fas fa-calendar fa-2x text-gray-300"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-3 col-md-6 mb-4">
+							<div class="card border-left-primary shadow h-100 py-2">
+								<div class="card-body">
+									<div class="row no-gutters align-items-center">
+										<div class="col mr-2">
+											<div
+												class="text-xs font-weight-bold primary text-uppercase mb-1">
+												Traduzione inglese</div>
+											<div class="h5 mb-0 font-weight-bold text-gray-800">
+												<input type="checkbox" class="form-control">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<hr class="divider">
+
+					<div class="row" style="margin-top: 3%;">
+
+						<div class="col-lg-8 offset-lg-2">
+
+							<!-- Collapsable Card Example -->
+							<div class="card shadow mb-4">
+								<!-- Card Header - Accordion -->
+								<a href="#antipasti" class="d-block card-header py-3"
+									data-toggle="collapse" role="button" aria-expanded="true"
+									aria-controls="collapseCardExample">
+									<h6 class="m-0 font-weight-bold text-primary">Antipasti</h6>
+								</a>
+								<!-- Card Content - Collapse -->
+								<div class="collapse" id="antipasti">
+									<div class="card-body">
+										<div class="form-row">
+											<table class="table table-bordered">
+												<thead>
+													<tr>
+														<th class="text-center">Nome</th>
+														<th class="text-center">Prezzo</th>
+														<th class="text-center"></th>
+													</tr>
+												</thead>
+												<tbody id="tbody_antipasti">
+
+												</tbody>
+											</table>
+										</div>
+										<button class="btn btn-md btn-primary" id="addBtnAntipasto"
+											type="button">
+											<i class="fas fa-fw fa-plus"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<div class="card shadow mb-4">
+								<!-- Card Header - Accordion -->
+								<a href="#primi" class="d-block card-header py-3"
+									data-toggle="collapse" role="button" aria-expanded="true"
+									aria-controls="collapseCardExample">
+									<h6 class="m-0 font-weight-bold text-primary">Primi</h6>
+								</a>
+								<!-- Card Content - Collapse -->
+								<div class="collapse" id="primi">
+									<div class="card-body">
+										<div class="form-row">
+											<table class="table table-bordered">
+												<thead>
+													<tr>
+														<th class="text-center">Nome</th>
+														<th class="text-center">Prezzo</th>
+														<th class="text-center"></th>
+													</tr>
+												</thead>
+												<tbody id="tbody">
+
+												</tbody>
+											</table>
+										</div>
+										<button class="btn btn-md btn-primary" id="addBtnPrimo"
+											type="button">
+											<i class="fas fa-fw fa-plus"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<div class="card shadow mb-4">
+								<!-- Card Header - Accordion -->
+								<a href="#secondi" class="d-block card-header py-3"
+									data-toggle="collapse" role="button" aria-expanded="true"
+									aria-controls="collapseCardExample">
+									<h6 class="m-0 font-weight-bold text-primary">Secondi</h6>
+								</a>
+								<!-- Card Content - Collapse -->
+								<div class="collapse" id="secondi">
+									<div class="card-body">
+										<div class="form-row">
+											<table class="table table-bordered">
+												<thead>
+													<tr>
+														<th class="text-center">Nome</th>
+														<th class="text-center">Prezzo</th>
+														<th class="text-center"></th>
+													</tr>
+												</thead>
+												<tbody id="tbody_secondi">
+
+												</tbody>
+											</table>
+										</div>
+										<button class="btn btn-md btn-primary" id="addBtnSecondo"
+											type="button">
+											<i class="fas fa-fw fa-plus"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="card shadow mb-4">
+								<!-- Card Header - Accordion -->
+								<a href="#dolci" class="d-block card-header py-3"
+									data-toggle="collapse" role="button" aria-expanded="true"
+									aria-controls="collapseCardExample">
+									<h6 class="m-0 font-weight-bold text-primary">Dolci</h6>
+								</a>
+								<!-- Card Content - Collapse -->
+								<div class="collapse" id="dolci">
+									<div class="card-body">
+										<div class="form-row">
+											<table class="table table-bordered">
+												<thead>
+													<tr>
+														<th class="text-center">Nome</th>
+														<th class="text-center">Prezzo</th>
+														<th class="text-center"></th>
+													</tr>
+												</thead>
+												<tbody id="tbody_dolci">
+
+												</tbody>
+											</table>
+										</div>
+										<button class="btn btn-md btn-primary" id="addBtnDolce"
+											type="button">
+											<i class="fas fa-fw fa-plus"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+							<center>
+								<div class="mb-3">
+									<button type="submit" class="btn btn-primary" id="saveMenuToDb">Salva</button>
+								</div>
+								
+								
+								
+								<img id="itemPreview" src="">
+								
+
+							</center>
+
+						</div>
+
+					</div>
+
+				</div>
+				<!-- /.container-fluid -->
+
+			</div>
+			<!-- End of Main Content -->
+
+			<!-- Footer -->
+			<div th:replace="fragments/footer"></div>
+			<!-- End of Footer -->
+
+		</div>
+		<!-- End of Content Wrapper -->
+
+	</div>
+	<!-- End of Page Wrapper -->
+
+	<!-- Bootstrap core JavaScript-->
+	<script src="vendor/jquery/jquery.min.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+	<!-- Core plugin JavaScript-->
+	<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+	<!-- Custom scripts for all pages-->
+	<script src="js/sb-admin-2.min.js"></script>
+
+	<script>
+	var count_antipasti = 1;
+	var count = 1;
+	var count_secondi = 1;
+	var count_dolci = 1;
+	$(document).ready(function() {
+		 $('#addBtnAntipasto').click(function () {
+	            let dynamicRowHTML = `
+	            <tr class="rowClass""> 
+	                <td class="row-index text-center"> 
+	                <input type="text" class="form-control"
+						placeholder="Nome piatto" id="antipasto_nome_${count_antipasti}">
+	                </td> 
+	                <td>
+	                <input type="number" class="form-control"
+						placeholder="Prezzo" id="antipasto_prezzo_${count_antipasti}">
+	                </td>
+	                <td class="text-center"> 
+	                    <button class="btn btn-danger remove"
+	                        type="button"><i class="fas fa-fw fa-trash"></i>
+	                    </button> 
+	                </td> 
+	            </tr>`;
+	            $('#tbody_antipasti').append(dynamicRowHTML);
+	            count_antipasti++;
+	        });
+	     $('#addBtnPrimo').click(function () {
+	            let dynamicRowHTML = `
+	            <tr class="rowClass""> 
+	                <td class="row-index text-center"> 
+	                <input type="text" class="form-control"
+						placeholder="Nome piatto" id="primo_nome_${count}">
+	                </td> 
+	                <td>
+	                <input type="number" class="form-control"
+						placeholder="Prezzo" id="primo_prezzo_${count}">
+	                </td>
+	                <td class="text-center"> 
+	                    <button class="btn btn-danger remove"
+	                        type="button"><i class="fas fa-fw fa-trash"></i>
+	                    </button> 
+	                </td> 
+	            </tr>`;
+	            $('#tbody').append(dynamicRowHTML);
+	            count++;
+	        });
+	    $('#addBtnSecondo').click(function () {
+	            let dynamicRowHTML = `
+	            <tr class="rowClass""> 
+	                <td class="row-index text-center"> 
+	                <input type="text" class="form-control"
+						placeholder="Nome piatto" id="secondo_nome_${count_secondi}">
+	                </td> 
+	                <td>
+	                <input type="number" class="form-control"
+						placeholder="Prezzo" id="secondo_prezzo_${count_secondi}">
+	                </td>
+	                <td class="text-center"> 
+	                    <button class="btn btn-danger remove"
+	                        type="button"><i class="fas fa-fw fa-trash"></i>
+	                    </button> 
+	                </td> 
+	            </tr>`;
+	            $('#tbody_secondi').append(dynamicRowHTML);
+	            count_secondi++;
+	        });
+	 
+	     $('#addBtnDolce').click(function () {
+	            let dynamicRowHTML = `
+	            <tr class="rowClass""> 
+	                <td class="row-index text-center"> 
+	                <input type="text" class="form-control"
+						placeholder="Nome piatto" id="dolce_nome_${count_dolci}">
+	                </td> 
+	                <td>
+	                <input type="number" class="form-control"
+						placeholder="Prezzo" id="dolce_prezzo_${count_dolci}">
+	                </td>
+	                <td class="text-center"> 
+	                    <button class="btn btn-danger remove"
+	                        type="button"><i class="fas fa-fw fa-trash"></i>
+	                    </button> 
+	                </td> 
+	            </tr>`;
+	            $('#tbody_dolci').append(dynamicRowHTML);
+	            count_dolci++;
+	        });
+	 
+	     	//Remove rows on tables
+	     	$('#tbody_antipasti').on('click', '.remove', function () {
+	            $(this).parent('td.text-center').parent('tr.rowClass').remove(); 
+	        });
+	        $('#tbody').on('click', '.remove', function () {
+	            $(this).parent('td.text-center').parent('tr.rowClass').remove(); 
+	        });
+	        $('#tbody_secondi').on('click', '.remove', function () {
+	            $(this).parent('td.text-center').parent('tr.rowClass').remove(); 
+	        });
+	        $('#tbody_dolci').on('click', '.remove', function () {
+	            $(this).parent('td.text-center').parent('tr.rowClass').remove(); 
+	        });
+	});
+	
+	$('#saveMenuToDb').click(function() {
+		
+		var url= "http://localhost:8080/menu";
+		var products = [];
+		
+		for (let i = 1; i < count; i++) {
+			var primo = {
+					"name" : $('#primo_nome_' + i).val(),
+					"price": $('#primo_prezzo_' + i).val(),
+					"category": "PRIMI"
+			}
+			products.push(primo);
+		}
+		
+		for (let i = 1; i < count_secondi; i++) {
+			var secondo = {
+					"name" : $('#secondo_nome_' + i).val(),
+					"price": $('#secondo_prezzo_' + i).val(),
+					"category": "SECONDI"
+			}
+			products.push(secondo);
+		}
+		
+		for (let i = 1; i < count_dolci; i++) {
+			var dolce = {
+					"name" : $('#dolce_nome_' + i).val(),
+					"price": $('#dolce_prezzo_' + i).val(),
+					"category": "SECONDI"
+			}
+			products.push(secondo);
+		}
+		
+		var menu = {};
+		menu.name = "test";
+		menu.products = products;
+		
+		$.ajax({
+			  url:url,
+			  type:"POST",
+			  data: JSON.stringify(menu),
+			  contentType:"application/json; charset=utf-8",
+			  dataType:"json",
+			  success: function(response){
+				  console.log(response)
+				  $('#itemPreview').attr('src', `data:image/png;base64,${response}`);
+			  }
+			})
+		 
+	})
+	</script>
+
+</body>
+
+</html>
