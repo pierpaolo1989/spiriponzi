@@ -32,9 +32,12 @@ public class SecurityConfig {
                                 .requestMatchers("/index").permitAll()
                                 .requestMatchers("/menu/**").permitAll()
                                 .requestMatchers("/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
-                                .requestMatchers("/users").hasRole("USER")
-                                .requestMatchers("/cards").hasRole("USER")
-                                .requestMatchers("/list-menu").hasRole("USER")
+                                .requestMatchers("/dashboard").hasRole("USER")
+                                .requestMatchers("/claims").hasRole("USER")
+                                .requestMatchers("/report").hasRole("USER")
+                                .requestMatchers("/withdraws").hasRole("USER")
+                                .requestMatchers("/withdraw-requests").hasRole("USER")
+                                .requestMatchers("/recover-password").hasRole("USER")
                 ).formLogin(
                         form -> form
                                 .loginPage("/login")

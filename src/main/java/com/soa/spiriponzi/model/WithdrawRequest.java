@@ -35,5 +35,11 @@ public class WithdrawRequest {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Column
+    private double amount;
+    @Column
+    private String transactionId;
+    @Column
+    private String currency;
 
 }

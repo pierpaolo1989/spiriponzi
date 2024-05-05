@@ -52,7 +52,7 @@
 					<!-- Page Heading -->
 					<div
 						class="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 class="h3 mb-0 text-gray-800">Elenco Menu</h1>
+						<h1 class="h3 mb-0 text-gray-800">Withdraw Requests</h1>
 					</div>
 
 					<hr class="divider">
@@ -60,15 +60,15 @@
 					<div class="row" style="margin-top: 3%;">
 
 						<div class="col-lg-10 offset-lg-1">
-							<table id="table_menu" class="display table">
+							<table id="table_menu" class="display table" style="min-height:200px;">
 								<thead>
 									<tr>
 										<th>Id</th>
-										<th>Nome</th>
-										<th>Data inizio validità</th>
-										<th>Data fine validità</th>
-										<th>QR Code</th>
-										<th>Azioni</th>
+										<th>Currency</th>
+										<th>Amount</th>
+										<th>Date</th>
+										<th>Status</th>
+										<th>Transaction ID</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -109,38 +109,34 @@
  			{{#each this}}
 		 		 <tr>
 		 			<td>{{id}}</td>
-					<td>{{name}}</td>
-					<td>{{dateValidityFrom}}</td>
-					<td>{{dateValidityTo}}</td>
-					<td><input type="text" class="form-control"></td>
-					<td> <button class="btn btn-danger remove"
-	                        type="button"><i class="fas fa-fw fa-trash"></i>
-	                    </button> </td>
+					<td>{{currency}}</td>
+					<td>{{amount}}</td>
+					<td>{{date}}</td>
+					<td>{{status}}</td>
+					<td>{{transactionId}}</td>
 				</tr>
 		  {{/each}}
 		</script>
-
 
 		<script>
 			$(document).ready(function() {
 				var row_source = $("#row_template").html();
 				var row_template = Handlebars.compile(row_source);
 				$.ajax({
-					url : "http://localhost:8080/menu",
+					url : "http://localhost:8080/withdraws",
 					type : "GET",
 					contentType : "application/json; charset=utf-8",
 					dataType : "json",
 					success : function(response) {
-
-						$('#table_menu tbody').append(row_template(response));
-
-						response.forEach(function(number) {
-							$('#table_menu tbody').append(row_template);
-						});
-
+						if (response.length === 0) {
+							$('#table_menu tbody').append("<td colspan=6>No data available</td>");
+						} else {
+							response.forEach(function(number) {
+								$('#table_menu tbody').append(row_template);
+							});
+						}
 					}
 				})
-
 			});
 		</script>
 </body>

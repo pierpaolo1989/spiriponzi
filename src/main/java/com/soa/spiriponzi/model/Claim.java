@@ -30,6 +30,8 @@ public class Claim {
 	private Long id;
     @Column(nullable=false)
 	private LocalDateTime dateRequest;
+    @Column(nullable=false)
+	private double amount;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
