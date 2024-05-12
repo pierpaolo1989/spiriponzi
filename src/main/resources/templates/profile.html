@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Spiriponzi - Profile</title>
+
+<link th:href="@{vendor/fontawesome-free/css/all.min.css}"
+	rel="stylesheet" type="text/css">
+
+<!-- Custom fonts for this template-->
+<link
+	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+	rel="stylesheet">
+
+<!-- Custom styles for this template-->
+<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
+
+</head>
+
+<body id="page-top">
+
+	<!-- Page Wrapper -->
+	<div id="wrapper">
+
+		<!-- Sidebar -->
+		<div th:replace="fragments/sidebar"></div>
+		<!-- End of Sidebar -->
+
+		<!-- Content Wrapper -->
+		<div id="content-wrapper" class="d-flex flex-column">
+
+			<!-- Main Content -->
+			<div id="content">
+
+				<!-- Topbar -->
+				<div th:replace="fragments/navbar"></div>
+				<!-- End of Topbar -->
+
+				<!-- Begin Page Content -->
+				<div class="container-fluid">
+
+					<!-- Page Heading -->
+					<div
+						class="d-sm-flex align-items-center justify-content-between mb-4">
+						<h1 class="h3 mb-0 text-gray-800">Profile</h1>
+						<i class="fas fa-money fa-sm text-white-50"></i>
+					</div>
+
+					<!-- Content Row -->
+					<div th:replace="fragments/summary"></div>
+					
+					<hr class="divider">
+
+					<!-- Content Row -->
+
+					<div class="row" style="margin-top: 2%;">
+
+						<!-- Area Chart -->
+						<div class="col-lg-10 mb-4 offset-lg-1">
+							<div class="card shadow mb-12">
+								<div
+									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+									<h6 class="m-0 font-weight-bold text-primary">Personal
+										Data</h6>
+								</div>
+								<!-- Card Body -->
+								<div class="card-body">
+									<div class="chart-area">
+									<div class="row">
+										<div class = "col-lg-5">
+											<img class="img-profile rounded-circle text-center" width="50%"
+												src="img/undraw_profile.svg" style="margin-left:25%; margin-top: 3%;">
+										</div>
+										<div class="col-lg-7">
+										<form method="POST" enctype="utf8" class="text-center"  th:action="@{/user-data}" 
+											th:object="${updateUser}">
+											<div class="form-group mb-6">
+												<label class="form-label">Email</label> <input
+													class="form-control" id="text" name="email"
+													th:field="*{email}" type="text" readonly />
+											</div>
+
+											<div class="form-group mb-6">
+
+												<label class="form-label">BTC Wallet</label> <input
+													class="form-control" id="btcWallet" name="btcWallet"
+													th:field="*{btcWallet}" type="text" />
+											</div>
+
+											<div class="form-group mb-6">
+
+												<label class="form-label">ETH Wallet</label> <input
+													class="form-control" id="ethWallet" name="ethWallet"
+													th:field="*{ethWallet}" type="text" />
+											</div>
+
+
+											<button class="btn btn-primary" id="claim_button">SAVE</button>
+										</form>
+										</div>
+									</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+				<!-- /.container-fluid -->
+
+			</div>
+			<!-- End of Main Content -->
+
+			<!-- Footer -->
+			<div th:replace="fragments/footer"></div>
+			<!-- End of Footer -->
+
+		</div>
+		<!-- End of Content Wrapper -->
+
+	</div>
+	<!-- End of Page Wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
+	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+	<!-- Core plugin JavaScript-->
+	<script th:src="@{vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+	<script type="text/javascript" th:src="@{/js/sb-admin-2.min.js}"></script>
+
+	<!-- Page level plugins -->
+	<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
+
+</body>
+
+</html>

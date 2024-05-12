@@ -17,6 +17,8 @@ public class UserDto
     private Long id;
     private String firstName;
     private String lastName;
+    private String ethWallet;
+    private String btcWallet;
     @NotEmpty(message = "Email should not be empty")
     @Email
     private String email;

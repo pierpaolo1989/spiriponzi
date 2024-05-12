@@ -11,9 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.soa.spiriponzi.dto.WithdrawDto;
+import com.soa.spiriponzi.exception.WithdrawalException;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.WithdrawRequest;
+import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.WithdrawRepository;
+import com.soa.spiriponzi.utils.Constants;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class WithdrawServiceImpl implements WithdrawService {
 
 	private final WithdrawRepository withdrawRepository;
+	private final UserRepository userRepository;
 
 	@Override
 	public List<WithdrawDto> findByUser(String email, int page, int size) {
@@ -40,12 +44,14 @@ public class WithdrawServiceImpl implements WithdrawService {
 
 	@Override
 	public void startRequest(String email, WithdrawDto request) {
+		User user = userRepository.findByEmail(email);
+		if(user.getUserStats().getAnnualPoints() < Constants.LIMIT_WITHDRAWAL) {
+			throw new WithdrawalException();
+		}
 		var entity = new WithdrawRequest();
 		entity.setAmount(request.getAmount());
 		entity.setDateRequest(LocalDateTime.now());
 		entity.setStatus("PENDING");
-		User user = new User();
-		user.setEmail(email);
 		entity.setUser(user);
 		entity.setCurrency(request.getCurrency());
 		withdrawRepository.save(entity);

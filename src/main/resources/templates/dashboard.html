@@ -55,95 +55,7 @@
 					</div>
 
 					<!-- Content Row -->
-					<div class="row">
-
-						<!-- Earnings (Monthly) Card Example -->
-						<div class="col-xl-3 col-md-6 mb-4">
-							<div class="card border-left-primary shadow h-100 py-2">
-								<div class="card-body">
-									<div class="row no-gutters align-items-center">
-										<div class="col mr-2">
-											<div
-												class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-												Points (Monthly)</div>
-											<div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-										</div>
-										<div class="col-auto">
-											<i class="fas fa-calendar fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Earnings (Monthly) Card Example -->
-						<div class="col-xl-3 col-md-6 mb-4">
-							<div class="card border-left-success shadow h-100 py-2">
-								<div class="card-body">
-									<div class="row no-gutters align-items-center">
-										<div class="col mr-2">
-											<div
-												class="text-xs font-weight-bold text-success text-uppercase mb-1">
-												Points (Annual)</div>
-											<div class="h5 mb-0 font-weight-bold text-gray-800">${user.balance}</div>
-										</div>
-										<div class="col-auto">
-											<i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Earnings (Monthly) Card Example -->
-						<div class="col-xl-3 col-md-6 mb-4">
-							<div class="card border-left-info shadow h-100 py-2">
-								<div class="card-body">
-									<div class="row no-gutters align-items-center">
-										<div class="col mr-2">
-											<div
-												class="text-xs font-weight-bold text-info text-uppercase mb-1">Number of claims
-											</div>
-											<div class="row no-gutters align-items-center">
-												<div class="col-auto">
-													<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-												</div>
-												<div class="col">
-													<div class="progress progress-sm mr-2">
-														<div class="progress-bar bg-info" role="progressbar"
-															style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-															aria-valuemax="100"></div>
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="col-auto">
-											<i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Pending Requests Card Example -->
-						<div class="col-xl-3 col-md-6 mb-4">
-							<div class="card border-left-warning shadow h-100 py-2">
-								<div class="card-body">
-									<div class="row no-gutters align-items-center">
-										<div class="col mr-2">
-											<div
-												class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-												Withdrawals</div>
-											<div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
-										</div>
-										<div class="col-auto">
-											<i class="fas fa-comments fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+					<div th:replace="fragments/summary"></div>
 
 					<!-- Content Row -->
 
@@ -165,16 +77,18 @@
 												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
 											<span id="captchaError" class="alert alert-danger col-sm-4"
 												style="display: none"></span>
-											<div id="countdown" style="display: none;">01:00:00</div>
+											<div id="countdown"
+												style="display: none; color: black; font-size: 30px; font-weight: bold; margin-top: 2%;">01:00:00</div>
 										</form>
-										<div class="row text-center">
+										<div class="text-center"
+											style="color: black; font-size: 30px; font-weight: bold;">
 											<span><strong>You can claim every hour !!!</strong></span>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-						
+
 						<div class="col-lg-6 mb-4">
 							<div class="card shadow mb-4">
 								<div
@@ -188,12 +102,14 @@
 											<button class="btn btn-primary" id="claim_button_eth">CLAIM</button>
 											<div class="g-recaptcha col-sm-5 text-center"
 												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
-											<span id="captchaError_eth" class="alert alert-danger col-sm-4"
-												style="display: none"></span>
-											<div id="countdown" style="display: none;">01:00:00</div>
+											<span id="captchaError_eth"
+												class="alert alert-danger col-sm-4" style="display: none"></span>
+											<div id="countdown"
+												style="display: none; color: black; font-size: 25px; font-weight: bold;">01:00:00</div>
 										</form>
 										<div class="row">
-											<span class="text-center"><strong>You can claim every hour !!!</strong></span>
+											<span class="text-center"><strong>You can
+													claim every hour !!!</strong></span>
 										</div>
 									</div>
 								</div>
@@ -210,17 +126,27 @@
 							<!-- Project Card Example -->
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">WHY SPIRIPONZI?</h6>
+									<h6 class="m-0 font-weight-bold text-primary">WHY
+										SPIRIPONZI?</h6>
 								</div>
 								<div class="card-body">
-								
-								Charles Ponzi was an Italian swindler and con artist who operated in the U.S. and Canada.
 
-Born in Lugo, Italy, he became known in the early 1920s as a swindler in North America for his money-making scheme. He promised clients a 50% profit within 45 days or 100% profit within 90 days, by buying discounted postal reply coupons in other countries and redeeming them at face value in the U.S. as a form of arbitrage: In reality, Ponzi was paying earlier investors using the investments of later investors. While this type of fraudulent investment scheme was not invented by Ponzi, it became so identified with him that it now is referred to as a "Ponzi scheme". His scheme ran for over a year before it collapsed, costing his "investors" $20 million.
-
-Ponzi may have been inspired by the scheme of William W. Miller (also known as "520% Miller"), a Brooklyn book-keeper who in 1899 used a similar deception to take in $1 million (approximately $35 million in 2022).
-								<br>
-								<br>
+									Charles Ponzi was an Italian swindler and con artist who
+									operated in the U.S. and Canada. Born in Lugo, Italy, he became
+									known in the early 1920s as a swindler in North America for his
+									money-making scheme. He promised clients a 50% profit within 45
+									days or 100% profit within 90 days, by buying discounted postal
+									reply coupons in other countries and redeeming them at face
+									value in the U.S. as a form of arbitrage: In reality, Ponzi was
+									paying earlier investors using the investments of later
+									investors. While this type of fraudulent investment scheme was
+									not invented by Ponzi, it became so identified with him that it
+									now is referred to as a "Ponzi scheme". His scheme ran for over
+									a year before it collapsed, costing his "investors" $20
+									million. Ponzi may have been inspired by the scheme of William
+									W. Miller (also known as "520% Miller"), a Brooklyn book-keeper
+									who in 1899 used a similar deception to take in $1 million
+									(approximately $35 million in 2022). <br> <br>
 									<h4 class="small font-weight-bold">
 										Payout Details <span class="float-right">80%</span>
 									</h4>
@@ -250,22 +176,6 @@ Ponzi may have been inspired by the scheme of William W. Miller (also known as "
 										</div>
 									</div>
 								</div>
-								<div class="col-lg-6 mb-4">
-									<div class="card bg-success text-white shadow">
-										<div class="card-body">
-											Success
-											<div class="text-white-50 small">#1cc88a</div>
-										</div>
-									</div>
-								</div>
-								<div class="col-lg-6 mb-4">
-									<div class="card bg-info text-white shadow">
-										<div class="card-body">
-											Info
-											<div class="text-white-50 small">#36b9cc</div>
-										</div>
-									</div>
-								</div>
 							</div>
 
 						</div>
@@ -292,29 +202,6 @@ Ponzi may have been inspired by the scheme of William W. Miller (also known as "
 		class="fas fa-angle-up"></i>
 	</a>
 
-	<!-- Logout Modal-->
-	<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog"
-		aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-					<button class="close" type="button" data-dismiss="modal"
-						aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
-				</div>
-				<div class="modal-body">Select "Logout" below if you are ready
-					to end your current session.</div>
-				<div class="modal-footer">
-					<button class="btn btn-secondary" type="button"
-						data-dismiss="modal">Cancel</button>
-					<a class="btn btn-primary" th:href="@{/logout}">Logout</a>
-				</div>
-			</div>
-		</div>
-	</div>
-
 	<!-- Bootstrap core JavaScript-->
 	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
 	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
@@ -328,30 +215,27 @@ Ponzi may have been inspired by the scheme of William W. Miller (also known as "
 	<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
 
 	<!-- Page level custom scripts -->
-	<script th:src="@{js/demo/chart-area-demo.js}"></script>
-	<script th:src="@{js/demo/chart-pie-demo.js}"></script>
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
-$(function () {
-	jQuery.fn.extend({
-    	countdown: function () {
-        	// 1 hour countdown
-            let hour = 1, min = 0, sec = 0
-            render(hour, min, sec)
-            
-            const timer = setInterval(() => {
-            	if (hour == 0 && min == 0 && sec == 0) {
-                	clearInterval(timer)
-                    return ;
-                }
-                
-            	sec = dealSec(sec)
-                min = dealMin(min, sec)
-                hour = dealhour(hour, min, sec)
-                render(hour, min, sec)
-            }, 1000)
-        },
-    })
+	$(function () {
+		jQuery.fn.extend({
+	    	countdown: function () {
+	            let hour = 1, min = 0, sec = 0
+	            render(hour, min, sec)
+	            
+	            const timer = setInterval(() => {
+	            	if (hour == 0 && min == 0 && sec == 0) {
+	                	clearInterval(timer)
+	                    return ;
+	                }
+	                
+	            	sec = dealSec(sec)
+	                min = dealMin(min, sec)
+	                hour = dealhour(hour, min, sec)
+	                render(hour, min, sec)
+	            }, 1000)
+	        },
+    	})
 })
 
 
@@ -366,7 +250,7 @@ function register(event) {
     var serverContext = "http://localhost:8080/"
 
     var formData= $('form').serialize();
-    $.post(serverContext + "claims", formData, function(data){
+    $.post(serverContext + "claims", formData, function(data) {
         	$('#countdown').css('display','block');
     		$('#countdown').countdown();
     })

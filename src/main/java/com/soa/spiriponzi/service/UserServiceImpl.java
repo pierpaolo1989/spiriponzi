@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.Role;
 import com.soa.spiriponzi.model.User;
@@ -34,6 +35,14 @@ public class UserServiceImpl implements UserService {
             role = checkRoleExist();
         }
         user.setRoles(Arrays.asList(role));
+        userRepository.save(user);
+    }
+    
+    @Override
+    public void updateUser(UpdateUserDto userDto) {
+        var user = userRepository.findByEmail(userDto.getEmail());
+        user.setBtcWallet(userDto.getBtcWallet());
+        user.setEthWallet(userDto.getEthWallet());
         userRepository.save(user);
     }
 

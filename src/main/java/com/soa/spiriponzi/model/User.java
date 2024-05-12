@@ -40,7 +40,7 @@ public class User {
     @Column
 	private String btcWallet;
     @Column
-	private String ethWalet;
+	private String ethWallet;
     @Column
     private double balance;
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)

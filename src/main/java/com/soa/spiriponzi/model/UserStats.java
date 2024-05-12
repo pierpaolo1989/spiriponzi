@@ -28,13 +28,13 @@ public class UserStats {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
     @Column
-	private double monthlyPoints;
+	private int monthlyPoints;
     @Column
-	private double annualPoints;
+	private int annualPoints;
     @Column
-	private double numberOfClaims;
+	private int numberOfClaims;
     @Column
-	private double withdrawals;
+	private int withdrawals;
     @Column
     private LocalDateTime lastRequest;
     @OneToOne(mappedBy = "userStats")

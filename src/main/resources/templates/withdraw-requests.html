@@ -10,7 +10,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>Mensup - List Menu</title>
+<title>Spiriponzi - List Menu</title>
 
 <!-- Custom fonts for this template-->
 <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
@@ -60,7 +60,12 @@
 					<div class="row" style="margin-top: 3%;">
 
 						<div class="col-lg-10 offset-lg-1">
-							<table id="table_menu" class="display table" style="min-height:200px;">
+							
+							<button class="btn btn-primary float-right" id="start_withdraw"
+								style="margin-bottom: 3%;">START WITHDRAW</button>
+								
+							<table id="table_menu" class="display table"
+								style="min-height: 200px;">
 								<thead>
 									<tr>
 										<th>Id</th>
@@ -119,25 +124,36 @@
 		</script>
 
 		<script>
-			$(document).ready(function() {
-				var row_source = $("#row_template").html();
-				var row_template = Handlebars.compile(row_source);
-				$.ajax({
-					url : "http://localhost:8080/withdraws",
-					type : "GET",
-					contentType : "application/json; charset=utf-8",
-					dataType : "json",
-					success : function(response) {
-						if (response.length === 0) {
-							$('#table_menu tbody').append("<td colspan=6>No data available</td>");
-						} else {
-							response.forEach(function(number) {
-								$('#table_menu tbody').append(row_template);
+			$(document)
+					.ready(
+							function() {
+								var row_source = $("#row_template").html();
+								var row_template = Handlebars
+										.compile(row_source);
+								$
+										.ajax({
+											url : "http://localhost:8080/withdraws",
+											type : "GET",
+											contentType : "application/json; charset=utf-8",
+											dataType : "json",
+											success : function(response) {
+												if (response.length === 0) {
+													$('#table_menu tbody')
+															.append(
+																	"<td colspan=6>No data available</td>");
+												} else {
+													response
+															.forEach(function(
+																	number) {
+																$(
+																		'#table_menu tbody')
+																		.append(
+																				row_template);
+															});
+												}
+											}
+										})
 							});
-						}
-					}
-				})
-			});
 		</script>
 </body>
 

@@ -34,8 +34,11 @@ public class SecurityConfig {
                                 .requestMatchers("/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
                                 .requestMatchers("/dashboard").hasRole("USER")
                                 .requestMatchers("/claims").hasRole("USER")
+                                .requestMatchers("/user-data").hasRole("USER")
+                                .requestMatchers("/surf-ads").hasRole("USER")
                                 .requestMatchers("/report").hasRole("USER")
                                 .requestMatchers("/withdraws").hasRole("USER")
+                                .requestMatchers("/profile").hasRole("USER")
                                 .requestMatchers("/withdraw-requests").hasRole("USER")
                                 .requestMatchers("/recover-password").hasRole("USER")
                 ).formLogin(
