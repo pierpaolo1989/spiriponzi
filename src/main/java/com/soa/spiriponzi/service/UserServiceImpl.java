@@ -12,8 +12,10 @@ import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.Role;
 import com.soa.spiriponzi.model.User;
+import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.repository.RoleRepository;
 import com.soa.spiriponzi.repository.UserRepository;
+import com.soa.spiriponzi.repository.UserStatsRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserStatsRepository userStatsRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -69,4 +72,9 @@ public class UserServiceImpl implements UserService {
         role.setName("ROLE_USER");
         return roleRepository.save(role);
     }
+
+	@Override
+	public UserStats findStatsByEmail(String email) {
+		return userStatsRepository.findByUserEmail(email).orElse(null);
+	}
 }

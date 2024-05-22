@@ -9,11 +9,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.soa.spiriponzi.dto.ClaimDto;
-import com.soa.spiriponzi.dto.GenericResponse;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ClaimService;
 
@@ -36,7 +34,7 @@ public class ClaimController {
         try {
         	claimService.startClaim(authentication.getName());
 		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatusCode.valueOf(400));
+			//return new ResponseEntity<>(HttpStatusCode.valueOf(400));
 		}
         
         return ResponseEntity.ok(null);

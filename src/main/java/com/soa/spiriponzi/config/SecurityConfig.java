@@ -30,17 +30,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) ->
                         authorize.requestMatchers("/register/**").permitAll()
                                 .requestMatchers("/index").permitAll()
+                                .requestMatchers("/recover-password").permitAll()
                                 .requestMatchers("/menu/**").permitAll()
                                 .requestMatchers("/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
                                 .requestMatchers("/dashboard").hasRole("USER")
                                 .requestMatchers("/claims").hasRole("USER")
                                 .requestMatchers("/user-data").hasRole("USER")
+                                .requestMatchers("/users/**").hasRole("USER")
                                 .requestMatchers("/surf-ads").hasRole("USER")
+                                .requestMatchers("/survey").hasRole("USER")
                                 .requestMatchers("/report").hasRole("USER")
                                 .requestMatchers("/withdraws").hasRole("USER")
                                 .requestMatchers("/profile").hasRole("USER")
                                 .requestMatchers("/withdraw-requests").hasRole("USER")
-                                .requestMatchers("/recover-password").hasRole("USER")
                 ).formLogin(
                         form -> form
                                 .loginPage("/login")

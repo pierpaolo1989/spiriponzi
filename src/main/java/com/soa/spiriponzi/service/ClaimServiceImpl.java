@@ -40,7 +40,7 @@ public class ClaimServiceImpl implements ClaimService {
 		
 		//Update stats --> transform in async
 		java.util.Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(email);
-		if(optUserStats.isEmpty()) {
+		if (optUserStats.isEmpty()) {
 			var userStats = new UserStats();
 			userStats.setNumberOfClaims(1);
 			userStats.setMonthlyPoints(amount);
@@ -52,8 +52,13 @@ public class ClaimServiceImpl implements ClaimService {
 			
 		} else {
 			UserStats userStats = optUserStats.get();
-			if(now.isBefore(userStats.getLastRequest().plusHours(1))) {
+			/*if (now.isBefore(userStats.getLastRequest().plusHours(1))) {
 				throw new ClaimException();
+			}*/
+			if (userStats.getLastRequest().getMonth() == claim.getDateRequest().getMonth()) {
+				userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
+			} else {
+				userStats.setMonthlyPoints(amount);
 			}
 			userStats.setNumberOfClaims(userStats.getNumberOfClaims() + 1);
 			userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
@@ -66,7 +71,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	public List<ClaimDto> findByUser(String email) {
-		List<Claim> claims = claimRepository.findByUserEmail(email);
+		List<Claim> claims = claimRepository.findTop10ByUserEmailOrderByDateRequestDesc(email);
 		return claims.stream().map(obj -> {
 			return ClaimDto.builder()
 					.amount(obj.getAmount())

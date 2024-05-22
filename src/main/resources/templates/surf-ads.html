@@ -23,6 +23,13 @@
 <!-- Custom styles for this template-->
 <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
 
+<style>
+iframe {
+	width: -webkit-fill-available !important;
+	min-height: 600px !important;
+}
+</style>
+
 </head>
 
 <body id="page-top">
@@ -62,123 +69,19 @@
 					<div class="row">
 
 						<!-- Area Chart -->
-						<div class="col-lg-6 mb-4">
+						<div class="col-lg-12 mb-4">
 							<div class="card shadow mb-4">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Claim BTC</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Bitlabs</h6>
 								</div>
 								<!-- Card Body -->
-								<div class="card-body">
-									<div class="chart-area">
-										<form method="POST" enctype="utf8" class="text-center">
-											<button class="btn btn-primary" id="claim_button">CLAIM</button>
-											<div class="g-recaptcha col-sm-5 text-center"
-												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
-											<span id="captchaError" class="alert alert-danger col-sm-4"
-												style="display: none"></span>
-											<div id="countdown"
-												style="display: none; color: black; font-size: 30px; font-weight: bold; margin-top: 2%;">01:00:00</div>
-										</form>
-										<div class="text-center"
-											style="color: black; font-size: 30px; font-weight: bold;">
-											<span><strong>You can claim every hour !!!</strong></span>
-										</div>
-									</div>
+								<div class="card-body" style="min-height: 600px;">
+										<iframe src="https://web.bitlabs.ai/?uid=4jHuQ9EeNg_bMkw0NSAc3&token=fa47896b-dbff-47a7-bf0b-3e3b132174bb"></iframe>
 								</div>
 							</div>
 						</div>
 
-						<div class="col-lg-6 mb-4">
-							<div class="card shadow mb-4">
-								<div
-									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Claim ETH</h6>
-								</div>
-								<!-- Card Body -->
-								<div class="card-body">
-									<div class="chart-area">
-										<form method="POST" enctype="utf8" class="text-center">
-											<button class="btn btn-primary" id="claim_button_eth">CLAIM</button>
-											<div class="g-recaptcha col-sm-5 text-center"
-												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
-											<span id="captchaError_eth"
-												class="alert alert-danger col-sm-4" style="display: none"></span>
-											<div id="countdown"
-												style="display: none; color: black; font-size: 25px; font-weight: bold;">01:00:00</div>
-										</form>
-										<div class="row">
-											<span class="text-center"><strong>You can
-													claim every hour !!!</strong></span>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Content Row -->
-					<div class="row">
-
-						<!-- Content Column -->
-						<div class="col-lg-8 mb-4 offset-lg-2">
-
-							<!-- Project Card Example -->
-							<div class="card shadow mb-4">
-								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">WHY
-										SPIRIPONZI?</h6>
-								</div>
-								<div class="card-body">
-
-									Charles Ponzi was an Italian swindler and con artist who
-									operated in the U.S. and Canada. Born in Lugo, Italy, he became
-									known in the early 1920s as a swindler in North America for his
-									money-making scheme. He promised clients a 50% profit within 45
-									days or 100% profit within 90 days, by buying discounted postal
-									reply coupons in other countries and redeeming them at face
-									value in the U.S. as a form of arbitrage: In reality, Ponzi was
-									paying earlier investors using the investments of later
-									investors. While this type of fraudulent investment scheme was
-									not invented by Ponzi, it became so identified with him that it
-									now is referred to as a "Ponzi scheme". His scheme ran for over
-									a year before it collapsed, costing his "investors" $20
-									million. Ponzi may have been inspired by the scheme of William
-									W. Miller (also known as "520% Miller"), a Brooklyn book-keeper
-									who in 1899 used a similar deception to take in $1 million
-									(approximately $35 million in 2022). <br> <br>
-									<h4 class="small font-weight-bold">
-										Payout Details <span class="float-right">80%</span>
-									</h4>
-									<div class="progress mb-4">
-										<div class="progress-bar bg-info" role="progressbar"
-											style="width: 80%" aria-valuenow="80" aria-valuemin="0"
-											aria-valuemax="100"></div>
-									</div>
-									<h4 class="small font-weight-bold">
-										Account Setup <span class="float-right">Complete!</span>
-									</h4>
-									<div class="progress">
-										<div class="progress-bar bg-success" role="progressbar"
-											style="width: 100%" aria-valuenow="100" aria-valuemin="0"
-											aria-valuemax="100"></div>
-									</div>
-								</div>
-							</div>
-
-							<!-- Color System -->
-							<div class="row">
-								<div class="col-lg-12 mb-12">
-									<div class="card bg-primary text-white shadow">
-										<div class="card-body">
-											Primary
-											<div class="text-white-50 small">#4e73df</div>
-										</div>
-									</div>
-								</div>
-							</div>
-
-						</div>
 					</div>
 
 				</div>
@@ -216,83 +119,6 @@
 
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
-	<script>
-	$(function () {
-		jQuery.fn.extend({
-	    	countdown: function () {
-	            let hour = 1, min = 0, sec = 0
-	            render(hour, min, sec)
-	            
-	            const timer = setInterval(() => {
-	            	if (hour == 0 && min == 0 && sec == 0) {
-	                	clearInterval(timer)
-	                    return ;
-	                }
-	                
-	            	sec = dealSec(sec)
-	                min = dealMin(min, sec)
-	                hour = dealhour(hour, min, sec)
-	                render(hour, min, sec)
-	            }, 1000)
-	        },
-    	})
-})
-
-
-$(document).ready(function () {
-	$('form').submit(function(event) {
-		register(event);
-	});
-});
-
-function register(event) {
-    event.preventDefault();
-    var serverContext = "http://localhost:8080/"
-
-    var formData= $('form').serialize();
-    $.post(serverContext + "claims", formData, function(data) {
-        	$('#countdown').css('display','block');
-    		$('#countdown').countdown();
-    })
-    .fail(function(data) {
-        grecaptcha.reset();
-        
-        if(data.responseJSON.error == "InvalidReCaptcha"){ 
-            $("#captchaError").show().html(data.responseJSON.message);
-        }
-    });
-}
-
-function dealSec (sec) {
-    const timeRange = [...Array(60).keys()].reverse()
-	const idxNow = timeRange.indexOf(sec)
-    const idxNext = (idxNow + 1) % timeRange.length
-    return timeRange[idxNext]
-}
-
-function dealMin(min, sec) {
-    const timeRange = [...Array(60).keys()].reverse()
-    if (sec === 59) {
-    	const idxNow = timeRange.indexOf(min)
-        const idxNext = (idxNow + 1) % timeRange.length
-        return timeRange[idxNext]
-    }
-    return min
-}
-
-function dealhour (hour, min, sec) {
-	if (min === 59 && sec === 59) return hour - 1
-    return hour
-}
-
-function render(hour, min, sec) {
-	hour = ("00" + hour).slice(-2)
-    min  = ("00" + min).slice(-2)
-    sec  = ("00" + sec).slice(-2)
-    
-    $('#countdown').text(`${hour}:${min}:${sec}`)
-}
-</script>
 </body>
 
 </html>

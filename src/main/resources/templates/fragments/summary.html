@@ -1,6 +1,6 @@
 <div class="row">
 
-	<!-- Earnings (Monthly) Card Example -->
+	<!-- Earnings (Monthly) Card -->
 	<div class="col-xl-3 col-md-6 mb-4">
 		<div class="card border-left-primary shadow h-100 py-2">
 			<div class="card-body">
@@ -9,7 +9,7 @@
 						<div
 							class="text-xs font-weight-bold text-primary text-uppercase mb-1">
 							Points (Monthly)</div>
-						<div class="h5 mb-0 font-weight-bold text-gray-800">[[${user.userStats.monthlyPoints}]]</div>
+						<div class="h5 mb-0 font-weight-bold text-gray-800" id="monthlyPoints">[[${user.userStats.monthlyPoints}]]</div>
 					</div>
 					<div class="col-auto">
 						<i class="fas fa-money-bill fa-2x text-gray-300"></i>
@@ -19,7 +19,7 @@
 		</div>
 	</div>
 
-	<!-- Earnings (Monthly) Card Example -->
+	<!-- Earnings (Monthly) Card -->
 	<div class="col-xl-3 col-md-6 mb-4">
 		<div class="card border-left-success shadow h-100 py-2">
 			<div class="card-body">
@@ -28,7 +28,7 @@
 						<div
 							class="text-xs font-weight-bold text-success text-uppercase mb-1">
 							Points (Annual)</div>
-						<div class="h5 mb-0 font-weight-bold text-gray-800">[[${user.userStats.annualPoints}]]</div>
+						<div class="h5 mb-0 font-weight-bold text-gray-800" id="annualPoints">[[${user.userStats.annualPoints}]]</div>
 					</div>
 					<div class="col-auto">
 						<i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -38,6 +38,7 @@
 		</div>
 	</div>
 
+	<!-- Number of claims -->
 	<div class="col-xl-3 col-md-6 mb-4">
 		<div class="card border-left-info shadow h-100 py-2">
 			<div class="card-body">
@@ -48,7 +49,7 @@
 							of claims</div>
 						<div class="row no-gutters align-items-center">
 							<div class="col-auto">
-								<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">[[${user.userStats.numberOfClaims}]]</div>
+								<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800" id="numberOfClaims">[[${user.userStats.numberOfClaims}]]</div>
 							</div>
 						</div>
 					</div>
@@ -60,6 +61,7 @@
 		</div>
 	</div>
 
+	<!-- Withdrawals -->
 	<div class="col-xl-3 col-md-6 mb-4">
 		<div class="card border-left-warning shadow h-100 py-2">
 			<div class="card-body">
@@ -68,7 +70,7 @@
 						<div
 							class="text-xs font-weight-bold text-warning text-uppercase mb-1">
 							Withdrawals</div>
-						<div class="h5 mb-0 font-weight-bold text-gray-800">[[${user.userStats.withdrawals}]]</div>
+						<div class="h5 mb-0 font-weight-bold text-gray-800" id="withdrawals">[[${user.userStats.withdrawals}]]</div>
 					</div>
 					<div class="col-auto">
 						<i class="fa-solid fa-money-bill-transfer"></i> <i

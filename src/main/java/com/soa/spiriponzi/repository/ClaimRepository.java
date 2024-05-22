@@ -9,4 +9,5 @@ import com.soa.spiriponzi.model.Claim;
 public interface ClaimRepository  extends JpaRepository<Claim, Long> {
 
 	List<Claim> findByUserEmail(String email);
+	List<Claim> findTop10ByUserEmailOrderByDateRequestDesc(String email);
 }

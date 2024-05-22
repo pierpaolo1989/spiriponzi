@@ -89,6 +89,15 @@ public class AuthController {
 		model.addAttribute("user", user);
 		return "surf-ads";
 	}
+	
+
+	@GetMapping("/survey")
+	public String survey(Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final User user = userService.findByEmail(authentication.getName());
+		model.addAttribute("user", user);
+		return "survey";
+	}
 
 	@GetMapping("/withdraw-requests")
 	public String withdrawRequests(Model model) {
