@@ -56,7 +56,7 @@
 
 					<!-- Content Row -->
 					<div th:replace="fragments/summary"></div>
-					
+
 					<hr class="divider">
 
 					<!-- Content Row -->
@@ -72,41 +72,42 @@
 										Data</h6>
 								</div>
 								<!-- Card Body -->
-								<div class="card-body">
-									<div class="chart-area">
+								<div class="card-body" style="min-height: auto !important;">
 									<div class="row">
-										<div class = "col-lg-5">
-											<img class="img-profile rounded-circle text-center" width="50%"
-												src="img/undraw_profile.svg" style="margin-left:25%; margin-top: 3%;">
+										<div class="col-lg-5">
+											<img class="img-profile rounded-circle text-center"
+												width="50%" src="img/undraw_profile.svg"
+												style="margin-left: 25%; margin-top: 3%;">
 										</div>
 										<div class="col-lg-7">
-										<form method="POST" enctype="utf8" class="text-center"  th:action="@{/user-data}" 
-											th:object="${updateUser}">
-											<div class="form-group mb-6">
-												<label class="form-label">Email</label> <input
-													class="form-control" id="text" name="email"
-													th:field="*{email}" type="text" readonly />
+											<div th:if="${param.success}">
+												<div class="alert alert-info">You've successfully
+													update your data!</div>
 											</div>
+											<form method="POST" enctype="utf8" class="text-center"
+												th:action="@{/user-data}" th:object="${updateUser}">
+												<div class="form-group mb-6">
+													<label class="form-label">Email</label> <input
+														class="form-control" id="text" name="email"
+														th:field="*{email}" type="text" readonly />
+												</div>
 
-											<div class="form-group mb-6">
+												<div class="form-group mb-6">
 
-												<label class="form-label">BTC Wallet</label> <input
-													class="form-control" id="btcWallet" name="btcWallet"
-													th:field="*{btcWallet}" type="text" />
-											</div>
+													<label class="form-label">BTC Wallet</label> <input
+														class="form-control" id="btcWallet" name="btcWallet"
+														th:field="*{btcWallet}" type="text" />
+												</div>
 
-											<div class="form-group mb-6">
+												<div class="form-group mb-6">
 
-												<label class="form-label">ETH Wallet</label> <input
-													class="form-control" id="ethWallet" name="ethWallet"
-													th:field="*{ethWallet}" type="text" />
-											</div>
-
-
-											<button class="btn btn-primary" id="claim_button">SAVE</button>
-										</form>
+													<label class="form-label">ETH Wallet</label> <input
+														class="form-control" id="ethWallet" name="ethWallet"
+														th:field="*{ethWallet}" type="text" />
+												</div>
+												<button class="btn btn-primary" id="claim_button">SAVE</button>
+											</form>
 										</div>
-									</div>
 									</div>
 								</div>
 							</div>

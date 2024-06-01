@@ -20,6 +20,9 @@
 	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
 	rel="stylesheet">
 
+
+<link rel="icon" type="image/svg" href="img/favicon.ico">
+
 <!-- Custom styles for this template-->
 <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
 <style>
@@ -59,10 +62,8 @@
 						<i class="fas fa-money fa-sm text-white-50"></i>
 					</div>
 
-					<!-- Content Row -->
+					<!-- Summary -->
 					<div th:replace="fragments/summary"></div>
-
-					<!-- Content Row -->
 
 					<div class="row">
 
@@ -98,8 +99,7 @@
 							<div class="card shadow mb-4">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">
-									Claim ETH</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Claim ETH</h6>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body">
@@ -129,7 +129,6 @@
 						<!-- Content Column -->
 						<div class="col-lg-8 mb-4 offset-lg-2">
 
-							<!-- Project Card Example -->
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
 									<h6 class="m-0 font-weight-bold text-primary">WHY
@@ -159,22 +158,25 @@
 										million in 2022).
 									</p>
 									<br>
-									<h4 class="small font-weight-bold">
-										Payout Details <span class="float-right">80%</span>
-									</h4>
-									<div class="progress mb-4">
-										<div class="progress-bar bg-info" role="progressbar"
-											style="width: 80%" aria-valuenow="80" aria-valuemin="0"
-											aria-valuemax="100"></div>
-									</div>
-									<h4 class="small font-weight-bold">
-										Account Setup <span class="float-right">Complete!</span>
-									</h4>
-									<div class="progress">
-										<div class="progress-bar bg-success" role="progressbar"
-											style="width: 100%" aria-valuenow="100" aria-valuemin="0"
-											aria-valuemax="100"></div>
-									</div>
+								</div>
+							</div>
+
+							<div class="card shadow mb-4">
+								<div class="card-header py-3">
+									<h6 class="m-0 font-weight-bold text-primary">HOW TO EARN
+										MONEY WITH SPIRIPONZI?</h6>
+								</div>
+								<div class="card-body">
+									<p class="justified">You can earn money in the following
+										ways:</p>
+									<p class="justified">
+									<ul>
+										<li>Claiming free points every hour</li>
+										<li>Completing surveys</li>
+										<li>Playing games here</li>
+									</ul>
+									</p>
+									<br>
 								</div>
 							</div>
 
@@ -217,7 +219,28 @@
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
+	var serverContext = "http://localhost:8080/"
 	$(function () {
+		
+		$.ajax({
+		    url: serverContext + "users/stats",
+		    type: 'GET',
+		    contentType: "application/json",
+		    success: function(data) {
+		    	let lastDate = Date.parse(data.lastRequest);
+		    	let current_date = new Date();
+		    	let difference = current_date.getTime() - lastDate
+		    	let hoursMilli = 1000 * 60 * 60; // milliseconds * seconds * minutes
+		    	if (Math.abs(difference) < hoursMilli) {
+		    		$('#claim_button').prop('disabled', true);
+		    	   // less than 1 hour spent
+		    	} else {
+		    	   
+		    	   // more than 1 hour ago
+		    	}
+		    }
+		});
+		
 		jQuery.fn.extend({
 	    	countdown: function () {
 	            let hour = 1, min = 0, sec = 0
@@ -247,8 +270,6 @@ $(document).ready(function () {
 
 function register(event) {
     event.preventDefault();
-    var serverContext = "http://localhost:8080/"
-
     var formData= $('form').serialize();
     $.post(serverContext + "claims", formData, function(data) {
         	$('#countdown').css('display','block');

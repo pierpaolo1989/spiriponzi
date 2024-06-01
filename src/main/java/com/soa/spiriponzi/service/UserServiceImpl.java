@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.soa.spiriponzi.dto.RecoverPasswordDto;
+import com.soa.spiriponzi.dto.ResetPasswordDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.Role;
@@ -18,15 +20,18 @@ import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserStatsRepository userStatsRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     public void saveUser(UserDto userDto) {
@@ -76,5 +81,17 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserStats findStatsByEmail(String email) {
 		return userStatsRepository.findByUserEmail(email).orElse(null);
+	}
+
+	@Override
+	public void recoverPassword(RecoverPasswordDto password) {
+		log.info("Sending email for password procedure. User with email: {}", password.getEmail());
+		ResetPasswordDto reset = ResetPasswordDto.builder().email(password.getEmail()).build();
+		try {
+			emailService.sendEmail(reset);
+		} catch (Exception e) {
+			log.error("Impossible to send email. Error: {}", e.getMessage(), e);
+		}
+		
 	}
 }

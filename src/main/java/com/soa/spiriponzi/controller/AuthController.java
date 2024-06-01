@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
@@ -57,6 +58,22 @@ public class AuthController {
 		userService.saveUser(user);
 		return "redirect:/register?success";
 	}
+	
+	@PostMapping("/recover-password/save")
+	public String registration(@Valid @ModelAttribute("passowrd") RecoverPasswordDto password,
+			BindingResult result,
+			Model model){
+		User existing = userService.findByEmail(password.getEmail());
+		if (existing == null) {
+			result.rejectValue("email", null, "There is no account registered with this email");
+		}
+		if (result.hasErrors()) {
+			model.addAttribute("password", password);
+			return "recover-password";
+		}
+		userService.recoverPassword(password);
+		return "redirect:/recover-password?success";
+	}
 
 	@PostMapping("/user-data")
 	public String updateUserStats(@Valid @ModelAttribute("updateUser") UpdateUserDto user,
@@ -101,11 +118,16 @@ public class AuthController {
 
 	@GetMapping("/withdraw-requests")
 	public String withdrawRequests(Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final User user = userService.findByEmail(authentication.getName());
+		model.addAttribute("user", user);
 		return "withdraw-requests";
 	}
 
 	@GetMapping("/recover-password")
 	public String recoverPassword(Model model) {
+		RecoverPasswordDto password = new RecoverPasswordDto();
+		model.addAttribute("password", password);
 		return "recover-password";
 	}
 
@@ -115,6 +137,14 @@ public class AuthController {
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
 		return "report";
+	}
+	
+	@GetMapping("/games")
+	public String games(Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final User user = userService.findByEmail(authentication.getName());
+		model.addAttribute("user", user);
+		return "games";
 	}
 
 	@GetMapping("/profile")

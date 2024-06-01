@@ -2,6 +2,7 @@ package com.soa.spiriponzi.service;
 
 import java.util.List;
 
+import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
@@ -18,5 +19,7 @@ public interface UserService {
     UserStats findStatsByEmail(String email);
 
     List<UserDto> findAllUsers();
+
+	void recoverPassword(RecoverPasswordDto password);
     
-}
+	}

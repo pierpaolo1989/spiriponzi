@@ -1,7 +1,6 @@
 package com.soa.spiriponzi.service;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
