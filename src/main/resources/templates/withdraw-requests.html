@@ -78,10 +78,11 @@
 						<div class="col-lg-10 offset-lg-1">
 
 							<button class="btn btn-primary float-right" id="start_withdraw"
+								data-toggle="modal" data-target="#withdrawalModal"
 								style="margin-bottom: 3%;">START WITHDRAW</button>
 
 							<table id="table_menu" class="display table"
-								style="min-height: 200px;">
+								style="min-height: 300px;">
 								<thead>
 									<tr>
 										<th>Id</th>
@@ -140,9 +141,53 @@
 		</script>
 
 		<script>
+		$('#proceed_withdraw')
+		.click(
+				function() {
+					var data = {};
+					data.amount = 3000;
+					data.currency = "BTC";
+					var serverContext = "http://localhost:8080/"
+					$
+							.ajax({
+								url : serverContext
+										+ "withdraws",
+								type : 'POST',
+								data : JSON
+										.stringify(data),
+								contentType : "application/json",
+								success : function(
+										data) {
+
+								}
+							});
+				});
 			$(document)
 					.ready(
 							function() {
+
+								$('#proceed_withdraw')
+										.click(
+												function() {
+													var data = {};
+													data.amount = 3000;
+													data.currency = "BTC";
+													var serverContext = "http://localhost:8080/"
+													$
+															.ajax({
+																url : serverContext
+																		+ "withdraws",
+																type : 'POST',
+																data : JSON
+																		.stringify(data),
+																contentType : "application/json",
+																success : function(
+																		data) {
+
+																}
+															});
+												});
+
 								var row_source = $("#row_template").html();
 								var row_template = Handlebars
 										.compile(row_source);
@@ -170,23 +215,42 @@
 											}
 										})
 							});
-
-			$('#start_withdraw').click(function() {
-				var data = {};
-				data.amount = 3000;
-				data.currency = "BTC";
-				var serverContext = "http://localhost:8080/"
-				$.ajax({
-					url : serverContext + "withdraws",
-					type : 'POST',
-					data : JSON.stringify(data),
-					contentType : "application/json",
-					success : function(data) {
-
-					}
-				});
-			})
 		</script>
+
+		<div class="modal fade" id="withdrawalModal" tabindex="-1"
+			role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Withdrawal</h5>
+						<button class="close" type="button" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">×</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form enctype="utf8" class="text-center">
+							<div class="mb-3">
+								<input type="text" id="username" name="username"
+									class="form-control" placeholder="Amount *" />
+							</div>
+							<div class="mb-3">
+								<select class="form-select form-control"
+									aria-label="Default select example">
+									<option selected>Choose wallet destination</option>
+									<option value="BTC">BTC</option>
+									<option value="ETH">ETH</option>
+								</select>
+							</div>
+						</form>
+						<div class="modal-footer">
+							<button class="btn btn-secondary" type="button"
+								data-dismiss="modal">Cancel</button>
+							<button class="btn btn-primary" id="proceed_withdraw">Proceed</button>
+						</div>
+					</div>
+				</div>
+			</div>
 </body>
 
 </html>
