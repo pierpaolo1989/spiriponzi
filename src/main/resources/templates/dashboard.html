@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
 
 <meta charset="utf-8">
@@ -79,10 +80,12 @@
 									<div class="chart-area">
 										<form method="POST" enctype="utf8" class="text-center">
 											<button class="btn btn-primary" id="claim_button">CLAIM</button>
-											<div class="g-recaptcha col-sm-5 text-center"
+											<center>
+											<div class="g-recaptcha col-sm-5 text-center" style="margin-top:3%;"
 												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
 											<span id="captchaError" class="alert alert-danger col-sm-4"
 												style="display: none"></span>
+											</center>
 											<div id="countdown"
 												style="display: none; color: black; font-size: 30px; font-weight: bold; margin-top: 2%;">01:00:00</div>
 										</form>
@@ -173,7 +176,7 @@
 									<ul>
 										<li>Claiming free points every hour</li>
 										<li>Completing surveys</li>
-										<li>Playing games here</li>
+										<li>Playing games <a th:href="@{/games}">here</a></li>
 									</ul>
 									</p>
 									<br>
@@ -230,25 +233,31 @@
 		    	let lastDate = Date.parse(data.lastRequest);
 		    	let current_date = new Date();
 		    	let difference = current_date.getTime() - lastDate
-		    	let hoursMilli = 1000 * 60 * 60; // milliseconds * seconds * minutes
+		    	let hoursMilli = 1000 * 60 * 60; 
 		    	if (Math.abs(difference) < hoursMilli) {
 		    		$('#claim_button').prop('disabled', true);
-		    	   // less than 1 hour spent
+		    		   let differenceValue = difference / 1000;
+			    	   differenceValue /= 60;
+			    	   let minutes = 60 - Math.round(differenceValue);
+			    	   let seconds = 0
+				       render(0, minutes, seconds)
+				       $('#countdown').text("00:"+minutes+":" + seconds);
+				       $('#countdown').countdown(0,minutes,seconds);
+				       $('#countdown').css('display','block');
 		    	} else {
-		    	   
-		    	   // more than 1 hour ago
+		    	 
 		    	}
 		    }
 		});
 		
 		jQuery.fn.extend({
-	    	countdown: function () {
-	            let hour = 1, min = 0, sec = 0
+	    	countdown: function (hour,min,sec) {
 	            render(hour, min, sec)
 	            
 	            const timer = setInterval(() => {
 	            	if (hour == 0 && min == 0 && sec == 0) {
 	                	clearInterval(timer)
+	                	$('#claim_button').prop('disabled', false);
 	                    return ;
 	                }
 	                
@@ -273,7 +282,7 @@ function register(event) {
     var formData= $('form').serialize();
     $.post(serverContext + "claims", formData, function(data) {
         	$('#countdown').css('display','block');
-    		$('#countdown').countdown();
+    		$('#countdown').countdown(1,0,0);
     		$.ajax({
     		    url: serverContext + "users/stats",
     		    type: 'GET',

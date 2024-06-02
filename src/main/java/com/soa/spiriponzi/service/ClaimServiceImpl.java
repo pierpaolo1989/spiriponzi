@@ -2,6 +2,7 @@ package com.soa.spiriponzi.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -39,7 +40,7 @@ public class ClaimServiceImpl implements ClaimService {
 		claimRepository.save(claim);
 		
 		//Update stats --> transform in async
-		java.util.Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(email);
+		Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(email);
 		if (optUserStats.isEmpty()) {
 			var userStats = new UserStats();
 			userStats.setNumberOfClaims(1);
@@ -52,9 +53,9 @@ public class ClaimServiceImpl implements ClaimService {
 			
 		} else {
 			UserStats userStats = optUserStats.get();
-			/*if (now.isBefore(userStats.getLastRequest().plusHours(1))) {
+			if (now.isBefore(userStats.getLastRequest().plusHours(1))) {
 				throw new ClaimException();
-			}*/
+			}
 			if (userStats.getLastRequest().getMonth() == claim.getDateRequest().getMonth()) {
 				userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
 			} else {

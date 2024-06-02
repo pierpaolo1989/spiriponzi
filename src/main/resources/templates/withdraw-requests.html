@@ -10,7 +10,9 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>Spiriponzi - List Menu</title>
+<title>Spiriponzi - Withdrawals</title>
+
+<link rel="icon" type="image/svg" href="img/favicon.ico">
 
 <!-- Custom fonts for this template-->
 <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
@@ -54,7 +56,7 @@
 						class="d-sm-flex align-items-center justify-content-between mb-4">
 						<h1 class="h3 mb-0 text-gray-800">Withdraw Requests</h1>
 					</div>
-					
+
 					<!-- Summary -->
 					<div th:replace="fragments/summary"></div>
 
@@ -63,7 +65,8 @@
 					<div class="alert alert-warning col-lg-6 offset-lg-3" role="alert">
 						<ul>
 							<li>You can submit a withdraw request when you reach <strong>3000</strong>
-								points!</li>
+								points!
+							</li>
 							<li>The conversation rate depends on market condition</li>
 							<li>It's possible to convert points in <strong>BTC</strong>
 								o <strong>ETH</strong></li>
@@ -167,6 +170,22 @@
 											}
 										})
 							});
+
+			$('#start_withdraw').click(function() {
+				var data = {};
+				data.amount = 3000;
+				data.currency = "BTC";
+				var serverContext = "http://localhost:8080/"
+				$.ajax({
+					url : serverContext + "withdraws",
+					type : 'POST',
+					data : JSON.stringify(data),
+					contentType : "application/json",
+					success : function(data) {
+
+					}
+				});
+			})
 		</script>
 </body>
 

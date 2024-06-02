@@ -50,7 +50,7 @@ public class WithdrawServiceImpl implements WithdrawService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void startRequest(String email, WithdrawDto request) {
 		User user = userRepository.findByEmail(email);
-		if(user.getUserStats().getAnnualPoints() < Constants.LIMIT_WITHDRAWAL) {
+		if (user.getUserStats().getAnnualPoints() < Constants.LIMIT_WITHDRAWAL) {
 			throw new WithdrawalException();
 		}
 		var entity = new WithdrawRequest();
@@ -61,7 +61,7 @@ public class WithdrawServiceImpl implements WithdrawService {
 		entity.setCurrency(request.getCurrency());
 		withdrawRepository.save(entity);
 		
-		//Coinbase integration 
+		//Bitcoin org integration 
 		paymentService.createTransaction(user.getBtcWallet(), Double.valueOf(request.getAmount()).longValue());
 	}
 

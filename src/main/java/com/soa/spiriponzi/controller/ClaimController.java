@@ -34,7 +34,7 @@ public class ClaimController {
         try {
         	claimService.startClaim(authentication.getName());
 		} catch (Exception e) {
-			//return new ResponseEntity<>(HttpStatusCode.valueOf(400));
+			return new ResponseEntity<>(HttpStatusCode.valueOf(400));
 		}
         
         return ResponseEntity.ok(null);
