@@ -13,6 +13,7 @@ import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
 		networkParameters = NetworkParameters.fromID(bitcoinNetwork);
 	}
 
+	@Async
 	@Override
 	public void createTransaction(String address, long amount) {
 		

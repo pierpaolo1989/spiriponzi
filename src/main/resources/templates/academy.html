@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Spiriponzi - Academy</title>
+
+    <link th:href="@{vendor/fontawesome-free/css/all.min.css}"
+          rel="stylesheet" type="text/css">
+
+    <!-- Custom fonts for this template-->
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+
+    <link rel="icon" type="image/svg" href="img/favicon.ico">
+
+    <!-- Custom styles for this template-->
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
+    <style>
+        .justified {
+            text-align: justify;
+        }
+    </style>
+
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar"></div>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Topbar -->
+            <div th:replace="fragments/navbar"></div>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div
+                        class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">Academy</h1>
+                    <i class="fas fa-money fa-sm text-white-50"></i>
+                </div>
+
+                <!-- Summary -->
+                <div th:replace="fragments/summary"></div>
+
+                <!-- Content Row -->
+                <div class="row">
+
+                    <!-- Content Column -->
+                    <div class="col-lg-8 mb-4 offset-lg-2">
+
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    WHAT ARE MEMECOINS?
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="justified">
+                                    Memecoins are a type of cryptocurrency inspired by internet memes and jokes. Examples include Dogecoin (DOGE) and Shiba Inu (SHIB). While they often start as jokes, some memecoins gain real-world value and community support, making them interesting investment opportunities.
+                                    Unlike Bitcoin, memecoins often have an unlimited supply, making them more inflationary. Their value is largely driven by social media hype, celebrity endorsements, and community engagement. Some memecoins, like Dogecoin, have even been used for charity donations and online tipping.
+                                </p>
+                                <br>
+                            </div>
+                        </div>
+
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    WHAT IS BITCOIN?</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="justified">
+                                        Bitcoin is the first decentralized digital currency, created by an unknown person or group using the pseudonym Satoshi Nakamoto in 2009. It allows peer-to-peer transactions without the need for a central authority, using blockchain technology to ensure security and transparency.
+                                        Bitcoin is often referred to as "digital gold" due to its limited supply of 21 million coins. It is mined using a process called proof-of-work (PoW), where powerful computers solve complex mathematical problems to validate transactions and secure the network.
+                                </p>
+                                <br>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <div th:replace="fragments/footer"></div>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top"> <i
+        class="fas fa-angle-up"></i>
+</a>
+
+<!-- Bootstrap core JavaScript-->
+<script th:src="@{vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<!-- Core plugin JavaScript-->
+<script th:src="@{vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/sb-admin-2.min.js}"></script>
+
+<!-- Page level plugins -->
+<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
+
+<!-- Page level custom scripts -->
+<script src='https://www.google.com/recaptcha/api.js'></script>
+<script>
+    var serverContext = "http://localhost:8080/"
+    var serverContext = "http://localhost:8080/"
+
+$(function () {
+    $.ajax({
+        url: serverContext + "users/stats",
+        type: 'GET',
+        contentType: "application/json",
+        success: function(data) {
+            let lastDate = Date.parse(data.lastRequest);
+            let currentDate = new Date();
+            let difference = currentDate.getTime() - lastDate;
+            let oneHour = 1000 * 60 * 60;
+
+            if (difference < oneHour) {
+                let remainingTime = oneHour - difference;
+                let remainingMinutes = Math.floor(remainingTime / 60000);
+                let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
+
+                $('#claim_button').prop('disabled', true);
+                $('#countdown').text("00:" + remainingMinutes + ":" + ("0" + remainingSeconds).slice(-2));
+                $('#countdown').countdown(0, remainingMinutes, remainingSeconds);
+                $('#countdown').css('display', 'block');
+            }
+        }
+    });
+});
+
+jQuery.fn.extend({
+    countdown: function (hour, min, sec) {
+        render(hour, min, sec);
+
+        const timer = setInterval(() => {
+            if (hour === 0 && min === 0 && sec === 0) {
+                clearInterval(timer);
+                $('#claim_button').prop('disabled', false);
+                return;
+            }
+
+            sec = dealSec(sec);
+            min = dealMin(min, sec);
+            hour = dealHour(hour, min, sec);
+            render(hour, min, sec);
+        }, 1000);
+    },
+});
+
+function dealSec(sec) {
+    return sec === 0 ? 59 : sec - 1;
+}
+
+function dealMin(min, sec) {
+    return sec === 59 ? (min === 0 ? 59 : min - 1) : min;
+}
+
+function dealHour(hour, min, sec) {
+    return min === 59 && sec === 59 ? hour - 1 : hour;
+}
+
+function render(hour, min, sec) {
+    $('#countdown').text(("00" + hour).slice(-2) + ":" + ("00" + min).slice(-2) + ":" + ("00" + sec).slice(-2));
+}
+
+
+$(document).ready(function () {
+    $('form').submit(function(event) {
+        register(event);
+    });
+});
+
+function register(event) {
+    event.preventDefault();
+    var formData= $('form').serialize();
+    $.post(serverContext + "claims", formData, function(data) {
+            $('#countdown').css('display','block');
+            $('#countdown').countdown(1,0,0);
+            $.ajax({
+                url: serverContext + "users/stats",
+                type: 'GET',
+                contentType: "application/json",
+                success: function(data) {
+                    console.log(data);
+                    $("#numberOfClaims").html(data.numberOfClaims);
+                    $("#monthlyPoints").html(data.monthlyPoints);
+                    $("#annualPoints").html(data.annualPoints);
+                    $("#withdrawals").html(data.withdrawals);
+                }
+            });
+    })
+    .fail(function(data) {
+
+        grecaptcha.reset();
+
+        if(data.responseJSON.error == "InvalidReCaptcha"){
+            $("#captchaError").show().html(data.responseJSON.message);
+        }
+    });
+}
+
+</script>
+</body>
+
+</html>

@@ -81,10 +81,11 @@
 										<form method="POST" enctype="utf8" class="text-center">
 											<button class="btn btn-primary" id="claim_button">CLAIM</button>
 											<center>
-											<div class="g-recaptcha col-sm-5 text-center" style="margin-top:3%;"
-												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
-											<span id="captchaError" class="alert alert-danger col-sm-4"
-												style="display: none"></span>
+												<div class="g-recaptcha col-sm-5 text-center"
+													style="margin-top: 3%;"
+													th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
+												<span id="captchaError" class="alert alert-danger col-sm-4"
+													style="display: none"></span>
 											</center>
 											<div id="countdown"
 												style="display: none; color: black; font-size: 30px; font-weight: bold; margin-top: 2%;">01:00:00</div>
@@ -105,21 +106,9 @@
 									<h6 class="m-0 font-weight-bold text-primary">Claim ETH</h6>
 								</div>
 								<!-- Card Body -->
-								<div class="card-body">
-									<div class="chart-area">
-										<form method="POST" enctype="utf8" class="text-center">
-											<button class="btn btn-primary" id="claim_button_eth">CLAIM</button>
-											<div class="g-recaptcha col-sm-5 text-center"
-												th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
-											<span id="captchaError_eth"
-												class="alert alert-danger col-sm-4" style="display: none"></span>
-											<div id="countdown"
-												style="display: none; color: black; font-size: 25px; font-weight: bold;">01:00:00</div>
-										</form>
-										<div class="row">
-											<span class="text-center"><strong>You can
-													claim every hour !!!</strong></span>
-										</div>
+								<div class="card-body bg-login-image">
+									<div class="chart-area bg-login-image">
+										<div class="col-lg-12 d-none d-lg-block"></div>
 									</div>
 								</div>
 							</div>
@@ -223,52 +212,67 @@
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
 	var serverContext = "http://localhost:8080/"
-	$(function () {
-		
-		$.ajax({
-		    url: serverContext + "users/stats",
-		    type: 'GET',
-		    contentType: "application/json",
-		    success: function(data) {
-		    	let lastDate = Date.parse(data.lastRequest);
-		    	let current_date = new Date();
-		    	let difference = current_date.getTime() - lastDate
-		    	let hoursMilli = 1000 * 60 * 60; 
-		    	if (Math.abs(difference) < hoursMilli) {
-		    		$('#claim_button').prop('disabled', true);
-		    		   let differenceValue = difference / 1000;
-			    	   differenceValue /= 60;
-			    	   let minutes = 60 - Math.round(differenceValue);
-			    	   let seconds = 0
-				       render(0, minutes, seconds)
-				       $('#countdown').text("00:"+minutes+":" + seconds);
-				       $('#countdown').countdown(0,minutes,seconds);
-				       $('#countdown').css('display','block');
-		    	} else {
-		    	 
-		    	}
-		    }
-		});
-		
-		jQuery.fn.extend({
-	    	countdown: function (hour,min,sec) {
-	            render(hour, min, sec)
-	            
-	            const timer = setInterval(() => {
-	            	if (hour == 0 && min == 0 && sec == 0) {
-	                	clearInterval(timer)
-	                	$('#claim_button').prop('disabled', false);
-	                    return ;
-	                }
-	                
-	            	sec = dealSec(sec)
-	                min = dealMin(min, sec)
-	                hour = dealhour(hour, min, sec)
-	                render(hour, min, sec)
-	            }, 1000)
-	        },
-    	})
-})
+	var serverContext = "http://localhost:8080/"
+
+$(function () {
+    $.ajax({
+        url: serverContext + "users/stats",
+        type: 'GET',
+        contentType: "application/json",
+        success: function(data) {
+            let lastDate = Date.parse(data.lastRequest);
+            let currentDate = new Date();
+            let difference = currentDate.getTime() - lastDate;
+            let oneHour = 1000 * 60 * 60;
+
+            if (difference < oneHour) {
+                let remainingTime = oneHour - difference;
+                let remainingMinutes = Math.floor(remainingTime / 60000);
+                let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
+
+                $('#claim_button').prop('disabled', true);
+                $('#countdown').text("00:" + remainingMinutes + ":" + ("0" + remainingSeconds).slice(-2));
+                $('#countdown').countdown(0, remainingMinutes, remainingSeconds);
+                $('#countdown').css('display', 'block');
+            }
+        }
+    });
+});
+
+jQuery.fn.extend({
+    countdown: function (hour, min, sec) {
+        render(hour, min, sec);
+
+        const timer = setInterval(() => {
+            if (hour === 0 && min === 0 && sec === 0) {
+                clearInterval(timer);
+                $('#claim_button').prop('disabled', false);
+                return;
+            }
+
+            sec = dealSec(sec);
+            min = dealMin(min, sec);
+            hour = dealHour(hour, min, sec);
+            render(hour, min, sec);
+        }, 1000);
+    },
+});
+
+function dealSec(sec) {
+    return sec === 0 ? 59 : sec - 1;
+}
+
+function dealMin(min, sec) {
+    return sec === 59 ? (min === 0 ? 59 : min - 1) : min;
+}
+
+function dealHour(hour, min, sec) {
+    return min === 59 && sec === 59 ? hour - 1 : hour;
+}
+
+function render(hour, min, sec) {
+    $('#countdown').text(("00" + hour).slice(-2) + ":" + ("00" + min).slice(-2) + ":" + ("00" + sec).slice(-2));
+}
 
 
 $(document).ready(function () {
@@ -306,35 +310,6 @@ function register(event) {
     });
 }
 
-function dealSec (sec) {
-    const timeRange = [...Array(60).keys()].reverse()
-	const idxNow = timeRange.indexOf(sec)
-    const idxNext = (idxNow + 1) % timeRange.length
-    return timeRange[idxNext]
-}
-
-function dealMin(min, sec) {
-    const timeRange = [...Array(60).keys()].reverse()
-    if (sec === 59) {
-    	const idxNow = timeRange.indexOf(min)
-        const idxNext = (idxNow + 1) % timeRange.length
-        return timeRange[idxNext]
-    }
-    return min
-}
-
-function dealhour (hour, min, sec) {
-	if (min === 59 && sec === 59) return hour - 1
-    return hour
-}
-
-function render(hour, min, sec) {
-	hour = ("00" + hour).slice(-2)
-    min  = ("00" + min).slice(-2)
-    sec  = ("00" + sec).slice(-2)
-    
-    $('#countdown').text(`${hour}:${min}:${sec}`)
-}
 </script>
 </body>
 

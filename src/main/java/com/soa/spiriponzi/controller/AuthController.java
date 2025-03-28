@@ -116,6 +116,14 @@ public class AuthController {
 		return "survey";
 	}
 
+	@GetMapping("/academy")
+	public String academy(Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final User user = userService.findByEmail(authentication.getName());
+		model.addAttribute("user", user);
+		return "academy";
+	}
+
 	@GetMapping("/withdraw-requests")
 	public String withdrawRequests(Model model) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

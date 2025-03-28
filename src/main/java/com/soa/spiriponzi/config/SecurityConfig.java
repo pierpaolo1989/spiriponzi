@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 .requestMatchers("/games").hasRole("USER")
                                 .requestMatchers("/surf-ads").hasRole("USER")
                                 .requestMatchers("/survey").hasRole("USER")
+                                .requestMatchers("/academy").hasRole("USER")
                                 .requestMatchers("/report").hasRole("USER")
                                 .requestMatchers("/withdraws").hasRole("USER")
                                 .requestMatchers("/profile").hasRole("USER")
