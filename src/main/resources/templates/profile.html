@@ -148,6 +148,41 @@
 	<!-- Page level plugins -->
 	<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
 
+	<script>
+		$(document).ready(function () {
+    $("#claim_button").click(function (event) {
+        let btcWallet = $("#btcWallet").val().trim();
+        let ethWallet = $("#ethWallet").val().trim();
+        let isValid = true;
+
+        // Espressione regolare per BTC Address (inizia con 1, 3 o bc1 e segue un formato valido)
+        let btcRegex = /^(1|3|bc1)[a-zA-HJ-NP-Z0-9]{25,39}$/;
+
+        // Espressione regolare per ETH Address (inizia con 0x e ha 40 caratteri esadecimali)
+        let ethRegex = /^0x[a-fA-F0-9]{40}$/;
+
+        // Rimuove i vecchi messaggi di errore
+        $(".error-message").remove();
+
+        // Validazione BTC Wallet
+        if (btcWallet !== "" && !btcRegex.test(btcWallet)) {
+            $("#btcWallet").after('<p class="error-message text-danger">Invalid BTC Wallet Address</p>');
+            isValid = false;
+        }
+
+        // Validazione ETH Wallet
+        if (ethWallet !== "" && !ethRegex.test(ethWallet)) {
+            $("#ethWallet").after('<p class="error-message text-danger">Invalid ETH Wallet Address</p>');
+            isValid = false;
+        }
+
+        // Blocca l'invio del form se la validazione fallisce
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
 </body>
 
 </html>
