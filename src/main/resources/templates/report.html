@@ -53,15 +53,16 @@
 
 					<div th:replace="fragments/summary"></div>
 					
-					<!-- Page Heading -->
-					<div
-						class="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 class="h3 mb-0 text-gray-800">Last 10 Claims</h1>
-					</div>
+					<div class="col-lg-10 mb-4 offset-lg-1 mt-5">
+						<div class="card shadow mb-12">
+							<div
+									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h6 class="m-0 font-weight-bold text-primary">Last 10 Claims</h6>
+							</div>
+							<!-- Card Body -->
+							<div class="card-body" style="min-height: auto !important;">
+								<div class="row">
 
-					<div class="row" style="margin-top: 3%;">
-
-						<div class="col-lg-10 offset-lg-1">
 							<table id="table_claims" class="display table"
 								style="min-height: 200px;">
 								<thead>
@@ -76,7 +77,10 @@
 							</table>
 						</div>
 					</div>
+			</div>
+					</div>
 				</div>
+			</div>
 				<!-- /.container-fluid -->
 
 				<!-- End of Main Content -->

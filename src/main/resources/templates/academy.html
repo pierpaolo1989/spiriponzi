@@ -70,9 +70,9 @@
                 <div class="row">
 
                     <!-- Content Column -->
-                    <div class="col-lg-8 mb-4 offset-lg-2">
+                    <div class="col-lg-8 mb-4 offset-lg-2 mt-4" id="lessons">
 
-                        <div class="card shadow mb-4 mt-4">
+                        <div class="card shadow mb-4">
                             <div class="card-header py-3">
                                 <h6 class="m-0 font-weight-bold text-primary">
                                     WHAT ARE MEMECOINS?
@@ -83,7 +83,6 @@
                                     Memecoins are a type of cryptocurrency inspired by internet memes and jokes. Examples include Dogecoin (DOGE) and Shiba Inu (SHIB). While they often start as jokes, some memecoins gain real-world value and community support, making them interesting investment opportunities.
                                     Unlike Bitcoin, memecoins often have an unlimited supply, making them more inflationary. Their value is largely driven by social media hype, celebrity endorsements, and community engagement. Some memecoins, like Dogecoin, have even been used for charity donations and online tipping.
                                 </p>
-                                <br>
                             </div>
                         </div>
 
@@ -97,7 +96,6 @@
                                         Bitcoin is the first decentralized digital currency, created by an unknown person or group using the pseudonym Satoshi Nakamoto in 2009. It allows peer-to-peer transactions without the need for a central authority, using blockchain technology to ensure security and transparency.
                                         Bitcoin is often referred to as "digital gold" due to its limited supply of 21 million coins. It is mined using a process called proof-of-work (PoW), where powerful computers solve complex mathematical problems to validate transactions and secure the network.
                                 </p>
-                                <br>
                             </div>
                         </div>
 
@@ -124,7 +122,6 @@
                                     In blockchain, decentralization refers to the transfer of control and decision-making from a centralized entity (individual, organization, or group thereof) to a distributed network. Decentralized networks strive to reduce the level of trust that participants must place in one another, and deter their ability to exert authority or control over one another in ways that degrade the functionality of the network.
                                     Decentralization is not a new concept. When building a technology solution, three primary network architectures are typically considered: centralized, distributed, and decentralized. While blockchain technologies often make use of decentralized networks, a blockchain application itself cannot be categorized simply as being decentralized or not. Rather, decentralization is a sliding scale and should be applied to all aspects of a blockchain application. By decentralizing the management of and access to resources in an application, greater and fairer service can be achieved. Decentralization typically has some tradeoffs such as lower transaction throughput, but ideally, the tradeoffs are worth the improved stability and service levels they produce.
                                 </p>
-                                <br>
                             </div>
                         </div>
 
@@ -165,107 +162,13 @@
 <script th:src="@{vendor/chart.js/Chart.min.js}"></script>
 
 <!-- Page level custom scripts -->
-<script src='https://www.google.com/recaptcha/api.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
 <script>
-    var serverContext = "http://localhost:8080/"
-    var serverContext = "http://localhost:8080/"
-
-$(function () {
-    $.ajax({
-        url: serverContext + "users/stats",
-        type: 'GET',
-        contentType: "application/json",
-        success: function(data) {
-            let lastDate = Date.parse(data.lastRequest);
-            let currentDate = new Date();
-            let difference = currentDate.getTime() - lastDate;
-            let oneHour = 1000 * 60 * 60;
-
-            if (difference < oneHour) {
-                let remainingTime = oneHour - difference;
-                let remainingMinutes = Math.floor(remainingTime / 60000);
-                let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
-
-                $('#claim_button').prop('disabled', true);
-                $('#countdown').text("00:" + remainingMinutes + ":" + ("0" + remainingSeconds).slice(-2));
-                $('#countdown').countdown(0, remainingMinutes, remainingSeconds);
-                $('#countdown').css('display', 'block');
-            }
-        }
-    });
-});
-
-jQuery.fn.extend({
-    countdown: function (hour, min, sec) {
-        render(hour, min, sec);
-
-        const timer = setInterval(() => {
-            if (hour === 0 && min === 0 && sec === 0) {
-                clearInterval(timer);
-                $('#claim_button').prop('disabled', false);
-                return;
-            }
-
-            sec = dealSec(sec);
-            min = dealMin(min, sec);
-            hour = dealHour(hour, min, sec);
-            render(hour, min, sec);
-        }, 1000);
-    },
-});
-
-function dealSec(sec) {
-    return sec === 0 ? 59 : sec - 1;
-}
-
-function dealMin(min, sec) {
-    return sec === 59 ? (min === 0 ? 59 : min - 1) : min;
-}
-
-function dealHour(hour, min, sec) {
-    return min === 59 && sec === 59 ? hour - 1 : hour;
-}
-
-function render(hour, min, sec) {
-    $('#countdown').text(("00" + hour).slice(-2) + ":" + ("00" + min).slice(-2) + ":" + ("00" + sec).slice(-2));
-}
-
-
-$(document).ready(function () {
-    $('form').submit(function(event) {
-        register(event);
-    });
-});
-
-function register(event) {
-    event.preventDefault();
-    var formData= $('form').serialize();
-    $.post(serverContext + "claims", formData, function(data) {
-            $('#countdown').css('display','block');
-            $('#countdown').countdown(1,0,0);
-            $.ajax({
-                url: serverContext + "users/stats",
-                type: 'GET',
-                contentType: "application/json",
-                success: function(data) {
-                    console.log(data);
-                    $("#numberOfClaims").html(data.numberOfClaims);
-                    $("#monthlyPoints").html(data.monthlyPoints);
-                    $("#annualPoints").html(data.annualPoints);
-                    $("#withdrawals").html(data.withdrawals);
-                }
-            });
-    })
-    .fail(function(data) {
-
-        grecaptcha.reset();
-
-        if(data.responseJSON.error == "InvalidReCaptcha"){
-            $("#captchaError").show().html(data.responseJSON.message);
-        }
-    });
-}
-
+		new Sortable(document.getElementById('lessons'), {
+			animation: 150,
+			ghostClass: 'sortable-ghost'
+		});
 </script>
 </body>
 

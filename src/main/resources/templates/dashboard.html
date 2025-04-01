@@ -30,6 +30,50 @@
 .justified {
 	text-align: justify;
 }
+
+    /* Container per le informazioni delle criptovalute */
+    .crypto-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 15px;
+    }
+
+    /* Icona delle criptovalute */
+    .crypto-icon {
+        width: 30px;
+        height: 30px;
+        margin-right: 15px;
+    }
+
+    /* Stile per i prezzi */
+    #btc-price, #eth-price {
+        color: #333;
+    }
+
+    .crypto-container strong {
+        font-size: 18px;
+        color: #444;
+    }
+
+    .crypto-container span {
+        font-size: 20px;
+        font-weight: bold;
+        color: #4CAF50; /* Colore verde per i prezzi */
+    }
+
+    /* Responsive: se la pagina è più piccola, le icone si adattano */
+    @media (max-width: 768px) {
+        .crypto-icon {
+            width: 25px;
+            height: 25px;
+        }
+
+        .crypto-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
 </style>
 
 </head>
@@ -115,16 +159,12 @@
 						</div>
 					</div>
 
-					<!-- Content Row -->
 					<div class="row">
-
-						<!-- Content Column -->
-						<div class="col-lg-8 mb-4 offset-lg-2">
-
+						<!-- Colonna con spiegazione Spiriponzi -->
+						<div class="col-lg-6 mb-4">
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">WHY
-										SPIRIPONZI?</h6>
+									<h6 class="m-0 font-weight-bold text-primary">WHY SPIRIPONZI?</h6>
 								</div>
 								<div class="card-body">
 									<p class="justified">Spiriponzi is an Italian term meaning
@@ -139,7 +179,8 @@
 										buying discounted postal reply coupons in other countries and
 										redeeming them at face value in the U.S. as a form of
 										arbitrage: In reality, Ponzi was paying earlier investors
-										using the investments of later investors. While this type of
+										using the investments of later investors.<br><br>
+										While this type of
 										fraudulent investment scheme was not invented by Ponzi, it
 										became so identified with him that it now is referred to as a
 										"Ponzi scheme". His scheme ran for over a year before it
@@ -149,10 +190,12 @@
 										similar deception to take in $1 million (approximately $35
 										million in 2022).
 									</p>
-									<br>
 								</div>
 							</div>
+						</div>
 
+						<!-- Colonna con quotazioni di BTC ed ETH -->
+						<div class="col-lg-6 mb-4">
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
 									<h6 class="m-0 font-weight-bold text-primary">HOW TO EARN
@@ -164,14 +207,42 @@
 									<p class="justified">
 									<ul>
 										<li>Claiming free points every hour</li>
-										<li>Completing surveys</li>
 										<li>Playing games <a target="_blank" th:href="@{/games}">here</a></li>
+									    <li>Surfing ads <a target="_blank" th:href="@{/surf-ads}">here</a></li>
 									</ul>
 									</p>
-									<br>
 								</div>
 							</div>
+							<div class="card shadow mb-4">
+								<div class="card-header py-3">
+									<h6 class="m-0 font-weight-bold text-primary">Real-Time Cryptocurrency Prices</h6>
+								</div>
+								<div class="card-body">
+									<!-- Sezione Bitcoin -->
+									<div id="btc-price" style="font-size: 20px; margin-bottom: 10px;">
+										<div class="crypto-container">
+											<img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="crypto-icon" />
+											<strong>BTC Price:</strong> &nbsp;$<span id="btcValue">Loading...</span>
+										</div>
+									</div>
 
+									<!-- Sezione Ethereum -->
+									<div id="eth-price" style="font-size: 20px;">
+										<div class="crypto-container">
+											<img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="crypto-icon" />
+											<strong>ETH Price:</strong> &nbsp;$<span id="ethValue">Loading...</span>
+										</div>
+									</div>
+
+									<!-- Sezione Solana -->
+									<div id="solana-price" style="font-size: 20px;">
+										<div class="crypto-container">
+											<img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="Tether" class="crypto-icon" />
+											<strong>USDT Price:</strong> &nbsp;$<span id="tetherValue">Loading...</span>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 
@@ -212,7 +283,6 @@
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
 	var serverContext = "http://localhost:8080/"
-	var serverContext = "http://localhost:8080/"
 
 $(function () {
     $.ajax({
@@ -228,13 +298,13 @@ $(function () {
             if (difference < oneHour) {
                 let remainingTime = oneHour - difference;
                 let remainingMinutes = Math.floor(remainingTime / 60000);
-                let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
-
                 $('#claim_button').prop('disabled', true);
+                let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
                 $('#countdown').text("00:" + remainingMinutes + ":" + ("0" + remainingSeconds).slice(-2));
                 $('#countdown').countdown(0, remainingMinutes, remainingSeconds);
                 $('#countdown').css('display', 'block');
             }
+
         }
     });
 });
@@ -276,6 +346,32 @@ function render(hour, min, sec) {
 
 
 $(document).ready(function () {
+
+	 // Funzione per recuperare i dati delle criptovalute
+        function getCryptoPrices() {
+            $.ajax({
+                url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd',
+                type: 'GET',
+                success: function(data) {
+                    // Aggiorna i valori delle criptovalute
+                    $('#btcValue').text(data.bitcoin.usd);
+                    $('#ethValue').text(data.ethereum.usd);
+                    $('#tetherValue').text(data.tether.usd);
+                },
+                error: function() {
+                    $('#btcValue').text('Error');
+                    $('#ethValue').text('Error');
+                    $('#tetherValue').text('Error');
+                }
+            });
+        }
+
+        // Richiama la funzione per ottenere i prezzi
+        getCryptoPrices();
+
+        // Aggiorna i prezzi ogni 60 secondi
+        setInterval(getCryptoPrices, 60000);
+
 	$('form').submit(function(event) {
 		register(event);
 	});
@@ -292,7 +388,7 @@ function register(event) {
     		    type: 'GET',
     		    contentType: "application/json",
     		    success: function(data) {
-    		    	console.log(data);
+    		        $('#claim_button').prop('disabled', true);
     	        	$("#numberOfClaims").html(data.numberOfClaims);
     	        	$("#monthlyPoints").html(data.monthlyPoints);
     	        	$("#annualPoints").html(data.annualPoints);

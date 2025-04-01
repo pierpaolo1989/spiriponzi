@@ -2,255 +2,139 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
 
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="">
-<meta name="author" content="">
+	<title>Spiriponzi - Withdrawals</title>
 
-<title>Spiriponzi - Withdrawals</title>
+	<link rel="icon" type="image/svg" href="img/favicon.ico">
 
-<link rel="icon" type="image/svg" href="img/favicon.ico">
+	<!-- Custom fonts for this template-->
+	<link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-<!-- Custom fonts for this template-->
-<link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
-	type="text/css">
-<link
-	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-	rel="stylesheet">
+	<!-- Custom styles for this template-->
+	<link href="css/sb-admin-2.min.css" rel="stylesheet">
 
-<!-- Custom styles for this template-->
-<link href="css/sb-admin-2.min.css" rel="stylesheet">
-
-<link rel="stylesheet"
-	href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
-
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
 </head>
 
 <body id="page-top">
+<div id="wrapper">
+	<div th:replace="fragments/sidebar"></div>
 
-	<!-- Page Wrapper -->
-	<div id="wrapper">
+	<div id="content-wrapper" class="d-flex flex-column">
+		<div id="content">
+			<div th:replace="fragments/navbar"></div>
 
-		<!-- Sidebar -->
-		<div th:replace="fragments/sidebar"></div>
-		<!-- End of Sidebar -->
+			<div class="container-fluid">
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 class="h3 mb-0 text-gray-800">Withdraw Requests</h1>
+				</div>
 
-		<!-- Content Wrapper -->
-		<div id="content-wrapper" class="d-flex flex-column">
+				<div th:replace="fragments/summary"></div>
 
-			<!-- Main Content -->
-			<div id="content">
+				<hr class="divider">
 
-				<!-- Topbar -->
-				<div th:replace="fragments/navbar"></div>
-				<!-- End of Topbar -->
+				<div class="alert alert-warning col-lg-6 offset-lg-3" role="alert">
+					<ul>
+						<li>You can submit a withdraw request when you reach <strong>3000</strong> points!</li>
+						<li>The conversion rate depends on market condition</li>
+						<li>It's possible to convert points in <strong>BTC</strong> or <strong>ETH</strong></li>
+					</ul>
+				</div>
 
-				<!-- Begin Page Content -->
-				<div class="container-fluid">
-
-					<!-- Page Heading -->
-					<div
-						class="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 class="h3 mb-0 text-gray-800">Withdraw Requests</h1>
-					</div>
-
-					<!-- Summary -->
-					<div th:replace="fragments/summary"></div>
-
-					<hr class="divider">
-
-					<div class="alert alert-warning col-lg-6 offset-lg-3" role="alert">
-						<ul>
-							<li>You can submit a withdraw request when you reach <strong>3000</strong>
-								points!
-							</li>
-							<li>The conversation rate depends on market condition</li>
-							<li>It's possible to convert points in <strong>BTC</strong>
-								o <strong>ETH</strong></li>
-						</ul>
-					</div>
-
-					<div class="row" style="margin-top: 3%;">
-
-						<div class="col-lg-10 offset-lg-1">
-
-							<button class="btn btn-primary float-right" id="start_withdraw"
-								data-toggle="modal" data-target="#withdrawalModal"
-								style="margin-bottom: 3%;">START WITHDRAW</button>
-
-							<table id="table_menu" class="display table"
-								style="min-height: 300px;">
-								<thead>
-									<tr>
-										<th>Id</th>
-										<th>Currency</th>
-										<th>Amount</th>
-										<th>Date</th>
-										<th>Status</th>
-										<th>Transaction ID</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+				<div class="row" style="margin-top: 3%;">
+					<div class="col-lg-10 offset-lg-1">
+						<button class="btn btn-primary float-right" id="start_withdraw" data-toggle="modal" data-target="#withdrawalModal" style="margin-bottom: 3%;">START WITHDRAW</button>
+						<table id="table_menu" class="display table" style="min-height: 300px;">
+							<thead>
+							<tr>
+								<th>Id</th>
+								<th>Currency</th>
+								<th>Amount</th>
+								<th>Date</th>
+								<th>Status</th>
+								<th>Transaction ID</th>
+							</tr>
+							</thead>
+							<tbody>
+							<tr>
+							</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
-				<!-- /.container-fluid -->
-
-				<!-- End of Main Content -->
-
-				<!-- Footer -->
-				<div th:replace="fragments/footer"></div>
-				<!-- End of Footer -->
-
 			</div>
-			<!-- End of Content Wrapper -->
 
+			<div th:replace="fragments/footer"></div>
 		</div>
-		<!-- End of Page Wrapper -->
+	</div>
+</div>
 
-		<!-- Bootstrap core JavaScript-->
-		<script src="vendor/jquery/jquery.min.js"></script>
-		<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-		<!-- Core plugin JavaScript-->
-		<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-		<!-- Custom scripts for all pages-->
-		<script src="js/sb-admin-2.min.js"></script>
-
-		<script
-			src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
-		<script id="row_template" type="text/x-handlebars-template">
- 			{{#each this}}
-		 		 <tr>
-		 			<td>{{id}}</td>
-					<td>{{currency}}</td>
-					<td>{{amount}}</td>
-					<td>{{date}}</td>
-					<td>{{status}}</td>
-					<td>{{transactionId}}</td>
-				</tr>
-		  {{/each}}
-		</script>
-
-		<script>
-		$('#proceed_withdraw')
-		.click(
-				function() {
-					var data = {};
-					data.amount = 3000;
-					data.currency = "BTC";
-					var serverContext = "http://localhost:8080/"
-					$
-							.ajax({
-								url : serverContext
-										+ "withdraws",
-								type : 'POST',
-								data : JSON
-										.stringify(data),
-								contentType : "application/json",
-								success : function(
-										data) {
-
-								}
-							});
-				});
-			$(document)
-					.ready(
-							function() {
-
-								$('#proceed_withdraw')
-										.click(
-												function() {
-													var data = {};
-													data.amount = 3000;
-													data.currency = "BTC";
-													var serverContext = "http://localhost:8080/"
-													$
-															.ajax({
-																url : serverContext
-																		+ "withdraws",
-																type : 'POST',
-																data : JSON
-																		.stringify(data),
-																contentType : "application/json",
-																success : function(
-																		data) {
-
-																}
-															});
-												});
-
-								var row_source = $("#row_template").html();
-								var row_template = Handlebars
-										.compile(row_source);
-								$
-										.ajax({
-											url : "http://localhost:8080/withdraws",
-											type : "GET",
-											contentType : "application/json; charset=utf-8",
-											dataType : "json",
-											success : function(response) {
-												if (response.length === 0) {
-													$('#table_menu tbody')
-															.append(
-																	"<td colspan=6>No data available</td>");
-												} else {
-													response
-															.forEach(function(
-																	number) {
-																$(
-																		'#table_menu tbody')
-																		.append(
-																				row_template);
-															});
-												}
-											}
-										})
-							});
-		</script>
-
-		<div class="modal fade" id="withdrawalModal" tabindex="-1"
-			role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="exampleModalLabel">Withdrawal</h5>
-						<button class="close" type="button" data-dismiss="modal"
-							aria-label="Close">
-							<span aria-hidden="true">×</span>
-						</button>
-					</div>
-					<div class="modal-body">
-						<form enctype="utf8" class="text-center">
-							<div class="mb-3">
-								<input type="text" id="username" name="username"
-									class="form-control" placeholder="Amount *" />
-							</div>
-							<div class="mb-3">
-								<select class="form-select form-control"
-									aria-label="Default select example">
-									<option selected>Choose wallet destination</option>
-									<option value="BTC">BTC</option>
-									<option value="ETH">ETH</option>
-								</select>
-							</div>
-						</form>
-						<div class="modal-footer">
-							<button class="btn btn-secondary" type="button"
-								data-dismiss="modal">Cancel</button>
-							<button class="btn btn-primary" id="proceed_withdraw">Proceed</button>
-						</div>
-					</div>
-				</div>
+<!-- Modal -->
+<div class="modal fade" id="withdrawalModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Withdrawal</h5>
+				<button class="close" type="button" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
 			</div>
+			<div class="modal-body">
+				<form enctype="utf8" class="text-center">
+					<div class="mb-3">
+						<input type="text" id="username" name="username" class="form-control" placeholder="Amount *" />
+					</div>
+					<div class="mb-3">
+						<select class="form-select form-control" aria-label="Default select example" id="wallet-destination">
+							<option selected>Choose wallet destination</option>
+							<option value="BTC">BTC</option>
+							<option value="ETH">ETH</option>
+						</select>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+				<button class="btn btn-primary" id="proceed_withdraw" disabled>Proceed</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Bootstrap core JavaScript-->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="js/sb-admin-2.min.js"></script>
+
+<script>
+	// Funzione per abilitare/disabilitare il pulsante Proceed
+    function checkFields() {
+        var amount = document.getElementById('username').value;
+        var wallet = document.getElementById('wallet-destination').value;
+        var proceedButton = document.getElementById('proceed_withdraw');
+
+        if (amount && wallet !== "Choose wallet destination") {
+            proceedButton.disabled = false; // Abilita il pulsante
+        } else {
+            proceedButton.disabled = true; // Disabilita il pulsante
+        }
+    }
+
+    // Aggiungi event listener per monitorare i cambiamenti negli input
+    document.getElementById('username').addEventListener('input', checkFields);
+    document.getElementById('wallet-destination').addEventListener('change', checkFields);
+</script>
 </body>
 
 </html>

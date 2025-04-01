@@ -39,10 +39,17 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         Role role = roleRepository.findByName("ROLE_USER");
-        if(role == null){
+        if (role == null){
             role = checkRoleExist();
         }
         user.setRoles(Arrays.asList(role));
+        //User stats
+        var userStats = new UserStats();
+        userStats.setNumberOfClaims(1);
+        userStats.setMonthlyPoints(0);
+        userStats.setAnnualPoints(0);
+        userStatsRepository.save(userStats);
+        user.setUserStats(userStats);
         userRepository.save(user);
     }
     

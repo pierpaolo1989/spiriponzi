@@ -27,35 +27,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeHttpRequests((authorize) ->
-                        authorize.requestMatchers("/register/**").permitAll()
-                                .requestMatchers("/index").permitAll()
-                                .requestMatchers("/recover-password/**").permitAll()
-                                .requestMatchers("/menu/**").permitAll()
-                                .requestMatchers("/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
-                                .requestMatchers("/dashboard").hasRole("USER")
-                                .requestMatchers("/claims").hasRole("USER")
-                                .requestMatchers("/user-data").hasRole("USER")
-                                .requestMatchers("/users/**").hasRole("USER")
-                                .requestMatchers("/games").hasRole("USER")
-                                .requestMatchers("/surf-ads").hasRole("USER")
-                                .requestMatchers("/survey").hasRole("USER")
-                                .requestMatchers("/academy").hasRole("USER")
-                                .requestMatchers("/report").hasRole("USER")
-                                .requestMatchers("/withdraws").hasRole("USER")
-                                .requestMatchers("/profile").hasRole("USER")
-                                .requestMatchers("/withdraw-requests").hasRole("USER")
-                ).formLogin(
-                        form -> form
-                                .loginPage("/login")
-                                .loginProcessingUrl("/login")
-                                .defaultSuccessUrl("/dashboard")
-                                .permitAll()
-                ).logout(
-                        logout -> logout
-                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                                .permitAll()
+                .authorizeHttpRequests((authorize) -> authorize
+                        // Pagine accessibili senza login
+                        .requestMatchers("/register/**", "/index", "/recover-password/**", "/menu/**",
+                                "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
+
+                        // Tutte le altre pagine richiedono il ruolo USER
+                        .requestMatchers("/**").hasRole("USER")
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/dashboard")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .permitAll()
                 );
+
         return http.build();
     }
 

@@ -1,5 +1,6 @@
 package com.soa.spiriponzi.controller;
 
+import com.soa.spiriponzi.dto.ADDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -17,10 +18,12 @@ import com.soa.spiriponzi.service.UserService;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @Controller
 public class AuthController {
 
-	private UserService userService;
+	private final UserService userService;
 
 	public AuthController(UserService userService) {
 		this.userService = userService;
@@ -49,7 +52,7 @@ public class AuthController {
 			Model model){
 		User existing = userService.findByEmail(user.getEmail());
 		if (existing != null) {
-			result.rejectValue("email", null, "There is already an account registered with that email");
+			result.rejectValue("email", null, "There is already an account registered with this email");
 		}
 		if (result.hasErrors()) {
 			model.addAttribute("user", user);
@@ -104,9 +107,16 @@ public class AuthController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
+		List<ADDto> ads = List.of(
+				ADDto.builder().title("P4P - The best community about amateur photographers").id(1L).url("https://passion4pics.net").timer(10).reward(20).build(),
+				ADDto.builder().title("Pierpaolo Di Dato's blog - Articles about coding and finance").id(2L).url("https://pierpaolodidato.blog.it").timer(10).reward(20).build(),
+				ADDto.builder().title("microeconomia.info - microeconomics exercises with solutions").id(3L).url("https://microeconomia.info").timer(15).reward(25).build(),
+				ADDto.builder().title("Unofficial website about Civitella del Lago - historical village near Orvieto (Italy)").id(4L).url("https://civitelladellago.com").timer(10).reward(20).build(),
+				ADDto.builder().title("Urban Scratches: Journey through street art of Naples and province").id(4L).url("https://www.amazon.it/Urban-Scratches-Journey-through-province-ebook/dp/B09FC5L51Q/ref=sr_1_2?__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&sr=8-2").timer(10).reward(10).build()
+		);
+		model.addAttribute("ads", ads);
 		return "surf-ads";
 	}
-	
 
 	@GetMapping("/survey")
 	public String survey(Model model) {

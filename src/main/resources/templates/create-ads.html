@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport"
+		  content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<title>Spiriponzi - Ads</title>
+
+	<link rel="icon" type="image/svg" href="img/favicon.ico">
+
+	<link th:href="@{vendor/fontawesome-free/css/all.min.css}"
+		  rel="stylesheet" type="text/css">
+
+	<!-- Custom fonts for this template-->
+	<link
+			href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+			rel="stylesheet">
+
+	<!-- Custom styles for this template-->
+	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
+
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
+			crossorigin="anonymous"></script>
+	<style>
+		.ad-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .ad-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .ad-card:hover {
+            transform: scale(1.05);
+        }
+        .countdown {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: red;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .countdown i {
+            margin-right: 5px;
+        }
+        .reward-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffa500;
+            margin-top: 10px;
+        }
+        .reward-info i {
+            margin-right: 5px;
+        }
+        .reward-button {
+            margin-top: 10px;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .reward-button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+        .reward-button:hover:not(:disabled) {
+            background: #218838;
+        }
+        @media (max-width: 1200px) {
+            .ad-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 992px) {
+            .ad-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 576px) {
+            .ad-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+	</style>
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+	<!-- Sidebar -->
+	<div th:replace="fragments/sidebar"></div>
+	<!-- End of Sidebar -->
+
+	<!-- Content Wrapper -->
+	<div id="content-wrapper" class="d-flex flex-column">
+
+		<!-- Main Content -->
+		<div id="content">
+
+			<!-- Topbar -->
+			<div th:replace="fragments/navbar"></div>
+			<!-- End of Topbar -->
+
+			<!-- Begin Page Content -->
+			<div class="container-fluid">
+
+				<!-- Page Heading -->
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 class="h3 mb-0 text-gray-800">Create ads</h1>
+					<i class="fas fa-money fa-sm text-white-50"></i>
+				</div>
+
+				<!-- Content Row -->
+				<div th:replace="fragments/summary"></div>
+
+				<!-- Content Row -->
+
+				<div class="row">
+
+					<!-- Area Chart -->
+					<div class="col-lg-12 mb-4">
+						<div class="card shadow mb-4">
+							<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h6 class="m-0 font-weight-bold text-primary">Your ads</h6>
+							</div>
+							<!-- Card Body -->
+							<div class="card-body ad-container" style="min-height: 600px;">
+
+								<div class="ad-card" th:each="ad, iter : ${ads}">
+									<p th:text="${ad.title}">Titolo Annuncio</p>
+									<div class="reward-info">
+										<i class="fas fa-coins"></i>
+										<span th:text="${ad.reward}">10</span>
+									</div>
+									<p class="countdown" th:id="'countdown-' + ${iter.index}">
+										<i class="fas fa-clock"></i> Attendi 10s
+									</p>
+									<button class="reward-button" th:id="'reward-btn-' + ${iter.index}" onclick="claimReward(this)" disabled>Ottieni Ricompensa</button>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+			<!-- /.container-fluid -->
+
+		</div>
+		<!-- End of Main Content -->
+
+		<!-- Footer -->
+		<div th:replace="fragments/footer"></div>
+		<!-- End of Footer -->
+
+	</div>
+	<!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Bootstrap core JavaScript-->
+	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
+	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+	<!-- Core plugin JavaScript-->
+	<script th:src="@{vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+	<script type="text/javascript" th:src="@{/js/sb-admin-2.min.js}"></script>
+
+	<!-- Page level plugins -->
+	<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
+
+	<!-- Page level custom scripts -->
+	<script src='https://www.google.com/recaptcha/api.js'></script>
+	<script>
+		function startCountdown(index, duration) {
+        let countdownElement = document.getElementById('countdown-' + index);
+        let rewardButton = document.getElementById('reward-btn-' + index);
+        let secondsLeft = duration;
+
+        let interval = setInterval(() => {
+            if (secondsLeft > 0) {
+                countdownElement.textContent = "Attendi " + secondsLeft + "s";
+                secondsLeft--;
+            } else {
+                clearInterval(interval);
+                countdownElement.textContent = "Tempo scaduto!";
+                rewardButton.disabled = false;
+                rewardButton.style.display = "block";
+            }
+        }, 1000);
+    }
+
+    function claimReward(button) {
+        alert("Ricompensa accreditata!");
+        button.disabled = true;
+    }
+
+    // Avvia i countdown per ogni annuncio
+    document.addEventListener("DOMContentLoaded", () => {
+        let adsCount = document.querySelectorAll('.ad-card').length;
+        //for (let i = 0; i < adsCount; i++) {
+          //  startCountdown(i, 10); // Countdown di 10 secondi per ogni annuncio
+        //}
+    });
+</script>
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
+			crossorigin="anonymous"></script>
+</body>
+
+</html>
