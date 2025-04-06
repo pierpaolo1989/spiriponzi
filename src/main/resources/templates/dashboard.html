@@ -210,7 +210,6 @@
 										<li>Playing games <a target="_blank" th:href="@{/games}">here</a></li>
 									    <li>Surfing ads <a target="_blank" th:href="@{/surf-ads}">here</a></li>
 									</ul>
-									</p>
 								</div>
 							</div>
 							<div class="card shadow mb-4">
@@ -299,6 +298,7 @@ $(function () {
                 let remainingTime = oneHour - difference;
                 let remainingMinutes = Math.floor(remainingTime / 60000);
                 $('#claim_button').prop('disabled', true);
+                $('.g-recaptcha').css('pointer-events', 'none').css('opacity', '0.5'); // Disabilita il reCAPTCHA
                 let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
                 $('#countdown').text("00:" + remainingMinutes + ":" + ("0" + remainingSeconds).slice(-2));
                 $('#countdown').countdown(0, remainingMinutes, remainingSeconds);
@@ -383,6 +383,7 @@ function register(event) {
     $.post(serverContext + "claims", formData, function(data) {
         	$('#countdown').css('display','block');
     		$('#countdown').countdown(1,0,0);
+    		$('.g-recaptcha').css('pointer-events', 'none').css('opacity', '0.5'); // Disabilita reCAPTCHA dopo claim
     		$.ajax({
     		    url: serverContext + "users/stats",
     		    type: 'GET',

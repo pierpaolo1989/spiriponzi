@@ -1,14 +1,19 @@
 package com.soa.spiriponzi.dto;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ADDto {
     private Long id;
     private String title;
     private double reward;
     private int timer;
     private String url;
+    private boolean completed;
 }

@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name="claim")
+@Table(name="ads")
 public class Ad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,4 +24,6 @@ public class Ad {
     private String url;
     @Column
     private boolean active;
+    @ManyToOne
+    private User proposer;
 }

@@ -24,8 +24,10 @@
 
 <!-- Custom styles for this template-->
 <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
+	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js"></script>
 
-<style>
+
+	<style>
 iframe {
 	width: -webkit-fill-available !important;
 	min-height: 600px !important;
@@ -79,7 +81,7 @@ iframe {
 								</div>
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
-										<iframe src="https://web.bitlabs.ai/?uid=4jHuQ9EeNg_bMkw0NSAc3&token=fa47896b-dbff-47a7-bf0b-3e3b132174bb"></iframe>
+									<!--	<iframe src="https://web.bitlabs.ai/?uid=4jHuQ9EeNg_bMkw0NSAc3&token=fa47896b-dbff-47a7-bf0b-3e3b132174bb"></iframe>-->
 								</div>
 							</div>
 						</div>
@@ -92,7 +94,8 @@ iframe {
 								</div>
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
-									<iframe src="https://offers.cpx-research.com/index.php?app_id=23067&ext_user_id=1&username=test@gmail.com&email=test@gmail.com&subid_1=&subid_2"></iframe>
+
+									<div id="fullscreen"></div>
 								</div>
 							</div>
 						</div>
@@ -134,6 +137,78 @@ iframe {
 
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
+
+	<script>
+		// How to use:
+        // 1. Add div(s) to html and give it an id
+        // 2. add this config script before the script tag
+        // 3. place the script on the bottom before the closing html tag
+
+        // All instances will take up the available space of its div
+        // If you are using the sidebar option, please specify a fixed height
+        // To debug, please only use 1 option
+
+        const script1 = {
+            div_id: "fullscreen", // string // Entry point for the script
+            theme_style: 1, // int // Theme: Select 1 for fullscreen, 2 for sidebar, 3 for sidebar single item
+            order_by: 2, // int // Sort surveys (optional): Select 1 for best score (default), 2 for best money, 3 for best conversion rate
+            limit_surveys: 7 // int // Limit the number of surveys displayed (optional). Default is 12.
+        };
+
+
+        const config = {
+            general_config: {
+                app_id: 23067, //number
+                ext_user_id: 3, // string
+                 email: "", // string
+                 username: "", // string
+               	secure_hash: "", // string if enabled on publisher area
+                subid_1: "", // string
+                subid_2: "", // string
+            },
+            style_config: {
+                text_color: "#2b2b2b", // string // hex, rgba, colorcode
+                survey_box: {
+                    topbar_background_color: "#ffaf20", // string // hex, rgba, colorcode
+                    box_background_color: "white", // string // hex, rgba, colorcode
+                    rounded_borders: true, // boolean true || false
+                    stars_filled: "black", // string // hex, rgba, colorcode
+                },
+            },
+            script_config: [script1], // Object Array
+            debug: false, // boolean
+             useIFrame: true, //boolean
+             iFramePosition: 1, // 1 right (default), 2 left
+            functions: {
+                no_surveys_available: () =>
+                {
+                    console.log("no surveys available function here");
+                }, // Function without parameter, NEVER USE window.alert... because of infinite loop
+                count_new_surveys: (countsurveys) =>
+                {
+                    console.log("count surveys function here, count:", countsurveys);
+                },
+                get_all_surveys: (surveys) =>
+                {
+                    console.log("get all surveys function here, surveys: ", surveys);
+                },
+                get_transaction: (transactions) =>
+                {
+                    console.log("transaction function here, transaction: ", transactions);
+                }
+
+
+          }
+
+
+          };
+
+        window.config = config;
+
+	</script>
+
+	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js"></script>
+
 </body>
 
 </html>

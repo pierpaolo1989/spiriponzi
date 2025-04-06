@@ -108,6 +108,18 @@
     opacity: 0.5;
     pointer-events: none;
 }
+
+		.received-message {
+    height: 20px;
+    color: green;
+    font-weight: bold;
+    text-align: center;
+    visibility: hidden;
+}
+
+.received-message.visible {
+    visibility: visible;
+}
 	</style>
 </head>
 
@@ -158,6 +170,8 @@
 								<div class="ad-card" th:each="ad, iter : ${ads}"
 									 th:data-url="${ad.url}"
 									 th:data-timer="${ad.timer}"
+									 th:data-id="${ad.id}"
+									 th:classappend="${ad.completed} ? ' disabled' : ''"
 									 onclick="openAd(this)"
 								style="cursor:pointer;">
 									<p th:text="${ad.title}">Titolo Annuncio</p>
@@ -165,11 +179,17 @@
 										<i class="fas fa-coins"></i>
 										<span th:text="${ad.reward}">10</span>
 									</div>
-									<p class="countdown" th:id="'countdown-' + ${iter.index}">
-										<i class="fas fa-clock"></i> Attendi 10s
+									<p class="countdown"
+									   th:id="'countdown-' + ${iter.index}"
+									   th:data-timer="${ad.timer}">
+										<i class="fas fa-clock"></i> Attendi <span th:text="${ad.timer}">10</span>s
 									</p>
 									<button class="reward-button" th:id="'reward-btn-' + ${iter.index}" disabled>Ottieni Ricompensa</button>
-									<p class="received-message" style="display: none; color: green; font-weight: bold;">Ricompensa ricevuta</p>
+									<p class="received-message"
+									   th:classappend="${ad.completed} ? ' visible' : ''"
+									   th:id="'received-msg-' + ${iter.index}">
+										Reward received
+									</p>
 								</div>
 
 							</div>
@@ -216,59 +236,80 @@
 	<script>
 
 		function openAd(element) {
-    let adUrl = element.getAttribute("data-url");
-    let adTimer = parseInt(element.getAttribute("data-timer"), 10);
+        let adId = element.getAttribute("data-id");
+        let adUrl = element.getAttribute("data-url");
+        let adTimer = parseInt(element.getAttribute("data-timer"), 10);
+        let index = [...document.querySelectorAll(".ad-card")].indexOf(element);
 
-    if (adUrl) {
-        let adWindow = window.open(adUrl, "_blank");
+        if (adUrl) {
+            let adWindow = window.open(adUrl, "_blank");
 
-        setTimeout(() => {
-            console.log("Ricompensa ricevuta");
-            if (adWindow) {
-                adWindow.close();
+            setTimeout(() => {
+                fetch(`/ads?idAd=${adId}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        console.log("Ricompensa accreditata con successo");
+                    } else {
+                        console.error("Errore nell'accredito della ricompensa");
+                    }
+                }).catch(error => {
+                    console.error("Errore nella richiesta AJAX", error);
+                });
+
+                if (adWindow) {
+                    adWindow.close();
+                }
+
+                element.classList.add("disabled");
+
+                // Mostra "Reward received"
+                let receivedMessage = element.querySelector(".received-message");
+                if (receivedMessage) {
+                    receivedMessage.classList.add("visible");
+                }
+
+                // Disattiva bottone e timer
+                let rewardButton = document.getElementById('reward-btn-' + index);
+                if (rewardButton) {
+                    rewardButton.style.display = "none";
+                    rewardButton.disabled = true;
+                }
+
+                let countdown = document.getElementById('countdown-' + index);
+                if (countdown) {
+                    countdown.textContent = "Completed";
+                }
+
+            }, adTimer * 1000);
+        }
+    }
+                function startCountdown(index, duration) {
+                let countdownElement = document.getElementById('countdown-' + index);
+                let rewardButton = document.getElementById('reward-btn-' + index);
+                let secondsLeft = duration;
+
+                let interval = setInterval(() => {
+                    if (secondsLeft > 0) {
+                        countdownElement.textContent = "Attendi " + secondsLeft + "s";
+                        secondsLeft--;
+                    } else {
+                        clearInterval(interval);
+                        countdownElement.textContent = "Tempo scaduto!";
+                        rewardButton.disabled = false;
+                        rewardButton.style.display = "block";
+                    }
+                }, 1000);
             }
 
-            // Disabilita l'annuncio
-            element.classList.add("disabled");
-
-            // Mostra il messaggio "Ricompensa ricevuta"
-            let receivedMessage = element.querySelector(".received-message");
-            if (receivedMessage) {
-                receivedMessage.style.display = "block";
+            function claimReward(button) {
+                alert("Ricompensa accreditata!");
+                button.disabled = true;
             }
-        }, adTimer * 1000); // Converti i secondi in millisecondi
-    }
-}
-		function startCountdown(index, duration) {
-        let countdownElement = document.getElementById('countdown-' + index);
-        let rewardButton = document.getElementById('reward-btn-' + index);
-        let secondsLeft = duration;
 
-        let interval = setInterval(() => {
-            if (secondsLeft > 0) {
-                countdownElement.textContent = "Attendi " + secondsLeft + "s";
-                secondsLeft--;
-            } else {
-                clearInterval(interval);
-                countdownElement.textContent = "Tempo scaduto!";
-                rewardButton.disabled = false;
-                rewardButton.style.display = "block";
-            }
-        }, 1000);
-    }
-
-    function claimReward(button) {
-        alert("Ricompensa accreditata!");
-        button.disabled = true;
-    }
-
-    // Avvia i countdown per ogni annuncio
-    document.addEventListener("DOMContentLoaded", () => {
-        let adsCount = document.querySelectorAll('.ad-card').length;
-        //for (let i = 0; i < adsCount; i++) {
-          //  startCountdown(i, 10); // Countdown di 10 secondi per ogni annuncio
-        //}
-    });
 </script>
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 			crossorigin="anonymous"></script>

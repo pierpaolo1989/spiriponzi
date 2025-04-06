@@ -52,32 +52,60 @@
 				<div class="container-fluid">
 
 					<div th:replace="fragments/summary"></div>
-					
-					<div class="col-lg-10 mb-4 offset-lg-1 mt-5">
-						<div class="card shadow mb-12">
-							<div
-									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h6 class="m-0 font-weight-bold text-primary">Last 10 Claims</h6>
-							</div>
-							<!-- Card Body -->
-							<div class="card-body" style="min-height: auto !important;">
-								<div class="row">
 
-							<table id="table_claims" class="display table"
-								style="min-height: 200px;">
-								<thead>
-									<tr>
-										<th>Id</th>
-										<th>Date</th>
-										<th>Amount</th>
-									</tr>
-								</thead>
-								<tbody>
-								</tbody>
-							</table>
+					<div class="col-lg-10 mb-4 offset-lg-1 mt-5">
+
+						<!-- Section 1: Last 10 Claims -->
+						<div class="card shadow mb-4">
+							<div class="card-header d-flex justify-content-between align-items-center">
+								<h6 class="m-0 font-weight-bold text-primary">Last 10 Claims</h6>
+								<button class="btn btn-sm btn-link toggle-btn" data-toggle="collapse" data-target="#collapseClaims1"
+										aria-expanded="true" aria-controls="collapseClaims1">
+									<i class="fas fa-chevron-up"></i>
+								</button>
+							</div>
+							<div id="collapseClaims1" class="collapse show">
+								<div class="card-body">
+									<table id="table_claims" class="display table" style="min-height: 200px;">
+										<thead>
+										<tr>
+											<th>Id</th>
+											<th>Date</th>
+											<th>Amount</th>
+										</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
 						</div>
-					</div>
-			</div>
+
+						<!-- Section 2: Other Claims -->
+						<div class="card shadow mb-4">
+							<div class="card-header d-flex justify-content-between align-items-center">
+								<h6 class="m-0 font-weight-bold text-primary">Last 10 ads surfed</h6>
+								<button class="btn btn-sm btn-link toggle-btn" data-toggle="collapse" data-target="#collapseClaims2"
+										aria-expanded="false" aria-controls="collapseClaims2">
+									<i class="fas fa-chevron-down"></i>
+								</button>
+							</div>
+							<div id="collapseClaims2" class="collapse">
+								<div class="card-body">
+									<table id="table_surfed_ads" class="display table" style="min-height: 200px;">
+										<thead>
+										<tr>
+											<th>Title</th>
+											<th>Completed at</th>
+											<th>Reward</th>
+										</tr>
+										</thead>
+										<tbody>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+
 					</div>
 				</div>
 			</div>
@@ -117,10 +145,50 @@
 		  {{/each}}
 		</script>
 
+	<script id="row_template_ads" type="text/x-handlebars-template">
+		{{#each this}}
+		<tr>
+			<td>{{title}}</td>
+			<td>{{formatDateOnly completedAt}}</td>
+			<td>{{reward}}</td>
+		</tr>
+		{{/each}}
+	</script>
+
 		<script>
 			$(document)
 					.ready(
 							function() {
+
+							  function updateArrowIcon($collapse, isShown) {
+            const $icon = $collapse.prev('.card-header').find('i');
+            $icon.removeClass('fa-chevron-down fa-chevron-up');
+            $icon.addClass(isShown ? 'fa-chevron-up' : 'fa-chevron-down');
+        }
+
+        // Inizializza correttamente le icone in base allo stato iniziale
+        updateArrowIcon($('#collapseClaims1'), true);
+        updateArrowIcon($('#collapseClaims2'), false);
+
+        // Accordion behavior
+        $('#collapseClaims1').on('show.bs.collapse', function () {
+            $('#collapseClaims2').collapse('hide');
+            updateArrowIcon($(this), true);
+        });
+
+        $('#collapseClaims1').on('hide.bs.collapse', function () {
+            updateArrowIcon($(this), false);
+        });
+
+        $('#collapseClaims2').on('show.bs.collapse', function () {
+            $('#collapseClaims1').collapse('hide');
+            updateArrowIcon($(this), true);
+        });
+
+        $('#collapseClaims2').on('hide.bs.collapse', function () {
+            updateArrowIcon($(this), false);
+        });
+
 							Handlebars.registerHelper("formatDate", function (dateString) {
             let date = new Date(dateString);
             return date.toLocaleDateString("en-GB", {
@@ -132,6 +200,15 @@
                 second: "2-digit"
             });
         });
+
+        Handlebars.registerHelper("formatDateOnly", function (dateString) {
+    let date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+});
 								var row_source = $("#row_template").html();
 								var row_template = Handlebars
 										.compile(row_source);
@@ -151,6 +228,30 @@
 															.append(
 																	row_template(response));
 												}
+
+												var row_source_ads = $("#row_template_ads").html();
+								var row_template_ads = Handlebars
+										.compile(row_source_ads);
+
+											$
+										.ajax({
+											url : "http://localhost:8080/get-ads",
+											type : "GET",
+											contentType : "application/json; charset=utf-8",
+											dataType : "json",
+											success : function(response) {
+												if (response.length === 0) {
+													$('#table_surfed_ads tbody')
+															.append(
+																	"<td colspan=6>No data available</td>");
+												} else {
+													$('#table_surfed_ads tbody')
+															.append(
+																	row_template_ads(response));
+												}
+												}
+
+											})
 											}
 										})
 							});

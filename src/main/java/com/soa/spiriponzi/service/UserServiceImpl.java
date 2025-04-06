@@ -1,26 +1,20 @@
 package com.soa.spiriponzi.service;
 
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.soa.spiriponzi.dto.*;
+import com.soa.spiriponzi.exception.ClaimException;
+import com.soa.spiriponzi.model.*;
+import com.soa.spiriponzi.repository.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.soa.spiriponzi.dto.RecoverPasswordDto;
-import com.soa.spiriponzi.dto.ResetPasswordDto;
-import com.soa.spiriponzi.dto.UpdateUserDto;
-import com.soa.spiriponzi.dto.UserDto;
-import com.soa.spiriponzi.model.Role;
-import com.soa.spiriponzi.model.User;
-import com.soa.spiriponzi.model.UserStats;
-import com.soa.spiriponzi.repository.RoleRepository;
-import com.soa.spiriponzi.repository.UserRepository;
-import com.soa.spiriponzi.repository.UserStatsRepository;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +26,8 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final AdRepository adRepository;
+    private final UserAdRepository userAdRepository;
 
     @Override
     public void saveUser(UserDto userDto) {
@@ -69,7 +65,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> findAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.stream().map((user) -> convertEntityToDto(user))
+        return users.stream().map(this::convertEntityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -101,4 +97,46 @@ public class UserServiceImpl implements UserService {
 		}
 		
 	}
+
+    @Override
+    public List<ADDto> findAdsByUser(Long userId) {
+        List<Object[]> results = adRepository.findAdsWithCompletionStatus(userId);
+
+        return results.stream()
+                .map(row -> {
+                    Ad ad = (Ad) row[0];
+                    boolean completed = (Boolean) row[1];
+                    ADDto dto = new ADDto();
+                    dto.setId(ad.getId());
+                    dto.setUrl(ad.getUrl());
+                    dto.setTitle(ad.getTitle());
+                    dto.setTimer(ad.getTimer());
+                    dto.setReward(ad.getReward());
+                    dto.setCompleted(completed);
+                    return dto;
+                })
+                .toList();
+    }
+
+    @Override
+    public void createUserAd(User user, Long idAd) {
+        var ad = adRepository.findById(idAd);
+        UserAd userAd = new UserAd();
+        userAd.setAd(ad.get());
+        userAd.setUser(user);
+        userAd.setCompletedAt(LocalDate.now());
+        userAdRepository.save(userAd);
+
+        //Update user stats
+        Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(user.getEmail());
+        UserStats userStats = optUserStats.get();
+        int amount = (int) ad.get().getReward();
+        if (userStats.getLastRequest().getMonth() == LocalDate.now().getMonth()) {
+            userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
+        } else {
+            userStats.setMonthlyPoints((int) ad.get().getReward());
+        }
+        userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
+        userStatsRepository.save(userStats);
+    }
 }

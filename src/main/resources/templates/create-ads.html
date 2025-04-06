@@ -104,6 +104,13 @@
                 grid-template-columns: repeat(1, 1fr);
             }
         }
+
+		input:invalid {
+    border-color: red;
+}
+.input-error {
+    border: 2px solid red !important;
+}
 	</style>
 </head>
 
@@ -151,16 +158,38 @@
 							<!-- Card Body -->
 							<div class="card-body ad-container" style="min-height: 600px;">
 
-								<div class="ad-card" th:each="ad, iter : ${ads}">
-									<p th:text="${ad.title}">Titolo Annuncio</p>
-									<div class="reward-info">
-										<i class="fas fa-coins"></i>
-										<span th:text="${ad.reward}">10</span>
+								<div th:if="${ads == null or ads.isEmpty()}">
+									<p class="text-center text-gray-500">There is no ads yet</p>
+									<div class="text-center mt-3">
+										<button class="btn btn-primary" onclick="toggleAdForm()">
+											<i class="fas fa-plus"></i> CREATE AD
+										</button>
 									</div>
-									<p class="countdown" th:id="'countdown-' + ${iter.index}">
-										<i class="fas fa-clock"></i> Attendi 10s
-									</p>
-									<button class="reward-button" th:id="'reward-btn-' + ${iter.index}" onclick="claimReward(this)" disabled>Ottieni Ricompensa</button>
+								</div>
+
+								<!-- Form a comparsa per creare un nuovo annuncio -->
+								<div id="adFormContainer" class="p-4" style="display:none; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); margin-top: 20px; background: #fff;">
+									<h2>Create Ad</h2>
+									<form id="adForm">
+										<div class="form-group">
+											<label for="title">Title</label>
+											<input type="text" id="title" class="form-control" required maxlength="150">
+										</div>
+										<div class="form-group">
+											<label for="url">URL</label>
+											<input type="url" id="url" class="form-control" required>
+										</div>
+										<div class="form-group">
+											<label for="duration">Minimum Visit Duration (seconds)</label>
+											<input type="number" id="duration" class="form-control" required>
+										</div>
+										<div class="form-group">
+											<label for="points">Points per View</label>
+											<input type="number" id="points" class="form-control" required>
+										</div>
+										<button type="submit" class="btn btn-success">Submit</button>
+										<button type="button" class="btn btn-secondary" onclick="toggleAdForm()">Cancel</button>
+									</form>
 								</div>
 
 							</div>
@@ -204,36 +233,61 @@
 
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
-	<script>
-		function startCountdown(index, duration) {
-        let countdownElement = document.getElementById('countdown-' + index);
-        let rewardButton = document.getElementById('reward-btn-' + index);
-        let secondsLeft = duration;
+<!-- Script per mostrare/nascondere il form -->
+<script>
+    function toggleAdForm() {
+        let formContainer = document.getElementById("adFormContainer");
+        formContainer.style.display = (formContainer.style.display === "none" || formContainer.style.display === "") ? "block" : "none";
+    }
 
-        let interval = setInterval(() => {
-            if (secondsLeft > 0) {
-                countdownElement.textContent = "Attendi " + secondsLeft + "s";
-                secondsLeft--;
-            } else {
-                clearInterval(interval);
-                countdownElement.textContent = "Tempo scaduto!";
-                rewardButton.disabled = false;
-                rewardButton.style.display = "block";
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById("adForm");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let isValid = true;
+            const inputs = form.querySelectorAll("input");
+
+            inputs.forEach(input => {
+                input.classList.remove("input-error");
+                if (!input.value.trim()) {
+                    input.classList.add("input-error");
+                    isValid = false;
+                }
+            });
+
+             if (isValid) {
+                const data = {
+                    title: title.value,
+                    url: document.getElementById("url").value,
+                    timer: document.getElementById("duration").value,
+                    reward: document.getElementById("points").value
+                };
+
+                fetch('/user-ads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Ad created successfully!");
+                        form.reset();
+                        toggleAdForm(); // Nascondi il form
+                        // Qui potresti anche aggiornare la lista degli ad senza ricaricare la pagina
+                    } else {
+                        alert("Something went wrong while submitting the ad.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Server error. Please try again later.");
+                });
             }
-        }, 1000);
-    }
-
-    function claimReward(button) {
-        alert("Ricompensa accreditata!");
-        button.disabled = true;
-    }
-
-    // Avvia i countdown per ogni annuncio
-    document.addEventListener("DOMContentLoaded", () => {
-        let adsCount = document.querySelectorAll('.ad-card').length;
-        //for (let i = 0; i < adsCount; i++) {
-          //  startCountdown(i, 10); // Countdown di 10 secondi per ogni annuncio
-        //}
+        });
     });
 </script>
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
