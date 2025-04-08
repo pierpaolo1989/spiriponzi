@@ -253,6 +253,10 @@
                 }).then(response => {
                     if (response.ok) {
                         console.log("Ricompensa accreditata con successo");
+                        $("#numberOfClaims").html(response.numberOfClaims);
+    	        	$("#monthlyPoints").html(response.monthlyPoints);
+    	        	$("#annualPoints").html(response.annualPoints);
+    	        	$("#withdrawals").html(response.withdrawals);
                     } else {
                         console.error("Errore nell'accredito della ricompensa");
                     }

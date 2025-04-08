@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="SOA Information technology">
+
+    <title>Spiriponzi - FAQ</title>
+
+    <link rel="icon" type="image/svg" href="img/favicon.ico">
+    <link th:href="@{vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        .row.justify-content-center {
+            flex: 1;
+        }
+
+        .navbar {
+            background-color: #4e73df;
+            padding: 0.75rem 1rem;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-weight: bold;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .navbar a:hover {
+            color: #d1d1d1;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-primary">
+
+<!-- Navbar -->
+<div class="navbar">
+    <div class="navbar-content">
+        <div class="sidebar-brand-icon">
+            <i class="fas fa-solid fa-coins"></i> &nbsp;Spiriponzi
+        </div>
+        <a th:href="@{/login}">Login</a>
+        <a th:href="@{/register}">Register</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="h4 text-primary font-weight-bold">Frequently Asked Questions</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold text-dark">💰 What is a crypto faucet?</h5>
+                        <p>A crypto faucet is a website that gives out small amounts of cryptocurrency for free, typically in exchange for completing simple tasks or captcha verifications.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold text-dark">🔒 Is Spiriponzi safe?</h5>
+                        <p>Yes, Spiriponzi uses secure protocols and does not require any sensitive information beyond your email address for registration.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold text-dark">🕓 How often can I claim points?</h5>
+                        <p>You can claim points once every 60 minutes. Check back regularly to maximize your earnings!</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold text-dark">💸 How do I withdraw crypto?</h5>
+                        <p>Once you accumulate 3,000 points, you can request a withdrawal. We currently support Bitcoin (BTC) and Ethereum (ETH).</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold text-dark">🔁 Can I refer friends?</h5>
+                        <p>Yes! Share your referral link to earn bonus points every time someone signs up through it and starts claiming.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold text-dark">📬 I didn’t receive my withdrawal, what should I do?</h5>
+                        <p>Withdrawals are processed within 48 hours. If it's been longer, please contact our support team via email or Telegram.</p>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a th:href="@{/login}" class="btn btn-primary">Back to Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script th:src="@{vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{js/sb-admin-2.min.js}"></script>
+
+</body>
+</html>

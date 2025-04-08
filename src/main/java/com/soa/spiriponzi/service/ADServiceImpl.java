@@ -20,7 +20,7 @@ public class ADServiceImpl implements ADService {
 
 	@Override
 	public List<UserADDto> findSurfedAdsByUser(Long userId) {
-		var ads = userAdRepository.findByUserIdAndCompletedAtIsNotNull(userId);
+		var ads = userAdRepository.findByUserIdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId);
 		return ads.stream().map(userAd -> {
 			UserADDto dto = new UserADDto();
 			dto.setTitle(userAd.getAd().getTitle());

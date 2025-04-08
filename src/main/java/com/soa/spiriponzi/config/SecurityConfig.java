@@ -29,7 +29,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
-                        .requestMatchers("/register/**", "/index", "/recover-password/**", "/menu/**",
+                        .requestMatchers("/register/**", "/index", "faq", "/recover-password/**", "/menu/**",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
 
                         // Tutte le altre pagine richiedono il ruolo USER

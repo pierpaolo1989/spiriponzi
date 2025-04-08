@@ -30,6 +30,30 @@ iframe {
 	width: -webkit-fill-available !important;
 	min-height: 600px !important;
 }
+
+	.expand-icon {
+    cursor: pointer;
+    color: #007bff;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+.expand-icon:hover {
+    transform: scale(1.2);
+}
+.fullscreen-card {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999;
+    background: white;
+    overflow: auto;
+    padding: 20px;
+}
+.fullscreen-card .card-body {
+    height: calc(100vh - 100px) !important;
+}
 </style>
 
 </head>
@@ -78,9 +102,10 @@ iframe {
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 									<h6 class="m-0 font-weight-bold text-primary">Bubble BUbble</h6>
+									<i class="fas fa-expand expand-icon" onclick="toggleFullscreen(this)" title="Espandi"></i>
 								</div>
-								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
+
 									<div>
 										<script
 											src="https://cdn.htmlgames.com/embed.js?game=BubbleBubble&amp;bgcolor=white"></script>
@@ -95,6 +120,7 @@ iframe {
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 									<h6 class="m-0 font-weight-bold text-primary">Soldier
 										Attack 3</h6>
+									<i class="fas fa-expand expand-icon" onclick="toggleFullscreen(this)" title="Espandi"></i>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
@@ -105,12 +131,29 @@ iframe {
 								</div>
 							</div>
 						</div>
+						<div class="row">
+							<div class="col-lg-12 mb-4 text-center">
+								<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+								<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
+										crossorigin="anonymous"></script>
+								<!-- Test1 -->
+								<ins class="adsbygoogle"
+									 style="display:block"
+									 data-ad-client="ca-pub-3177939731250769"
+									 data-ad-slot="7359001609"
+									 data-ad-format="auto"
+									 data-full-width-responsive="true"></ins>
+								<script>
+									(adsbygoogle = window.adsbygoogle || []).push({});
+								</script>
+							</div>
+						</div>
 
 						<div class="col-lg-6 mb-4">
 							<div class="card shadow mb-4">
-								<div
-									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 									<h6 class="m-0 font-weight-bold text-primary">Neon Math</h6>
+									<i class="fas fa-expand expand-icon" onclick="toggleFullscreen(this)" title="Espandi"></i>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
@@ -128,6 +171,7 @@ iframe {
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 									<h6 class="m-0 font-weight-bold text-primary">Galaxy
 										Shooter</h6>
+									<i class="fas fa-expand expand-icon" onclick="toggleFullscreen(this)" title="Espandi"></i>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
@@ -175,6 +219,25 @@ iframe {
 
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
+
+	<script>
+		function toggleFullscreen(icon) {
+    const card = icon.closest('.card');
+    const isFullscreen = card.classList.contains('fullscreen-card');
+
+    if (isFullscreen) {
+        card.classList.remove('fullscreen-card');
+        icon.classList.remove('fa-compress');
+        icon.classList.add('fa-expand');
+        icon.setAttribute('title', 'Espandi');
+    } else {
+        card.classList.add('fullscreen-card');
+        icon.classList.remove('fa-expand');
+        icon.classList.add('fa-compress');
+        icon.setAttribute('title', 'Riduci');
+    }
+}
+	</script>
 </body>
 
 </html>

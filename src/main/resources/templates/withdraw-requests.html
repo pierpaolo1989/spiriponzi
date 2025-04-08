@@ -20,6 +20,21 @@
 	<link href="css/sb-admin-2.min.css" rel="stylesheet">
 
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+
+	<style>
+		.modal-backdrop.show {
+            opacity: 0.8 !important;
+        }
+
+        .modal-dialog {
+            margin-top: 10vh;
+        }
+
+        .modal-content {
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+	</style>
 </head>
 
 <body id="page-top">
@@ -62,8 +77,6 @@
 							</tr>
 							</thead>
 							<tbody>
-							<tr>
-							</tr>
 							</tbody>
 						</table>
 					</div>
@@ -97,6 +110,9 @@
 							<option value="ETH">ETH</option>
 						</select>
 					</div>
+					<div class="mb-3" id="wallet-address-group" style="display: none;">
+						<input type="text" id="wallet-address" name="wallet-address" class="form-control" placeholder="Wallet Address *" />
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
@@ -117,23 +133,44 @@
 <!-- Custom scripts for all pages-->
 <script src="js/sb-admin-2.min.js"></script>
 
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
-	// Funzione per abilitare/disabilitare il pulsante Proceed
-    function checkFields() {
-        var amount = document.getElementById('username').value;
-        var wallet = document.getElementById('wallet-destination').value;
-        var proceedButton = document.getElementById('proceed_withdraw');
+	function checkFields() {
+		const amount = document.getElementById('username').value;
+		const wallet = document.getElementById('wallet-destination').value;
+		const walletAddressGroup = document.getElementById('wallet-address-group');
+		const walletAddress = document.getElementById('wallet-address');
+		const proceedButton = document.getElementById('proceed_withdraw');
 
-        if (amount && wallet !== "Choose wallet destination") {
-            proceedButton.disabled = false; // Abilita il pulsante
-        } else {
-            proceedButton.disabled = true; // Disabilita il pulsante
-        }
-    }
+		// Mostra o nasconde il campo "Address wallet"
+		if (wallet === "BTC" || wallet === "ETH") {
+			walletAddressGroup.style.display = "block";
+		} else {
+			walletAddressGroup.style.display = "none";
+			walletAddress.value = ""; // Reset se non selezionato
+		}
 
-    // Aggiungi event listener per monitorare i cambiamenti negli input
-    document.getElementById('username').addEventListener('input', checkFields);
-    document.getElementById('wallet-destination').addEventListener('change', checkFields);
+		// Abilita bottone solo se tutti i campi sono pieni
+		if (amount && (wallet === "BTC" || wallet === "ETH") && walletAddress.value) {
+			proceedButton.disabled = false;
+		} else {
+			proceedButton.disabled = true;
+		}
+	}
+
+	// Aggiungi event listener
+	document.getElementById('username').addEventListener('input', checkFields);
+	document.getElementById('wallet-destination').addEventListener('change', checkFields);
+	document.getElementById('wallet-address').addEventListener('input', checkFields);
+
+	$(document).ready(function () {
+		$('#table_menu').DataTable({
+			language: {
+				emptyTable: "No pending or completed requests"
+			}
+		});
+	});
 </script>
 </body>
 

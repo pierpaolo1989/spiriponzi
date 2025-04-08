@@ -8,5 +8,5 @@ import java.util.List;
 public interface UserAdRepository extends JpaRepository<UserAd, Long> {
 
 	List<UserAd> findByUserIdAndAdActiveIsTrue(Long userId);
-	List<UserAd> findByUserIdAndCompletedAtIsNotNull(Long userId);
+	List<UserAd> findByUserIdAndCompletedAtIsNotNullOrderByCompletedAtDesc(Long userId);
 }

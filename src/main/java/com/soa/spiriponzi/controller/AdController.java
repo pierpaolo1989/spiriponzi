@@ -2,7 +2,9 @@ package com.soa.spiriponzi.controller;
 
 import com.soa.spiriponzi.dto.ADDto;
 import com.soa.spiriponzi.dto.UserADDto;
+import com.soa.spiriponzi.dto.UserStatsDto;
 import com.soa.spiriponzi.model.User;
+import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,17 +31,24 @@ public class AdController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final User user = userService.findByEmail(authentication.getName());
         model.addAttribute("user", user);
-        model.addAttribute("ads", adService.findSurfedAdsByUser(user.getId()));
+        model.addAttribute("ads", adService.getProposedAds(user.getId()));
         return "create-ads";
     }
 
     @PostMapping("/ads")
     @ResponseBody
-    public String createUserAd(@RequestParam("idAd") Long idAd) {
+    public UserStatsDto createUserAd(@RequestParam("idAd") Long idAd) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final User user = userService.findByEmail(authentication.getName());
         userService.createUserAd(user, idAd);
-        return "ok";
+        final UserStats userStats = userService.findStatsByEmail(authentication.getName());
+        return UserStatsDto.builder()
+                .annualPoints(userStats.getAnnualPoints())
+                .monthlyPoints(userStats.getMonthlyPoints())
+                .numberOfClaims(userStats.getNumberOfClaims())
+                .withdrawals(userStats.getWithdrawals())
+                .lastRequest(userStats.getLastRequest())
+                .build();
     }
 
     @GetMapping("/get-ads")
