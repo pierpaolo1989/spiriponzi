@@ -25,12 +25,11 @@ public class WihdrawController {
 	
 	private final WithdrawService withdrawService;
 	
-	@GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<WithdrawDto>> findMenuByUser(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-														    @RequestParam(value = "size", required = false, defaultValue = "20") int size) {
+	@GetMapping
+	public List<WithdrawDto> findMenuByUser(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+											@RequestParam(value = "size", required = false, defaultValue = "20") int size) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		final var result = withdrawService.findByUser(authentication.getName(), page, size);
-		return ResponseEntity.ok(result);
+		return withdrawService.findByUser(authentication.getName(), page, size);
 	}
 	
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

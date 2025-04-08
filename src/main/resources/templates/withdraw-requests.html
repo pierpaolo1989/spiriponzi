@@ -34,6 +34,14 @@
             border-radius: 1rem;
             box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
+    .status-dot {
+        transition: transform 0.2s;
+    }
+
+    .status-dot:hover {
+        transform: scale(1.2);
+        cursor: pointer;
+    }
 	</style>
 </head>
 
@@ -65,7 +73,7 @@
 				<div class="row" style="margin-top: 3%;">
 					<div class="col-lg-10 offset-lg-1">
 						<button class="btn btn-primary float-right" id="start_withdraw" data-toggle="modal" data-target="#withdrawalModal" style="margin-bottom: 3%;">START WITHDRAW</button>
-						<table id="table_menu" class="display table" style="min-height: 300px;">
+						<table id="table_menu" class="display table  table-striped" style="min-height: 300px;">
 							<thead>
 							<tr>
 								<th>Id</th>
@@ -89,6 +97,7 @@
 </div>
 
 <!-- Modal -->
+<!-- Modal -->
 <div class="modal fade" id="withdrawalModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -101,7 +110,7 @@
 			<div class="modal-body">
 				<form enctype="utf8" class="text-center">
 					<div class="mb-3">
-						<input type="text" id="username" name="username" class="form-control" placeholder="Amount *" />
+						<input type="number" id="username" name="username" class="form-control" placeholder="Amount *" />
 					</div>
 					<div class="mb-3">
 						<select class="form-select form-control" aria-label="Default select example" id="wallet-destination">
@@ -110,8 +119,22 @@
 							<option value="ETH">ETH</option>
 						</select>
 					</div>
+					<div id="wallet-data"
+						 th:data-btc="${user.btcWallet}"
+						 th:data-eth="${user.ethWallet}"
+						 style="display:none;"></div>
 					<div class="mb-3" id="wallet-address-group" style="display: none;">
 						<input type="text" id="wallet-address" name="wallet-address" class="form-control" placeholder="Wallet Address *" />
+					</div>
+					<div class="mb-3">
+						<div style="text-align: center;">
+							<div class="g-recaptcha"
+								 style="margin-top: 3%;"
+								 th:attr="data-sitekey=${@captchaSettings.getSite()}"
+								 data-callback="recaptchaCallback"></div>
+							<span id="captchaError" class="alert alert-danger col-sm-4"
+								  style="display: none"></span>
+						</div>
 					</div>
 				</form>
 			</div>
@@ -133,44 +156,157 @@
 <!-- Custom scripts for all pages-->
 <script src="js/sb-admin-2.min.js"></script>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <!-- DataTables -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
-	function checkFields() {
-		const amount = document.getElementById('username').value;
-		const wallet = document.getElementById('wallet-destination').value;
-		const walletAddressGroup = document.getElementById('wallet-address-group');
-		const walletAddress = document.getElementById('wallet-address');
-		const proceedButton = document.getElementById('proceed_withdraw');
+	const walletData = document.getElementById('wallet-data');
+const userBTCWallet = walletData.dataset.btc || '';
+const userETHWallet = walletData.dataset.eth || '';
+let captchaCompleted = false;
 
-		// Mostra o nasconde il campo "Address wallet"
-		if (wallet === "BTC" || wallet === "ETH") {
-			walletAddressGroup.style.display = "block";
-		} else {
-			walletAddressGroup.style.display = "none";
-			walletAddress.value = ""; // Reset se non selezionato
-		}
+function recaptchaCallback() {
+    captchaCompleted = true;
+    checkFields();
+}
 
-		// Abilita bottone solo se tutti i campi sono pieni
-		if (amount && (wallet === "BTC" || wallet === "ETH") && walletAddress.value) {
-			proceedButton.disabled = false;
-		} else {
-			proceedButton.disabled = true;
-		}
+function onWalletChange() {
+	debugger;
+    const wallet = document.getElementById('wallet-destination').value;
+    const walletAddressGroup = document.getElementById('wallet-address-group');
+    const walletAddress = document.getElementById('wallet-address');
+
+    if (wallet === "BTC" || wallet === "ETH") {
+        walletAddressGroup.style.display = "block";
+
+        // Setta subito il valore visibile nell'input
+        walletAddress.value = (wallet === "BTC") ? userBTCWallet : userETHWallet;
+    } else {
+        walletAddressGroup.style.display = "none";
+        walletAddress.value = "";
+    }
+
+    checkFields(); // Poi ricalcola se abilitare il bottone
+}
+
+function checkFields() {
+    const amount = document.getElementById('username').value;
+    const wallet = document.getElementById('wallet-destination').value;
+    const walletAddress = document.getElementById('wallet-address');
+    const proceedButton = document.getElementById('proceed_withdraw');
+
+    if (amount && (wallet === "BTC" || wallet === "ETH") && walletAddress.value && captchaCompleted) {
+        proceedButton.disabled = false;
+    } else {
+        proceedButton.disabled = true;
+    }
+}
+
+document.getElementById('username').addEventListener('input', checkFields);
+document.getElementById('wallet-destination').addEventListener('change', onWalletChange);
+document.getElementById('wallet-address').addEventListener('input', checkFields);
+
+$(document).ready(function () {
+    $('#table_menu').DataTable({
+        ajax: {
+            url: '/withdraws',
+            dataSrc: ''
+        },
+        columns: [
+            { data: 'id',
+              className: 'text-center align-middle',},
+            { data: 'currency' ,
+             className: 'text-center align-middle',},
+            { data: 'amount',
+              className: 'text-center align-middle',},
+            {
+                data: 'dateRequest',
+                 className: 'text-center align-middle',
+                render: function (data) {
+                    const dateObj = new Date(data);
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const hours = String(dateObj.getHours()).padStart(2, '0');
+                    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+                    return `${day}/${month}/${year} ${hours}:${minutes}`;
+                }
+            },
+          {
+    data: 'status',
+    className: 'text-center align-middle',
+    render: function (data) {
+        const color = data === 'PENDING' ? 'red' : 'green';
+        const tooltip = data === 'PENDING' ? 'Pending' : 'Completed';
+        return `
+            <div class="d-flex justify-content-center align-items-center" data-toggle="tooltip" title="${tooltip}">
+                <span class="status-dot" style="
+                    display:inline-block;
+                    width:14px;
+                    height:14px;
+                    border-radius:50%;
+                    background-color:${color};
+                "></span>
+            </div>`;
+    }
+},
+            {
+                data: 'transactionId',
+                 className: 'text-center align-middle',
+                render: function (data) {
+                    return data && data.trim() !== '' ? data : '-';
+                }
+            }
+        ],
+        language: {
+            emptyTable: "No pending or completed requests"
+        }
+    });
+});
+
+	document.getElementById('proceed_withdraw').addEventListener('click', function () {
+	const amount = parseFloat(document.getElementById('username').value);
+	const currency = document.getElementById('wallet-destination').value;
+
+	if (!amount || isNaN(amount)) {
+		alert("Please enter a valid amount.");
+		return;
 	}
 
-	// Aggiungi event listener
-	document.getElementById('username').addEventListener('input', checkFields);
-	document.getElementById('wallet-destination').addEventListener('change', checkFields);
-	document.getElementById('wallet-address').addEventListener('input', checkFields);
+	if (currency !== "BTC" && currency !== "ETH") {
+		alert("Please select a valid currency.");
+		return;
+	}
 
-	$(document).ready(function () {
-		$('#table_menu').DataTable({
-			language: {
-				emptyTable: "No pending or completed requests"
-			}
-		});
+	const data = {
+		amount: amount,
+		currency: currency
+	};
+
+	// Esegui la chiamata POST AJAX
+	$.ajax({
+		type: "POST",
+		url: "/withdraws",
+		contentType: "application/json",
+		data: JSON.stringify(data),
+		success: function (response) {
+			alert("Withdrawal request sent successfully!");
+			$('#withdrawalModal').modal('hide');
+			// Eventuale reset form
+			document.getElementById('username').value = '';
+			document.getElementById('wallet-destination').value = '';
+			document.getElementById('wallet-address').value = '';
+			document.getElementById('wallet-address-group').style.display = 'none';
+			captchaCompleted = false;
+			grecaptcha.reset(); // reset del captcha
+			checkFields();
+		},
+		error: function (xhr, status, error) {
+			alert("Something went wrong: " + (xhr.responseText || error));
+		}
 	});
+});
 </script>
 </body>
 

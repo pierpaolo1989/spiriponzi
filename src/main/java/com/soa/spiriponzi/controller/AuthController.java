@@ -1,6 +1,8 @@
 package com.soa.spiriponzi.controller;
 
 import com.soa.spiriponzi.dto.ADDto;
+import com.soa.spiriponzi.service.WithdrawService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -20,14 +22,12 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Controller
 public class AuthController {
 
 	private final UserService userService;
-
-	public AuthController(UserService userService) {
-		this.userService = userService;
-	}
+	private final WithdrawService withdrawService;
 
 	@GetMapping("index")
 	public String home(){
