@@ -220,7 +220,7 @@
 									<!-- Sezione Bitcoin -->
 									<div id="btc-price" style="font-size: 20px; margin-bottom: 10px;">
 										<div class="crypto-container">
-											<img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="crypto-icon" />
+											<img src="img/bitcoin-btc-logo.png" alt="Bitcoin" class="crypto-icon" />
 											<strong>BTC Price:</strong> &nbsp;$<span id="btcValue">Loading...</span>
 										</div>
 									</div>
@@ -228,7 +228,7 @@
 									<!-- Sezione Ethereum -->
 									<div id="eth-price" style="font-size: 20px;">
 										<div class="crypto-container">
-											<img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="crypto-icon" />
+											<img src="img/ethereum-eth-logo.png" alt="Ethereum" class="crypto-icon" />
 											<strong>ETH Price:</strong> &nbsp;$<span id="ethValue">Loading...</span>
 										</div>
 									</div>
@@ -236,7 +236,7 @@
 									<!-- Sezione Solana -->
 									<div id="solana-price" style="font-size: 20px;">
 										<div class="crypto-container">
-											<img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="Tether" class="crypto-icon" />
+											<img src="img/tether-usdt-logo.png" alt="Tether" class="crypto-icon" />
 											<strong>USDT Price:</strong> &nbsp;$<span id="tetherValue">Loading...</span>
 										</div>
 									</div>
@@ -353,10 +353,16 @@ $(document).ready(function () {
                 url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd',
                 type: 'GET',
                 success: function(data) {
-                    // Aggiorna i valori delle criptovalute
-                    $('#btcValue').text(data.bitcoin.usd);
-                    $('#ethValue').text(data.ethereum.usd);
-                    $('#tetherValue').text(data.tether.usd);
+                    const formatter = new Intl.NumberFormat('it-IT', {
+                style: 'decimal',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            // Formatto e aggiorno i valori
+            $('#btcValue').text(formatter.format(data.bitcoin.usd));
+            $('#ethValue').text(formatter.format(data.ethereum.usd));
+            $('#tetherValue').text(formatter.format(data.tether.usd));
                 },
                 error: function() {
                     $('#btcValue').text('Error');

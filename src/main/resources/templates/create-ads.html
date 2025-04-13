@@ -190,7 +190,7 @@
 									 style="max-height: 200px;">
 
 									<div class="ad-header-bar text-white text-left px-2">
-										CREATED AT: 12/04/2025
+										CREATED AT: <span th:text="${ad.createdAt}">
 									</div>
 
 									<!-- Colonna principale: 10 colonne -->
@@ -301,94 +301,132 @@
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 <!-- Script per mostrare/nascondere il form -->
 <script>
-	function deleteAd(button) {
-	const adCard = button.closest('.ad-card');
-	const adId = adCard.getAttribute('data-id');
+	let adToDelete = null;
 
-	if (!adId) {
-		alert("Invalid ad ID.");
-		return;
-	}
-
-	if (!confirm("Are you sure you want to delete this ad?")) return;
-
-	fetch(`/user-ads/${adId}`, {
-		method: 'DELETE',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	})
-	.then(response => {
-		if (response.ok) {
-			alert("Ad deleted successfully.");
-			adCard.remove(); // Rimuove la card dalla pagina
-		} else {
-			alert("Failed to delete ad.");
-		}
-	})
-	.catch(error => {
-		console.error("Error deleting ad:", error);
-		alert("Server error. Please try again later.");
-	});
-}
-
-    function toggleAdForm() {
-        let formContainer = document.getElementById("adFormContainer");
-        formContainer.style.display = (formContainer.style.display === "none" || formContainer.style.display === "") ? "block" : "none";
+    function deleteAd(button) {
+        const adCard = button.closest('.ad-card');
+        adToDelete = adCard;
+        $('#deleteAdModal').modal('show');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById("adForm");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
+        confirmDeleteBtn.addEventListener("click", function () {
+            if (!adToDelete) return;
 
-            let isValid = true;
-            const inputs = form.querySelectorAll("input");
+            const adId = adToDelete.dataset.id;
 
-            inputs.forEach(input => {
-                input.classList.remove("input-error");
-                if (!input.value.trim()) {
-                    input.classList.add("input-error");
-                    isValid = false;
-                }
-            });
-
-             if (isValid) {
-                const data = {
-                    title: title.value,
-                    url: document.getElementById("url").value,
-                    timer: document.getElementById("duration").value,
-                    reward: document.getElementById("points").value
-                };
-
-                fetch('/user-ads', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert("Ad created successfully!");
-                        form.reset();
-                        toggleAdForm(); // Nascondi il form
-                        // Qui potresti anche aggiornare la lista degli ad senza ricaricare la pagina
-                    } else {
-                        alert("Something went wrong while submitting the ad.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("Server error. Please try again later.");
-                });
+            if (!adId) {
+                alert("Invalid ad ID.");
+                return;
             }
+
+            fetch(`/user-ads/${adId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                  fetch('/fragment/user-ads')
+    .then(response => response.text())
+    .then(html => {
+    debugger;
+        const container = document.querySelector('.ad-container');
+        container.innerHTML = html;
+        $('#deleteAdModal').modal('hide');
+    });
+                } else {
+                    alert("Failed to delete ad.");
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting ad:", error);
+                alert("Server error. Please try again later.");
+            });
         });
     });
+
+        function toggleAdForm() {
+            let formContainer = document.getElementById("adFormContainer");
+            formContainer.style.display = (formContainer.style.display === "none" || formContainer.style.display === "") ? "block" : "none";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById("adForm");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                let isValid = true;
+                const inputs = form.querySelectorAll("input");
+
+                inputs.forEach(input => {
+                    input.classList.remove("input-error");
+                    if (!input.value.trim()) {
+                        input.classList.add("input-error");
+                        isValid = false;
+                    }
+                });
+
+                 if (isValid) {
+                    const data = {
+                        title: title.value,
+                        url: document.getElementById("url").value,
+                        timer: document.getElementById("duration").value,
+                        reward: document.getElementById("points").value
+                    };
+
+                    fetch('/user-ads', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Ad created successfully!");
+                            form.reset();
+                            toggleAdForm(); // Nascondi il form
+                            // Qui potresti anche aggiornare la lista degli ad senza ricaricare la pagina
+                        } else {
+                            alert("Something went wrong while submitting the ad.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("Server error. Please try again later.");
+                    });
+                }
+            });
+        });
 </script>
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 			crossorigin="anonymous"></script>
+
+<!-- Modale di conferma eliminazione -->
+<div class="modal fade" id="deleteAdModal" tabindex="-1" role="dialog" aria-labelledby="deleteAdModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-danger text-white">
+				<h5 class="modal-title" id="deleteAdModalLabel">Delete Ad</h5>
+				<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you sure you want to delete this ad?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button id="confirmDeleteBtn" type="button" class="btn btn-danger">Delete</button>
+			</div>
+		</div>
+	</div>
+</div>
 </body>
 
 </html>

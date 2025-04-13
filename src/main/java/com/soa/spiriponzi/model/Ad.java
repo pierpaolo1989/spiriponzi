@@ -3,6 +3,8 @@ package com.soa.spiriponzi.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,4 +28,8 @@ public class Ad {
     private boolean active;
     @ManyToOne
     private User proposer;
+    @Column(name = "deleted", columnDefinition = "boolean default false")
+    private boolean deleted = false;
+    @Column
+    private LocalDate createdAt;
 }

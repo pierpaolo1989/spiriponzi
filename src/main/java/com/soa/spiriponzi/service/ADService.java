@@ -10,5 +10,6 @@ public interface ADService {
 
     List<UserADDto> findSurfedAdsByUser(Long userId);
     void create(User user, ADDto ad);
+    void delete(User user, Long id);
     List<ADDto> getProposedAds(Long id);
 }

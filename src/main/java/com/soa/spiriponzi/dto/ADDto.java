@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -15,5 +18,6 @@ public class ADDto {
     private double reward;
     private int timer;
     private String url;
+    private LocalDate createdAt;
     private boolean completed;
 }
