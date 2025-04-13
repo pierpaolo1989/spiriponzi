@@ -137,6 +137,7 @@
 						</div>
 					</div>
 				</form>
+				<div id="withdraw-error" class="alert alert-danger text-center" style="display: none;"></div>
 			</div>
 			<div class="modal-footer">
 				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
@@ -172,7 +173,6 @@ function recaptchaCallback() {
 }
 
 function onWalletChange() {
-	debugger;
     const wallet = document.getElementById('wallet-destination').value;
     const walletAddressGroup = document.getElementById('wallet-address-group');
     const walletAddress = document.getElementById('wallet-address');
@@ -265,6 +265,12 @@ $(document).ready(function () {
     });
 });
 
+$('#withdrawalModal').on('shown.bs.modal', function () {
+    document.getElementById('withdraw-error').style.display = 'none';
+    document.getElementById('proceed_withdraw').style.display = 'inline-block';
+    checkFields(); // ripristina lo stato del bottone
+});
+
 	document.getElementById('proceed_withdraw').addEventListener('click', function () {
 	const amount = parseFloat(document.getElementById('username').value);
 	const currency = document.getElementById('wallet-destination').value;
@@ -302,8 +308,20 @@ $(document).ready(function () {
 			grecaptcha.reset(); // reset del captcha
 			checkFields();
 		},
-		error: function (xhr, status, error) {
-			alert("Something went wrong: " + (xhr.responseText || error));
+		error: function (err) {
+   const errorBox = document.getElementById('withdraw-error');
+    const proceedButton = document.getElementById('proceed_withdraw');
+    let errorMessage = "An error occurred during the withdrawal request";
+
+    if (err.responseJSON && err.responseJSON.errorCode === 'INSUFFICIENT_POINTS') {
+        errorMessage = "You don't have enough annual points for this withdrawal";
+    } else if (err.responseJSON && err.responseJSON.errorCode === 'BELOW_MINIMUM') {
+        errorMessage = "The withdrawal amount is below the minimum threshold";
+    }
+
+    errorBox.innerText = errorMessage;
+    errorBox.style.display = 'block';
+    proceedButton.style.display = 'none';
 		}
 	});
 });

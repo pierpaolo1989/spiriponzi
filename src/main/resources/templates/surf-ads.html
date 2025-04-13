@@ -120,6 +120,28 @@
 .received-message.visible {
     visibility: visible;
 }
+
+		.report-abuse {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4e73df; /* Bootstrap primary */
+    color: white;
+    font-size: 12px;
+    padding: 5px 0;
+    text-align: center;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.report-abuse:hover {
+    background-color: #2e59d9;
+}
+.report-abuse i {
+    margin-right: 5px;
+}
 	</style>
 </head>
 
@@ -190,6 +212,9 @@
 									   th:id="'received-msg-' + ${iter.index}">
 										Reward received
 									</p>
+									<div class="report-abuse">
+										<i class="fas fa-exclamation-triangle"></i> Report Abuse
+									</div>
 								</div>
 
 							</div>

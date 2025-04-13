@@ -2,22 +2,24 @@ package com.soa.spiriponzi.exception;
 
 public class WithdrawalException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+    private final String errorCode;
 
-	public WithdrawalException() {
-        super();
-    }
-
-    public WithdrawalException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public WithdrawalException(final String message) {
+    public WithdrawalException(String errorCode, String message) {
         super(message);
+        this.errorCode = errorCode;
     }
 
-    public WithdrawalException(final Throwable cause) {
-        super(cause);
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    // Metodi factory per casi specifici
+    public static WithdrawalException insufficientPoints() {
+        return new WithdrawalException("INSUFFICIENT_POINTS", "User doesn't have enough points");
+    }
+
+    public static WithdrawalException belowMinimumAmount() {
+        return new WithdrawalException("BELOW_MINIMUM", "Withdrawal amount is below the minimum threshold");
     }
 
 }

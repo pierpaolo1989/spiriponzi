@@ -36,17 +36,18 @@
 		}
 
 	.navbar {
-		background-color: #4e73df;
-		padding: 0.75rem 1rem;
-		color: white;
-		display: flex;
-		justify-content: center; /* centro tutto orizzontalmente */
-		align-items: center;
-		position: fixed;
-		top: 0;
-		width: 100%;
-		z-index: 1030;
-	}
+   background-color: #4e73df;
+   padding: 0.75rem 1rem;
+   color: white;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   position: fixed;
+   top: 0;
+   width: 100%;
+   z-index: 1030;
+   height: 80px; /* Altezza fissa aumentata */
+}
 
 	.navbar-content {
 		display: flex;
@@ -75,8 +76,8 @@
 			<div class="sidebar-brand-icon">
 				<i class="fas fa-solid fa-coins"></i> &nbsp;Spiriponzi
 			</div>
-		<a th:href="@{/register}">Registrati</a>
-		<a th:href="@{/faq}">Come funziona?</a>
+		<a th:href="@{/register}">Registration</a>
+		<a th:href="@{/faq}">How it works?</a>
 	</div>
 </div>
 

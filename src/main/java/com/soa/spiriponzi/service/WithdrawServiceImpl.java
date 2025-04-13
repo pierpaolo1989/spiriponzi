@@ -56,7 +56,13 @@ public class WithdrawServiceImpl implements WithdrawService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void startRequest(String email, WithdrawDto request) {
 		User user = userRepository.findByEmail(email);
-		if (request.getAmount() >= Constants.LIMIT_WITHDRAWAL && user.getUserStats().getAnnualPoints() >= Constants.LIMIT_WITHDRAWAL) {
+		if (request.getAmount() < Constants.LIMIT_WITHDRAWAL) {
+			throw WithdrawalException.belowMinimumAmount();
+		}
+
+		if (user.getUserStats().getAnnualPoints() < Constants.LIMIT_WITHDRAWAL) {
+			throw WithdrawalException.insufficientPoints();
+		}
 
 			var entity = new WithdrawRequest();
 			entity.setAmount(request.getAmount());
@@ -68,9 +74,5 @@ public class WithdrawServiceImpl implements WithdrawService {
 
 			//Bitcoin org integration 
 			//paymentService.createTransaction(user.getBtcWallet(), Double.valueOf(request.getAmount()).longValue());
-		} else {
-			throw new WithdrawalException();
-		}
 	}
-
-	}
+}
