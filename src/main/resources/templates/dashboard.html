@@ -147,12 +147,16 @@
 							<div class="card shadow mb-4">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Claim ETH</h6>
+									<h6 class="m-0 font-weight-bold text-primary">QUIZ</h6>
 								</div>
 								<!-- Card Body -->
-								<div class="card-body bg-login-image">
-									<div class="chart-area bg-login-image">
-										<div class="col-lg-12 d-none d-lg-block"></div>
+								<div class="card-body">
+									<div class="quiz-container" style="color: black;">
+										<h5><strong>Quiz: Test your Crypto Knowledge</strong></h5>
+										<div id="quiz-question" style="margin-top: 10px; font-weight: bold;"></div>
+										<ul id="quiz-options" style="list-style-type: none; padding-left: 0;"></ul>
+										<button id="next-question" class="btn btn-sm btn-primary mt-2" style="display: none;">Next</button>
+										<div id="quiz-feedback" class="mt-2"></div>
 									</div>
 								</div>
 							</div>
@@ -281,6 +285,71 @@
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
+
+		const quizData = [
+    {
+        question: "What is the maximum supply of Bitcoin?",
+        options: ["21 million", "100 million", "50 million", "Unlimited"],
+        answer: "21 million"
+    },
+    {
+        question: "What does 'HODL' mean in crypto slang?",
+        options: ["Hold On for Dear Life", "Hack Or Die Later", "High Order Digital Ledger", "None of the above"],
+        answer: "Hold On for Dear Life"
+    },
+    {
+        question: "Which is a layer-2 scaling solution for Ethereum?",
+        options: ["Polkadot", "Solana", "Arbitrum", "Litecoin"],
+        answer: "Arbitrum"
+    },
+    {
+        question: "What is a common use of stablecoins?",
+        options: ["Buying houses", "Avoiding crypto volatility", "Mining", "Creating NFTs"],
+        answer: "Avoiding crypto volatility"
+    }
+];
+
+let currentQuestionIndex = 0;
+
+function loadQuestion() {
+    const quiz = quizData[currentQuestionIndex];
+    $("#quiz-question").text(quiz.question);
+    $("#quiz-options").empty();
+    $("#quiz-feedback").text("");
+    $("#next-question").hide();
+
+    quiz.options.forEach(option => {
+        $("#quiz-options").append(`
+            <li>
+                <button class="btn btn-outline-secondary btn-block option-button" style="margin-top: 5px;">${option}</button>
+            </li>
+        `);
+    });
+
+    $(".option-button").click(function() {
+        const selected = $(this).text();
+        const isCorrect = selected === quiz.answer;
+
+        if (isCorrect) {
+            $("#quiz-feedback").html('<span class="text-success">✅ Correct!</span>');
+        } else {
+            $("#quiz-feedback").html('<span class="text-danger">❌ Incorrect. The correct answer is: <strong>' + quiz.answer + '</strong></span>');
+        }
+
+        $(".option-button").prop("disabled", true);
+        $("#next-question").show();
+    });
+}
+
+$("#next-question").click(function() {
+    currentQuestionIndex = (currentQuestionIndex + 1) % quizData.length;
+    loadQuestion();
+});
+
+// Load first question on page load
+$(document).ready(function () {
+    loadQuestion();
+});
 	var serverContext = "http://localhost:8080/"
 
 $(function () {

@@ -190,7 +190,7 @@
 									 style="max-height: 200px;">
 
 									<div class="ad-header-bar text-white text-left px-2">
-										CREATED AT: <span th:text="${ad.createdAt}">
+										CREATED AT: <span th:text="${ad.createdAt}" />
 									</div>
 
 									<!-- Colonna principale: 10 colonne -->
@@ -333,7 +333,6 @@
                   fetch('/fragment/user-ads')
     .then(response => response.text())
     .then(html => {
-    debugger;
         const container = document.querySelector('.ad-container');
         container.innerHTML = html;
         $('#deleteAdModal').modal('hide');
@@ -348,6 +347,15 @@
             });
         });
     });
+
+    function reloadAds() {
+                     fetch('/fragment/user-ads')
+    .then(response => response.text())
+    .then(html => {
+        const container = document.querySelector('.ad-container');
+        container.innerHTML = html;
+        });
+        }
 
         function toggleAdForm() {
             let formContainer = document.getElementById("adFormContainer");
@@ -391,7 +399,7 @@
                             alert("Ad created successfully!");
                             form.reset();
                             toggleAdForm(); // Nascondi il form
-                            // Qui potresti anche aggiornare la lista degli ad senza ricaricare la pagina
+                            reloadAds();
                         } else {
                             alert("Something went wrong while submitting the ad.");
                         }
