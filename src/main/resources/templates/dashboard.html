@@ -350,11 +350,10 @@ $("#next-question").click(function() {
 $(document).ready(function () {
     loadQuestion();
 });
-	var serverContext = "http://localhost:8080/"
 
 $(function () {
     $.ajax({
-        url: serverContext + "users/stats",
+        url: "/users/stats",
         type: 'GET',
         contentType: "application/json",
         success: function(data) {
@@ -455,12 +454,12 @@ $(document).ready(function () {
 function register(event) {
     event.preventDefault();
     var formData= $('form').serialize();
-    $.post(serverContext + "claims", formData, function(data) {
+    $.post("/claims", formData, function(data) {
         	$('#countdown').css('display','block');
     		$('#countdown').countdown(1,0,0);
     		$('.g-recaptcha').css('pointer-events', 'none').css('opacity', '0.5'); // Disabilita reCAPTCHA dopo claim
     		$.ajax({
-    		    url: serverContext + "users/stats",
+    		    url: "/users/stats",
     		    type: 'GET',
     		    contentType: "application/json",
     		    success: function(data) {
