@@ -95,8 +95,11 @@ iframe {
 					<!-- Content Row -->
 					<div class="d-flex justify-content-center mb-3">
 						<span class="text-muted text-center">
-							<strong>Play to earn....every 60 seconds you can claim 100 points</strong>
+							<strong>Play to earn: every 60 seconds you can claim 100 coins</strong>
 						</span>
+					</div>
+					<div class="text-center text-primary mb-3" role="status" aria-live="polite">
+						<span id="gameClaimCountdown">Preparing your next game claim...</span>
 					</div>
 					<br>
 
@@ -210,6 +213,31 @@ iframe {
 		class="fas fa-angle-up"></i>
 	</a>
 
+	<div class="modal fade" id="gameClaimModal" tabindex="-1" role="dialog"
+		 aria-labelledby="gameClaimModalLabel" aria-hidden="true"
+		 data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title" id="gameClaimModalLabel">Game reward available</h5>
+				</div>
+				<div class="modal-body text-center">
+					<p>Your game is paused. Claim 100 coins to continue playing.</p>
+					<div class="border rounded p-4 mb-3 bg-light" aria-label="Advertisement">
+						<strong>Advertisement</strong>
+						<p class="text-muted mb-0 mt-2">Rewarded ad placement will appear here when a compatible Google Ad Manager unit is configured.</p>
+					</div>
+					<p id="gameClaimError" class="text-danger" role="alert"></p>
+				</div>
+				<div class="modal-footer justify-content-center">
+					<button type="button" class="btn btn-primary" id="gameClaimButton">
+						Claim 100 coins
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Bootstrap core JavaScript-->
 	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
 	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
@@ -226,6 +254,97 @@ iframe {
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 
 	<script>
+		let gameClaimSecondsRemaining = null;
+		let gameClaimTimer = null;
+		let gameClaimModalShown = false;
+
+		function updateGameClaimCountdown() {
+			const countdown = document.getElementById('gameClaimCountdown');
+			const claimButton = document.getElementById('gameClaimButton');
+			if (gameClaimSecondsRemaining > 0) {
+				const minutes = Math.floor(gameClaimSecondsRemaining / 60);
+				const seconds = gameClaimSecondsRemaining % 60;
+				countdown.textContent = `Next 100-coin claim in ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+				claimButton.disabled = true;
+				return;
+			}
+
+			countdown.textContent = 'Your 100-coin game claim is ready.';
+			claimButton.disabled = false;
+			if (!gameClaimModalShown) {
+				gameClaimModalShown = true;
+				$('#gameClaimModal').modal({ backdrop: 'static', keyboard: false });
+			}
+		}
+
+		function startGameClaimCountdown(secondsRemaining) {
+			if (gameClaimTimer) {
+				clearInterval(gameClaimTimer);
+			}
+			gameClaimSecondsRemaining = secondsRemaining;
+			updateGameClaimCountdown();
+			if (gameClaimSecondsRemaining > 0) {
+				gameClaimTimer = setInterval(() => {
+					gameClaimSecondsRemaining = Math.max(0, gameClaimSecondsRemaining - 1);
+					updateGameClaimCountdown();
+					if (gameClaimSecondsRemaining === 0) {
+						clearInterval(gameClaimTimer);
+						gameClaimTimer = null;
+					}
+				}, 1000);
+			}
+		}
+
+		async function syncGameClaimCountdown() {
+			try {
+				const response = await fetch('/claims/game/status');
+				if (!response.ok) {
+					throw new Error(`Could not load game claim status: ${response.status}`);
+				}
+				const secondsRemaining = Number(await response.json());
+				if (!Number.isInteger(secondsRemaining) || secondsRemaining < 0) {
+					throw new Error('The server returned an invalid game claim cooldown.');
+				}
+				startGameClaimCountdown(secondsRemaining);
+			} catch (error) {
+				console.error('Error loading game claim status:', error);
+				document.getElementById('gameClaimCountdown').textContent =
+						'Could not load the game claim timer. Retrying shortly...';
+				setTimeout(syncGameClaimCountdown, 5000);
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const claimButton = document.getElementById('gameClaimButton');
+			const claimError = document.getElementById('gameClaimError');
+
+			claimButton.addEventListener('click', async () => {
+				claimButton.disabled = true;
+				claimError.textContent = '';
+				try {
+					const response = await fetch('/claims/game', { method: 'POST' });
+					if (!response.ok) {
+						const message = await response.text();
+						throw new Error(message || `Claim failed: ${response.status}`);
+					}
+
+					const stats = await response.json();
+					document.getElementById('monthlyPoints').textContent = String(stats.monthlyPoints);
+					document.getElementById('annualPoints').textContent = String(stats.annualPoints);
+					document.getElementById('numberOfClaims').textContent = String(stats.numberOfClaims);
+					$('#gameClaimModal').modal('hide');
+					gameClaimModalShown = false;
+					await syncGameClaimCountdown();
+				} catch (error) {
+					console.error('Error claiming game coins:', error);
+					claimError.textContent = 'Could not claim the coins. Please try again.';
+					await syncGameClaimCountdown();
+				}
+			});
+
+			syncGameClaimCountdown();
+		});
+
 		function toggleFullscreen(icon) {
     const card = icon.closest('.card');
     const isFullscreen = card.classList.contains('fullscreen-card');

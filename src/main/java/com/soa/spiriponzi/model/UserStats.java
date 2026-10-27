@@ -37,6 +37,8 @@ public class UserStats {
 	private int withdrawals;
     @Column
     private LocalDateTime lastRequest;
+    @Column
+    private LocalDateTime lastGameClaimAt;
     @OneToOne(mappedBy = "userStats")
     private User user;
 

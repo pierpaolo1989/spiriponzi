@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.soa.spiriponzi.dto.ClaimDto;
+import com.soa.spiriponzi.dto.UserStatsDto;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ClaimService;
 
@@ -38,6 +39,18 @@ public class ClaimController {
 		}
         
         return ResponseEntity.ok(null);
+    }
+
+    @GetMapping("/game/status")
+    public long getGameClaimCooldownSeconds() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return claimService.getGameClaimCooldownSeconds(authentication.getName());
+    }
+
+    @PostMapping("/game")
+    public UserStatsDto startGameClaim() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return claimService.startGameClaim(authentication.getName());
     }
     
     @GetMapping
