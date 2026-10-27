@@ -20,6 +20,8 @@ public class Ad {
     private String title;
     @Column
     private double reward;
+    @Column(nullable = false, columnDefinition = "double precision default 0")
+    private double budget;
     @Column
     private int timer;
     @Column

@@ -2,6 +2,7 @@ package com.soa.spiriponzi.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -53,6 +54,11 @@ public class ClaimServiceImpl implements ClaimService {
 			
 		} else {
 			UserStats userStats = optUserStats.get();
+			if (Objects.isNull(userStats.getLastRequest())) {
+				userStats.setLastRequest(claim.getDateRequest());
+				userStatsRepository.save(userStats);
+				return;
+			}
 			if (now.isBefore(userStats.getLastRequest().plusHours(1))) {
 				throw new ClaimException();
 			}

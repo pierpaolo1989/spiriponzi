@@ -1,53 +1,58 @@
-<div class="ad-card row align-items-center"
-     th:each="ad, iter : ${ads}"
-     th:data-url="${ad.url}"
-     th:data-timer="${ad.timer}"
-     th:data-id="${ad.id}"
-     th:data-reward="${ad.reward}"
-     th:classappend="${ad.completed} ? ' disabled' : ''"
-     onclick="openAd(this)"
-     style="max-height: 200px;">
-
-  <div class="ad-header-bar text-white text-left px-2">
-    CREATED AT: 12/04/2025
+<div id="adList" th:fragment="adList">
+  <div class="ad-empty-state" th:if="${ads == null or ads.isEmpty()}">
+    <p class="text-center text-gray-500">There is no ads yet</p>
   </div>
 
-  <!-- Colonna principale: 10 colonne -->
-  <div class="col-10">
-    <p th:text="${ad.title}" class="font-weight-bold mb-1 text-left">Titolo Annuncio</p>
+  <div class="ad-card row align-items-center"
+       th:each="ad, iter : ${ads}"
+       th:data-url="${ad.url}"
+       th:data-timer="${ad.timer}"
+       th:data-id="${ad.id}"
+       th:data-reward="${ad.reward}"
+       th:data-budget="${ad.budget}"
+       th:data-active="${ad.active}"
+       th:classappend="${ad.completed} ? ' disabled' : ''"
+       onclick="openAd(this)"
+       style="max-height: 200px;">
 
-    <div class="reward-info justify-content-start mb-1">
-      <i class="fas fa-coins text-warning"></i>
-      <span th:text="${ad.reward} + ' coins'">10 coins</span>
+    <div class="ad-header-bar text-white text-left px-2">
+      CREATED AT: <span th:text="${ad.createdAt}"></span>
     </div>
 
-    <div class="countdown justify-content-start">
-      <i class="fas fa-clock"></i>
-      <span th:text="${ad.timer} + ' sec'">60 sec</span>
+    <div class="col-10">
+      <p th:text="${ad.title}" class="font-weight-bold mb-1 text-left">Titolo Annuncio</p>
+
+      <div class="reward-info justify-content-start mb-1">
+        <i class="fas fa-coins text-warning"></i>
+        <span th:text="${ad.reward} + ' coins'">10 coins</span>
+      </div>
+
+      <div class="text-muted small mb-1 text-left">
+        Budget: <span class="ad-budget-value" th:text="${ad.budget > 0 ? ad.budget + ' coins' : 'Not set'}">Not set</span>
+      </div>
+
+      <div class="countdown justify-content-start">
+        <i class="fas fa-clock"></i>
+        <span th:text="${ad.timer} + ' sec'">60 sec</span>
+      </div>
+    </div>
+
+    <div class="col-1 d-flex justify-content-center">
+      <div class="vr" style="height: 80%; width: 2px; background-color: #ccc;"></div>
+    </div>
+
+    <div class="col-1 d-flex flex-column align-items-center">
+      <button class="btn btn-sm btn-outline-secondary mb-2" onclick="event.stopPropagation(); togglePause(this);">
+        <i th:class="${ad.active} ? 'fas fa-pause' : 'fas fa-play'"></i>
+      </button>
+
+      <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); setBudget(this);">
+        <i class="fas fa-coins"></i>
+      </button>
+
+      <button class="btn btn-sm btn-outline-danger mt-2" onclick="event.stopPropagation(); deleteAd(this);">
+        <i class="fas fa-trash-alt"></i>
+      </button>
     </div>
   </div>
-
-  <!-- Divider verticale -->
-  <div class="col-1 d-flex justify-content-center">
-    <div class="vr" style="height: 80%; width: 2px; background-color: #ccc;"></div>
-  </div>
-
-  <!-- Colonna azioni: 1 colonna -->
-  <div class="col-1 d-flex flex-column align-items-center">
-    <!-- Pulsante Pausa/Play -->
-    <button class="btn btn-sm btn-outline-secondary mb-2" onclick="event.stopPropagation(); togglePause(this);">
-      <i class="fas fa-play"></i>
-    </button>
-
-    <!-- Pulsante Budget -->
-    <button class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); setBudget(this);">
-      <i class="fas fa-coins"></i>
-    </button>
-
-    <!-- Pulsante Delete -->
-    <button class="btn btn-sm btn-outline-danger mt-2" onclick="event.stopPropagation(); deleteAd(this);">
-      <i class="fas fa-trash-alt"></i>
-    </button>
-  </div>
-
 </div>

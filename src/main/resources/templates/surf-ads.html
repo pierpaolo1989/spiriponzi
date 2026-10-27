@@ -174,7 +174,7 @@
 				</div>
 
 				<!-- Content Row -->
-				<div th:replace="fragments/summary"></div>
+				<div th:replace="fragments/summary :: summary"></div>
 
 				<!-- Content Row -->
 
@@ -193,6 +193,7 @@
 									 th:data-url="${ad.url}"
 									 th:data-timer="${ad.timer}"
 									 th:data-id="${ad.id}"
+									 th:data-active="${ad.active}"
 									 th:classappend="${ad.completed} ? ' disabled' : ''"
 									 onclick="openAd(this)"
 								style="cursor:pointer;">
@@ -259,6 +260,19 @@
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
+        async function refreshSummary() {
+            const response = await fetch('/fragment/summary');
+            if (!response.ok) {
+                throw new Error(`Failed to refresh summary: ${response.status}`);
+            }
+
+            const html = await response.text();
+            const summary = document.getElementById('summaryContainer');
+            if (!summary) {
+                throw new Error("Summary container was not found.");
+            }
+            summary.outerHTML = html;
+        }
 
 		function openAd(element) {
         let adId = element.getAttribute("data-id");
@@ -269,50 +283,48 @@
         if (adUrl) {
             let adWindow = window.open(adUrl, "_blank");
 
-            setTimeout(() => {
-                fetch(`/ads?idAd=${adId}`, {
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(`/ads?idAd=${adId}`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     }
-                }).then(response => {
-                    if (response.ok) {
-                        console.log("Ricompensa accreditata con successo");
-                        $("#numberOfClaims").html(response.numberOfClaims);
-    	        	$("#monthlyPoints").html(response.monthlyPoints);
-    	        	$("#annualPoints").html(response.annualPoints);
-    	        	$("#withdrawals").html(response.withdrawals);
-                    } else {
-                        console.error("Errore nell'accredito della ricompensa");
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Reward request failed: ${response.status}`);
                     }
-                }).catch(error => {
-                    console.error("Errore nella richiesta AJAX", error);
-                });
 
-                if (adWindow) {
-                    adWindow.close();
+                    element.classList.add("disabled");
+
+                    let receivedMessage = element.querySelector(".received-message");
+                    if (receivedMessage) {
+                        receivedMessage.classList.add("visible");
+                    }
+
+                    let rewardButton = document.getElementById('reward-btn-' + index);
+                    if (rewardButton) {
+                        rewardButton.style.display = "none";
+                        rewardButton.disabled = true;
+                    }
+
+                    let countdown = document.getElementById('countdown-' + index);
+                    if (countdown) {
+                        countdown.textContent = "Completed";
+                    }
+
+                    try {
+                        await refreshSummary();
+                    } catch (error) {
+                        console.error("Reward was credited, but the summary could not be refreshed:", error);
+                    }
+                } catch (error) {
+                    console.error("Could not credit ad reward:", error);
+                } finally {
+                    if (adWindow) {
+                        adWindow.close();
+                    }
                 }
-
-                element.classList.add("disabled");
-
-                // Mostra "Reward received"
-                let receivedMessage = element.querySelector(".received-message");
-                if (receivedMessage) {
-                    receivedMessage.classList.add("visible");
-                }
-
-                // Disattiva bottone e timer
-                let rewardButton = document.getElementById('reward-btn-' + index);
-                if (rewardButton) {
-                    rewardButton.style.display = "none";
-                    rewardButton.disabled = true;
-                }
-
-                let countdown = document.getElementById('countdown-' + index);
-                if (countdown) {
-                    countdown.textContent = "Completed";
-                }
-
             }, adTimer * 1000);
         }
     }

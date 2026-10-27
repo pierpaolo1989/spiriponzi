@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.controller.rest;
 
 import com.soa.spiriponzi.dto.UserADDto;
+import com.soa.spiriponzi.dto.AdBudgetDto;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.UserService;
@@ -24,11 +25,32 @@ public class UserAdController {
         adService.create(user, adDto);
     }
 
+    @PutMapping("/{id}/toggle-active")
+    public boolean toggleActive(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = userService.findByEmail(authentication.getName());
+        return adService.toggleActive(user, id);
+    }
+
+    @GetMapping("/balance")
+    public double getAvailableBalance() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = userService.findByEmail(authentication.getName());
+        return adService.getAvailableBalance(user);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteAd(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final User user = userService.findByEmail(authentication.getName());
         adService.delete(user, id);
+    }
+
+    @PutMapping("/{id}/budget")
+    public double updateBudget(@PathVariable Long id, @RequestBody AdBudgetDto budgetDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = userService.findByEmail(authentication.getName());
+        return adService.updateBudget(user, id, budgetDto.getBudget());
     }
 
 }

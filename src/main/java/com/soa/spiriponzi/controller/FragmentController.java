@@ -24,4 +24,12 @@ public class FragmentController {
         model.addAttribute("ads", adService.getProposedAds(user.getId()));
         return "fragments/ads :: adList";
     }
+
+    @GetMapping("/fragment/summary")
+    public String getSummaryFragment(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final User user = userService.findByEmail(authentication.getName());
+        model.addAttribute("user", user);
+        return "fragments/summary :: summary";
+    }
 }

@@ -7,8 +7,10 @@ import com.soa.spiriponzi.model.*;
 import com.soa.spiriponzi.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -113,6 +115,7 @@ public class UserServiceImpl implements UserService {
                     dto.setTimer(ad.getTimer());
                     dto.setReward(ad.getReward());
                     dto.setCompleted(completed);
+                    dto.setActive(ad.isActive());
                     return dto;
                 })
                 .toList();
@@ -120,9 +123,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUserAd(User user, Long idAd) {
-        var ad = adRepository.findById(idAd);
+        var ad = adRepository.findById(idAd)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+        if (!ad.isActive() || ad.isDeleted()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad is not available");
+        }
+        if (ad.getProposer() != null && ad.getProposer().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot surf your own ad");
+        }
         UserAd userAd = new UserAd();
-        userAd.setAd(ad.get());
+        userAd.setAd(ad);
         userAd.setUser(user);
         userAd.setCompletedAt(LocalDate.now());
         userAdRepository.save(userAd);
@@ -130,11 +140,11 @@ public class UserServiceImpl implements UserService {
         //Update user stats
         Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(user.getEmail());
         UserStats userStats = optUserStats.get();
-        int amount = (int) ad.get().getReward();
+        int amount = (int) ad.getReward();
         if (userStats.getLastRequest().getMonth() == LocalDate.now().getMonth()) {
             userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
         } else {
-            userStats.setMonthlyPoints((int) ad.get().getReward());
+            userStats.setMonthlyPoints((int) ad.getReward());
         }
         userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
         userStatsRepository.save(userStats);
