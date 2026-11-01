@@ -140,4 +140,13 @@ public class ADServiceImpl implements ADService {
 		}).toList();
 
 	}
+
+	@Override
+	@Transactional
+	public void reportAbuse(Long id) {
+		Ad ad = adRepository.findWithLockById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+		ad.setAbuseCount(ad.getAbuseCount() + 1);
+		adRepository.save(ad);
+	}
 }

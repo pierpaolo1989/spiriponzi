@@ -158,6 +158,30 @@ class ADServiceImplTest {
         assertEquals(403, exception.getStatusCode().value());
     }
 
+    @Test
+    void reportAbuseIncrementsAndSavesAdCounter() {
+        Ad ad = Ad.builder().id(10L).abuseCount(2).build();
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
+
+        adService.reportAbuse(10L);
+
+        assertEquals(3, ad.getAbuseCount());
+        verify(adRepository).save(ad);
+    }
+
+    @Test
+    void reportAbuseRejectsUnknownAd() {
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> adService.reportAbuse(10L)
+        );
+
+        assertEquals(404, exception.getStatusCode().value());
+        verify(adRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
     private User userWithCoins(Long id, double balance, int annualPoints) {
         UserStats stats = UserStats.builder().annualPoints(annualPoints).build();
         return User.builder().id(id).balance(balance).userStats(stats).build();

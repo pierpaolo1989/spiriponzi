@@ -28,4 +28,5 @@ public class UserDto
     private String confirmPassword;
     @AssertTrue
     private Boolean terms;
+    private String referralCode;
 }

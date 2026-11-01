@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,11 @@ public class User {
 	private String ethWallet;
     @Column
     private double balance;
+    @Column(name = "referral_code", unique = true, length = 32)
+    private String referralCode;
+    @ManyToOne
+    @JoinColumn(name = "referred_by_user_id")
+    private User referredBy;
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(
             name="users_roles",

@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
@@ -25,6 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 public class AuthController {
+
+	private static final int CPX_APP_ID = 23067;
 
 	private final UserService userService;
 	private final WithdrawService withdrawService;
@@ -45,8 +48,10 @@ public class AuthController {
 	}
 
 	@GetMapping("register")
-	public String showRegistrationForm(Model model) {
+	public String showRegistrationForm(Model model,
+			@RequestParam(value = "ref", required = false) String referralCode) {
 		UserDto user = new UserDto();
+		user.setReferralCode(referralCode);
 		model.addAttribute("user", user);
 		return "register";
 	}
@@ -58,6 +63,10 @@ public class AuthController {
 		User existing = userService.findByEmail(user.getEmail());
 		if (existing != null) {
 			result.rejectValue("email", null, "There is already an account registered with this email");
+		}
+		if (user.getReferralCode() != null && !user.getReferralCode().isBlank()
+				&& !userService.isValidReferralCode(user.getReferralCode())) {
+			result.rejectValue("referralCode", null, "Referral code is not valid");
 		}
 		if (result.hasErrors()) {
 			model.addAttribute("user", user);
@@ -122,6 +131,10 @@ public class AuthController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
+		model.addAttribute("cpxAppId", CPX_APP_ID);
+		model.addAttribute("cpxExtUserId", user.getId().toString());
+		model.addAttribute("cpxEmail", user.getEmail());
+		model.addAttribute("cpxUsername", user.getEmail());
 		return "survey";
 	}
 
@@ -175,6 +188,7 @@ public class AuthController {
 				.ethWallet(user.getEthWallet())
 				.build();
 		model.addAttribute("updateUser", updateUser);
+		model.addAttribute("referralCode", userService.getOrCreateReferralCode(user.getId()));
 		return "profile";
 	}
 }

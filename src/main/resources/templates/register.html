@@ -65,6 +65,15 @@
 										</div>
 
 										<div class="form-group mb-3">
+											<label class="form-label">Referral code (optional)</label>
+											<input class="form-control" id="referralCode" name="referralCode"
+												placeholder="Enter a friend's referral code"
+												th:field="*{referralCode}" />
+											<p th:errors="*{referralCode}" class="text-danger"
+												th:if="${#fields.hasErrors('referralCode')}"></p>
+										</div>
+
+										<div class="form-group mb-3">
 											<label class="form-label">Confirm password *</label> <input
 												class="form-control" id="password" name="password"
 												placeholder="Confirm password" th:field="*{confirmPassword}"

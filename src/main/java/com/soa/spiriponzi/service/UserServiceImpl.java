@@ -10,18 +10,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
+
+    private static final int REFERRAL_REWARD = 1000;
 
     private final UserRepository userRepository;
     private final UserStatsRepository userStatsRepository;
@@ -32,10 +37,14 @@ public class UserServiceImpl implements UserService {
     private final UserAdRepository userAdRepository;
 
     @Override
+    @Transactional
     public void saveUser(UserDto userDto) {
+        User referrer = findReferrer(userDto.getReferralCode());
         User user = new User();
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setReferralCode(generateReferralCode());
+        user.setReferredBy(referrer);
         Role role = roleRepository.findByName("ROLE_USER");
         if (role == null){
             role = checkRoleExist();
@@ -44,11 +53,63 @@ public class UserServiceImpl implements UserService {
         //User stats
         var userStats = new UserStats();
         userStats.setNumberOfClaims(1);
-        userStats.setMonthlyPoints(0);
-        userStats.setAnnualPoints(0);
+        userStats.setMonthlyPoints(referrer == null ? 0 : REFERRAL_REWARD);
+        userStats.setAnnualPoints(referrer == null ? 0 : REFERRAL_REWARD);
         userStatsRepository.save(userStats);
         user.setUserStats(userStats);
         userRepository.save(user);
+
+        if (referrer != null) {
+            UserStats referrerStats = userStatsRepository.findWithLockByUserEmail(referrer.getEmail())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "Referrer has no coin balance"
+                    ));
+            referrerStats.setAnnualPoints(referrerStats.getAnnualPoints() + REFERRAL_REWARD);
+            referrerStats.setMonthlyPoints(referrerStats.getMonthlyPoints() + REFERRAL_REWARD);
+            userStatsRepository.save(referrerStats);
+        }
+    }
+
+    @Override
+    public boolean isValidReferralCode(String referralCode) {
+        if (referralCode == null || referralCode.isBlank()) {
+            return true;
+        }
+        return userRepository.findByReferralCode(normalizeReferralCode(referralCode)).isPresent();
+    }
+
+    @Override
+    @Transactional
+    public String getOrCreateReferralCode(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getReferralCode() == null || user.getReferralCode().isBlank()) {
+            user.setReferralCode(generateReferralCode());
+            userRepository.save(user);
+        }
+        return user.getReferralCode();
+    }
+
+    private User findReferrer(String referralCode) {
+        if (referralCode == null || referralCode.isBlank()) {
+            return null;
+        }
+        return userRepository.findByReferralCode(normalizeReferralCode(referralCode))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid referral code"));
+    }
+
+    private String normalizeReferralCode(String referralCode) {
+        return referralCode.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String generateReferralCode() {
+        for (int attempt = 0; attempt < 5; attempt++) {
+            String code = UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase(Locale.ROOT);
+            if (!userRepository.existsByReferralCode(code)) {
+                return code;
+            }
+        }
+        throw new IllegalStateException("Could not generate a unique referral code");
     }
     
     @Override

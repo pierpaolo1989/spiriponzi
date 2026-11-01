@@ -32,6 +32,8 @@ public class Ad {
     private User proposer;
     @Column(name = "deleted", columnDefinition = "boolean default false")
     private boolean deleted = false;
+    @Column(name = "abuse_count", nullable = false, columnDefinition = "integer default 0")
+    private int abuseCount;
     @Column
     private LocalDate createdAt;
 }

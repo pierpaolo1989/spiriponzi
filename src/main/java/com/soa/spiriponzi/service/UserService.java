@@ -13,6 +13,10 @@ public interface UserService {
 
 	void saveUser(UserDto userDto);
 
+	boolean isValidReferralCode(String referralCode);
+
+	String getOrCreateReferralCode(Long userId);
+
 	void updateUser(UpdateUserDto userDto);
 
 	User findByEmail(String email);

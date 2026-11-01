@@ -109,6 +109,10 @@
     pointer-events: none;
 }
 
+		.ad-card.disabled .report-abuse {
+		    pointer-events: auto;
+		}
+
 		.received-message {
     height: 20px;
     color: green;
@@ -135,6 +139,8 @@
     border-bottom-right-radius: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    border: 0;
+    font: inherit;
 }
 .report-abuse:hover {
     background-color: #2e59d9;
@@ -213,9 +219,11 @@
 									   th:id="'received-msg-' + ${iter.index}">
 										Reward received
 									</p>
-									<div class="report-abuse">
+									<button type="button" class="report-abuse"
+											th:attr="data-ad-id=${ad.id}"
+											onclick="event.stopPropagation(); showReportAbuseModal(this)">
 										<i class="fas fa-exclamation-triangle"></i> Report Abuse
-									</div>
+									</button>
 								</div>
 
 							</div>
@@ -245,6 +253,29 @@
 		class="fas fa-angle-up"></i>
 	</a>
 
+	<div class="modal fade" id="reportAbuseModal" tabindex="-1" role="dialog"
+		 aria-labelledby="reportAbuseModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="reportAbuseModalLabel">Report Abuse</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to report this ad as abusive?</p>
+					<div id="reportAbuseMessage" role="status" aria-live="polite"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-danger" id="confirmReportAbuseButton"
+							onclick="submitAbuseReport()">Confirm report</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Bootstrap core JavaScript-->
 	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
 	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
@@ -260,7 +291,42 @@
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 	<script>
-        async function refreshSummary() {
+	    let adIdToReport = null;
+
+	    function showReportAbuseModal(button) {
+	        adIdToReport = button.getAttribute("data-ad-id");
+	        document.getElementById("reportAbuseMessage").textContent = "";
+	        document.getElementById("confirmReportAbuseButton").disabled = false;
+	        $("#reportAbuseModal").modal("show");
+	    }
+
+	    async function submitAbuseReport() {
+	        if (!adIdToReport) {
+	            return;
+	        }
+
+	        const confirmButton = document.getElementById("confirmReportAbuseButton");
+	        const message = document.getElementById("reportAbuseMessage");
+	        confirmButton.disabled = true;
+	        message.textContent = "";
+
+	        try {
+	            const response = await fetch(`/ads/${encodeURIComponent(adIdToReport)}/report-abuse`, {
+	                method: "POST"
+	            });
+	            if (!response.ok) {
+	                throw new Error(`Abuse report failed: ${response.status}`);
+	            }
+
+	            message.textContent = "The ad has been reported.";
+	        } catch (error) {
+	            console.error("Could not report ad:", error);
+	            message.textContent = "The report could not be submitted. Please try again.";
+	            confirmButton.disabled = false;
+	        }
+	    }
+
+	    async function refreshSummary() {
             const response = await fetch('/fragment/summary');
             if (!response.ok) {
                 throw new Error(`Failed to refresh summary: ${response.status}`);
@@ -282,8 +348,22 @@
 
         if (adUrl) {
             let adWindow = window.open(adUrl, "_blank");
+            let countdown = document.getElementById('countdown-' + index);
+            let countdownValue = countdown ? countdown.querySelector('span') : null;
+            const deadline = Date.now() + Math.max(0, adTimer) * 1000;
 
-            setTimeout(async () => {
+            const updateCountdown = () => {
+                const secondsLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+                if (countdownValue) {
+                    countdownValue.textContent = secondsLeft;
+                }
+                if (secondsLeft === 0) {
+                    clearInterval(countdownInterval);
+                    creditReward();
+                }
+            };
+
+            const creditReward = async () => {
                 try {
                     const response = await fetch(`/ads?idAd=${adId}`, {
                     method: "POST",
@@ -308,7 +388,6 @@
                         rewardButton.disabled = true;
                     }
 
-                    let countdown = document.getElementById('countdown-' + index);
                     if (countdown) {
                         countdown.textContent = "Completed";
                     }
@@ -325,7 +404,10 @@
                         adWindow.close();
                     }
                 }
-            }, adTimer * 1000);
+            };
+
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
         }
     }
                 function startCountdown(index, duration) {

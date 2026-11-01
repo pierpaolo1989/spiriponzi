@@ -15,4 +15,5 @@ public interface ADService {
     double getAvailableBalance(User user);
     double updateBudget(User user, Long id, double budget);
     List<ADDto> getProposedAds(Long id);
+    void reportAbuse(Long id);
 }

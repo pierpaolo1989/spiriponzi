@@ -51,16 +51,26 @@ class AuthControllerTest {
         assertEquals("faq", controller.faq());
         assertEquals("login", controller.loginForm());
         assertEquals("recover-password", controller.recoverPassword(new ExtendedModelMap()));
-        assertEquals("register", controller.showRegistrationForm(new ExtendedModelMap()));
+        assertEquals("register", controller.showRegistrationForm(new ExtendedModelMap(), null));
     }
 
     @Test
     void showRegistrationFormAddsNewUserDto() {
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertEquals("register", controller.showRegistrationForm(model));
+        assertEquals("register", controller.showRegistrationForm(model, null));
 
         org.junit.jupiter.api.Assertions.assertInstanceOf(UserDto.class, model.get("user"));
+    }
+
+    @Test
+    void showRegistrationFormPrefillsReferralCodeFromInviteLink() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        assertEquals("register", controller.showRegistrationForm(model, "friend-code"));
+
+        UserDto dto = (UserDto) model.get("user");
+        assertEquals("friend-code", dto.getReferralCode());
     }
 
     @Test
@@ -89,6 +99,21 @@ class AuthControllerTest {
 
         assertSame(dto, model.get("user"));
         verify(result).rejectValue("email", null, "There is already an account registered with this email");
+    }
+
+    @Test
+    void registrationRejectsInvalidReferralCode() {
+        UserDto dto = new UserDto();
+        dto.setEmail("new@example.com");
+        dto.setReferralCode("invalid-code");
+        when(userService.findByEmail(dto.getEmail())).thenReturn(null);
+        when(userService.isValidReferralCode("invalid-code")).thenReturn(false);
+        BindingResult result = mock(BindingResult.class);
+        when(result.hasErrors()).thenReturn(true);
+
+        assertEquals("register", controller.registration(dto, result, new ExtendedModelMap()));
+
+        verify(result).rejectValue("referralCode", null, "Referral code is not valid");
     }
 
     @Test
@@ -152,12 +177,18 @@ class AuthControllerTest {
         assertEquals("surf-ads", controller.surfAds(model));
         assertEquals(ads, model.get("ads"));
         assertEquals("survey", controller.survey(model));
+        assertEquals(23067, model.get("cpxAppId"));
+        assertEquals("10", model.get("cpxExtUserId"));
+        assertEquals(ControllerTestSupport.EMAIL, model.get("cpxEmail"));
+        assertEquals(ControllerTestSupport.EMAIL, model.get("cpxUsername"));
         assertEquals("academy", controller.academy(model));
         assertEquals("withdraw-requests", controller.withdrawRequests(model));
         assertEquals("report", controller.report(model));
         assertEquals("games", controller.games(model));
+        when(userService.getOrCreateReferralCode(10L)).thenReturn("REFERRAL123");
         assertEquals("profile", controller.profile(model));
         assertSame(user, model.get("user"));
+        assertEquals("REFERRAL123", model.get("referralCode"));
         UpdateUserDto profileDto = (UpdateUserDto) model.get("updateUser");
         assertEquals(ControllerTestSupport.EMAIL, profileDto.getEmail());
         assertEquals("btc-address", profileDto.getBtcWallet());

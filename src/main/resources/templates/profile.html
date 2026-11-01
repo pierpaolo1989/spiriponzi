@@ -114,6 +114,28 @@
 
 					</div>
 
+						<div class="row">
+							<div class="col-lg-10 mb-4 offset-lg-1">
+								<div class="card shadow mb-4">
+									<div class="card-header py-3">
+										<h6 class="m-0 font-weight-bold text-primary">Invite a friend</h6>
+									</div>
+									<div class="card-body">
+										<p>Share your referral code. You and your friend each receive 1000 coins when they register.</p>
+										<div class="input-group">
+											<input class="form-control" id="referralCode" type="text"
+												th:value="${referralCode}" readonly aria-label="Your referral code" />
+											<div class="input-group-append">
+												<a class="btn btn-primary" th:href="@{/register(ref=${referralCode})}">
+													<i class="fas fa-user-plus"></i> Invite a friend
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+					</div>
+
 				</div>
 				<!-- /.container-fluid -->
 

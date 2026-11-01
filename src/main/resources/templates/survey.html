@@ -24,8 +24,6 @@
 
 <!-- Custom styles for this template-->
 <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
-	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js"></script>
-
 
 	<style>
 iframe {
@@ -123,6 +121,8 @@ iframe {
 		class="fas fa-angle-up"></i>
 	</a>
 
+	<div id="notification"></div>
+
 	<!-- Bootstrap core JavaScript-->
 	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
 	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
@@ -138,7 +138,7 @@ iframe {
 	<!-- Page level custom scripts -->
 	<script src='https://www.google.com/recaptcha/api.js'></script>
 
-	<script>
+	<script th:inline="javascript">
 		// How to use:
         // 1. Add div(s) to html and give it an id
         // 2. add this config script before the script tag
@@ -155,13 +155,25 @@ iframe {
             limit_surveys: 7 // int // Limit the number of surveys displayed (optional). Default is 12.
         };
 
+        const cpxAppId = /*[[${cpxAppId}]]*/ 23067;
+        const cpxExtUserId = /*[[${cpxExtUserId}]]*/ "";
+        const cpxEmail = /*[[${cpxEmail}]]*/ "";
+        const cpxUsername = /*[[${cpxUsername}]]*/ "";
+        const script4 = {
+            div_id: "notification",
+            theme_style: 4,
+            position: 5,
+            text: "New surveys are available!",
+            link: `https://offers.cpx-research.com/index.php?app_id=${encodeURIComponent(cpxAppId)}&ext_user_id=${encodeURIComponent(cpxExtUserId)}&username=${encodeURIComponent(cpxUsername)}&email=${encodeURIComponent(cpxEmail)}`,
+            newtab: true
+        };
 
         const config = {
             general_config: {
-                app_id: 23067, //number
-                ext_user_id: 3, // string
-                 email: "", // string
-                 username: "", // string
+                app_id: cpxAppId,
+                ext_user_id: cpxExtUserId,
+                email: cpxEmail,
+                username: cpxUsername,
                	secure_hash: "", // string if enabled on publisher area
                 subid_1: "", // string
                 subid_2: "", // string
@@ -175,7 +187,7 @@ iframe {
                     stars_filled: "black", // string // hex, rgba, colorcode
                 },
             },
-            script_config: [script1], // Object Array
+            script_config: [script1, script4],
             debug: false, // boolean
              useIFrame: true, //boolean
              iFramePosition: 1, // 1 right (default), 2 left
@@ -206,8 +218,7 @@ iframe {
         window.config = config;
 
 	</script>
-
-	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v2.0.js"></script>
+	<script type="text/javascript" src="https://cdn.cpx-research.com/assets/js/script_tag_v1.1.js"></script>
 
 </body>
 

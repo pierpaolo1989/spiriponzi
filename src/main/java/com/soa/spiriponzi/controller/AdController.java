@@ -8,13 +8,16 @@ import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -49,6 +52,12 @@ public class AdController {
                 .withdrawals(userStats.getWithdrawals())
                 .lastRequest(userStats.getLastRequest())
                 .build();
+    }
+
+    @PostMapping("/ads/{idAd}/report-abuse")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reportAbuse(@PathVariable Long idAd) {
+        adService.reportAbuse(idAd);
     }
 
     @GetMapping("/get-ads")
