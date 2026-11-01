@@ -141,7 +141,7 @@
 <div id="wrapper">
 
 	<!-- Sidebar -->
-	<div th:replace="fragments/sidebar"></div>
+	<div th:replace="~{fragments/sidebar}"></div>
 	<!-- End of Sidebar -->
 
 	<!-- Content Wrapper -->
@@ -151,7 +151,7 @@
 		<div id="content">
 
 			<!-- Topbar -->
-			<div th:replace="fragments/navbar"></div>
+			<div th:replace="~{fragments/navbar}"></div>
 			<!-- End of Topbar -->
 
 			<!-- Begin Page Content -->
@@ -164,7 +164,7 @@
 				</div>
 
 				<!-- Content Row -->
-				<div th:replace="fragments/summary"></div>
+				<div th:replace="~{fragments/summary}"></div>
 
 				<!-- Content Row -->
 
@@ -182,7 +182,7 @@
 							<!-- Card Body -->
 							<div class="card-body ad-container" style="min-height: 600px;">
 
-								<div th:replace="fragments/ads :: adList"></div>
+								<div th:replace="~{fragments/ads :: adList}"></div>
 
 								<!-- Form a comparsa per creare un nuovo annuncio -->
 								<div id="adFormContainer" class="p-4" style="display:none; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); margin-top: 20px; background: #fff;">
@@ -222,7 +222,7 @@
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
-		<div th:replace="fragments/footer"></div>
+		<div th:replace="~{fragments/footer}"></div>
 		<!-- End of Footer -->
 
 	</div>

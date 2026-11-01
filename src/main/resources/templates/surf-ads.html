@@ -157,7 +157,7 @@
 <div id="wrapper">
 
 	<!-- Sidebar -->
-	<div th:replace="fragments/sidebar"></div>
+	<div th:replace="~{fragments/sidebar}"></div>
 	<!-- End of Sidebar -->
 
 	<!-- Content Wrapper -->
@@ -167,7 +167,7 @@
 		<div id="content">
 
 			<!-- Topbar -->
-			<div th:replace="fragments/navbar"></div>
+			<div th:replace="~{fragments/navbar}"></div>
 			<!-- End of Topbar -->
 
 			<!-- Begin Page Content -->
@@ -180,7 +180,7 @@
 				</div>
 
 				<!-- Content Row -->
-				<div th:replace="fragments/summary :: summary"></div>
+				<div th:replace="~{fragments/summary :: summary}"></div>
 
 				<!-- Content Row -->
 
@@ -239,7 +239,7 @@
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
-		<div th:replace="fragments/footer"></div>
+		<div th:replace="~{fragments/footer}"></div>
 		<!-- End of Footer -->
 
 	</div>

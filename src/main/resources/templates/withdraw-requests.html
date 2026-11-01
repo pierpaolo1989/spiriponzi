@@ -144,18 +144,18 @@
 
 <body id="page-top">
 <div id="wrapper">
-	<div th:replace="fragments/sidebar"></div>
+	<div th:replace="~{fragments/sidebar}"></div>
 
 	<div id="content-wrapper" class="d-flex flex-column">
 		<div id="content">
-			<div th:replace="fragments/navbar"></div>
+			<div th:replace="~{fragments/navbar}"></div>
 
 			<div class="container-fluid">
 				<div class="d-sm-flex align-items-center justify-content-between mb-4">
 					<h1 class="h3 mb-0 text-gray-800">Withdraw Requests</h1>
 				</div>
 
-				<div th:replace="fragments/summary"></div>
+				<div th:replace="~{fragments/summary}"></div>
 
 				<hr class="divider">
 
@@ -197,7 +197,7 @@
 				</div>
 			</div>
 
-			<div th:replace="fragments/footer"></div>
+			<div th:replace="~{fragments/footer}"></div>
 		</div>
 	</div>
 </div>
