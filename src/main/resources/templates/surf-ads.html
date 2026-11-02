@@ -55,6 +55,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 4px;
         }
         .countdown i {
             margin-right: 5px;
@@ -211,7 +212,7 @@
 									<p class="countdown"
 									   th:id="'countdown-' + ${iter.index}"
 									   th:data-timer="${ad.timer}">
-										<i class="fas fa-clock"></i> Attendi <span th:text="${ad.timer}">10</span>s
+										<i class="fas fa-clock"></i><span>Wait</span><span class="countdown-value" th:text="${ad.timer}">10</span><span>seconds</span>
 									</p>
 									<button class="reward-button" th:id="'reward-btn-' + ${iter.index}" disabled>Ottieni Ricompensa</button>
 									<p class="received-message"
@@ -349,7 +350,7 @@
         if (adUrl) {
             let adWindow = window.open(adUrl, "_blank");
             let countdown = document.getElementById('countdown-' + index);
-            let countdownValue = countdown ? countdown.querySelector('span') : null;
+            let countdownValue = countdown ? countdown.querySelector('.countdown-value') : null;
             const deadline = Date.now() + Math.max(0, adTimer) * 1000;
 
             const updateCountdown = () => {
@@ -417,11 +418,14 @@
 
                 let interval = setInterval(() => {
                     if (secondsLeft > 0) {
-                        countdownElement.textContent = "Attendi " + secondsLeft + "s";
+                        let countdownValue = countdownElement.querySelector('.countdown-value');
+                        if (countdownValue) {
+                            countdownValue.textContent = secondsLeft;
+                        }
                         secondsLeft--;
                     } else {
                         clearInterval(interval);
-                        countdownElement.textContent = "Tempo scaduto!";
+                        countdownElement.textContent = "Time's up!";
                         rewardButton.disabled = false;
                         rewardButton.style.display = "block";
                     }
