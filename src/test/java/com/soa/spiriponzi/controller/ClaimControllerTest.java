@@ -2,6 +2,8 @@ package com.soa.spiriponzi.controller;
 
 import com.soa.spiriponzi.dto.ClaimDto;
 import com.soa.spiriponzi.dto.UserStatsDto;
+import com.soa.spiriponzi.exception.ClaimException;
+import com.soa.spiriponzi.exception.ReCaptchaInvalidException;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ClaimService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,17 +53,42 @@ class ClaimControllerTest {
     }
 
     @Test
-    void startClaimReturnsBadRequestWhenClaimServiceFails() {
+    void startClaimDoesNotHideUnexpectedClaimServiceFailures() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter("g-recaptcha-response")).thenReturn("captcha-response");
         doThrow(new IllegalStateException("claim failed"))
                 .when(claimService).startClaim(ControllerTestSupport.EMAIL);
 
+        assertThrows(IllegalStateException.class, () -> controller.startClaim(request));
+
+        verify(captchaService).processResponse("captcha-response");
+        verify(claimService).startClaim(ControllerTestSupport.EMAIL);
+    }
+
+    @Test
+    void startClaimReturnsCooldownStatusWhenUserClaimsTooSoon() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getParameter("g-recaptcha-response")).thenReturn("captcha-response");
+        doThrow(new ClaimException("You can claim once every hour"))
+                .when(claimService).startClaim(ControllerTestSupport.EMAIL);
+
+        var response = controller.startClaim(request);
+
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS, response.getStatusCode());
+        verify(claimService).startClaim(ControllerTestSupport.EMAIL);
+    }
+
+    @Test
+    void startClaimReturnsBadRequestWhenCaptchaIsInvalid() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getParameter("g-recaptcha-response")).thenReturn("captcha-response");
+        doThrow(new ReCaptchaInvalidException("Captcha validation failed"))
+                .when(captchaService).processResponse("captcha-response");
+
         var response = controller.startClaim(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        verify(captchaService).processResponse("captcha-response");
-        verify(claimService).startClaim(ControllerTestSupport.EMAIL);
+        verify(claimService, org.mockito.Mockito.never()).startClaim(ControllerTestSupport.EMAIL);
     }
 
     @Test

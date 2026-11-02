@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.service;
 
 import com.soa.spiriponzi.dto.UserDto;
+import com.soa.spiriponzi.model.Ad;
 import com.soa.spiriponzi.model.Role;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
@@ -32,6 +33,8 @@ class UserServiceImplTest {
     private UserStatsRepository userStatsRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+    private AdRepository adRepository;
+    private UserAdRepository userAdRepository;
     private UserServiceImpl userService;
 
     @BeforeEach
@@ -40,14 +43,16 @@ class UserServiceImplTest {
         userStatsRepository = mock(UserStatsRepository.class);
         roleRepository = mock(RoleRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
+        adRepository = mock(AdRepository.class);
+        userAdRepository = mock(UserAdRepository.class);
         userService = new UserServiceImpl(
                 userRepository,
                 userStatsRepository,
                 roleRepository,
                 passwordEncoder,
                 mock(EmailService.class),
-                mock(AdRepository.class),
-                mock(UserAdRepository.class)
+                adRepository,
+                userAdRepository
         );
     }
 
@@ -77,6 +82,7 @@ class UserServiceImplTest {
         UserStats newUserStats = newStatsCaptor.getAllValues().get(0);
         assertEquals(1000, newUserStats.getAnnualPoints());
         assertEquals(1000, newUserStats.getMonthlyPoints());
+        assertEquals(0, newUserStats.getNumberOfClaims());
 
         org.mockito.ArgumentCaptor<User> userCaptor = org.mockito.ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -112,5 +118,26 @@ class UserServiceImplTest {
         assertEquals(400, exception.getStatusCode().value());
         verify(userRepository, never()).save(any(User.class));
         verify(userStatsRepository, never()).save(any(UserStats.class));
+    }
+
+    @Test
+    void surfedAdWithNoPreviousClaimUpdatesAnnualAndMonthlyPoints() {
+        User user = User.builder().id(4L).email("player@example.com").build();
+        UserStats stats = UserStats.builder()
+                .annualPoints(50)
+                .monthlyPoints(50)
+                .numberOfClaims(0)
+                .lastRequest(null)
+                .build();
+        Ad ad = Ad.builder().id(5L).active(true).reward(20).build();
+        when(adRepository.findById(5L)).thenReturn(Optional.of(ad));
+        when(userStatsRepository.findByUserEmail(user.getEmail())).thenReturn(Optional.of(stats));
+
+        userService.createUserAd(user, 5L);
+
+        assertEquals(70, stats.getAnnualPoints());
+        assertEquals(70, stats.getMonthlyPoints());
+        verify(userStatsRepository).save(stats);
+        verify(userAdRepository).save(any(com.soa.spiriponzi.model.UserAd.class));
     }
 }

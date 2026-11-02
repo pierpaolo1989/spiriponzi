@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
         user.setRoles(Arrays.asList(role));
         //User stats
         var userStats = new UserStats();
-        userStats.setNumberOfClaims(1);
+        userStats.setNumberOfClaims(0);
         userStats.setMonthlyPoints(referrer == null ? 0 : REFERRAL_REWARD);
         userStats.setAnnualPoints(referrer == null ? 0 : REFERRAL_REWARD);
         userStatsRepository.save(userStats);
@@ -183,6 +184,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void createUserAd(User user, Long idAd) {
         var ad = adRepository.findById(idAd)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
@@ -202,10 +204,13 @@ public class UserServiceImpl implements UserService {
         Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(user.getEmail());
         UserStats userStats = optUserStats.get();
         int amount = (int) ad.getReward();
-        if (userStats.getLastRequest().getMonth() == LocalDate.now().getMonth()) {
+        LocalDateTime lastRequest = userStats.getLastRequest();
+        LocalDate today = LocalDate.now();
+        if (lastRequest == null
+                || (lastRequest.getYear() == today.getYear() && lastRequest.getMonth() == today.getMonth())) {
             userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
         } else {
-            userStats.setMonthlyPoints((int) ad.getReward());
+            userStats.setMonthlyPoints(amount);
         }
         userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
         userStatsRepository.save(userStats);

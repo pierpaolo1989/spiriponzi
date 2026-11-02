@@ -2,7 +2,11 @@ package com.soa.spiriponzi.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatusCode;
+import com.soa.spiriponzi.exception.ClaimException;
+import com.soa.spiriponzi.exception.InvalidReCaptchaException;
+import com.soa.spiriponzi.exception.ReCaptchaInvalidException;
+import com.soa.spiriponzi.model.ErrorResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,17 +32,23 @@ public class ClaimController {
     private final ClaimService claimService;
 
     @PostMapping
-    public ResponseEntity<Void> startClaim(HttpServletRequest request) {
+    public ResponseEntity<?> startClaim(HttpServletRequest request) {
         String response = request.getParameter("g-recaptcha-response");
-        captchaService.processResponse(response);
+        try {
+            captchaService.processResponse(response);
+        } catch (InvalidReCaptchaException | ReCaptchaInvalidException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("InvalidReCaptcha", e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try {
         	claimService.startClaim(authentication.getName());
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatusCode.valueOf(400));
+		} catch (ClaimException e) {
+			return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+					.body(new ErrorResponse("ClaimCooldown", e.getMessage(), HttpStatus.TOO_MANY_REQUESTS.value()));
 		}
         
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/game/status")

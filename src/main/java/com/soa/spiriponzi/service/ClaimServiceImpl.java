@@ -3,7 +3,6 @@ package com.soa.spiriponzi.service;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -37,51 +36,46 @@ public class ClaimServiceImpl implements ClaimService {
 	private final UserStatsRepository userStatsRepository;
 
 	@Override
+	@Transactional
 	public void startClaim(String email) {
 		User user = userRepository.findByEmail(email);
-		var amount = new Random().nextInt(99) + 1;
-		var now = LocalDateTime.now();
-		var claim = Claim.builder()
+		if (user == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+		}
+
+		UserStats userStats = userStatsRepository.findWithLockByUserEmail(email)
+				.orElseGet(() -> {
+					UserStats newStats = new UserStats();
+					newStats.setUser(user);
+					userStatsRepository.save(newStats);
+					user.setUserStats(newStats);
+					userRepository.save(user);
+					return newStats;
+				});
+		LocalDateTime now = LocalDateTime.now();
+		if (userStats.getLastRequest() != null
+				&& now.isBefore(userStats.getLastRequest().plusHours(1))) {
+			throw new ClaimException("You can claim once every hour");
+		}
+
+		int amount = new Random().nextInt(99) + 1;
+		Claim claim = Claim.builder()
 				.user(user)
-				.dateRequest(LocalDateTime.now())
+				.dateRequest(now)
 				.amount(amount)
 				.build();
-		claimRepository.save(claim);
-		
-		//Update stats --> transform in async
-		Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(email);
-		if (optUserStats.isEmpty()) {
-			var userStats = new UserStats();
-			userStats.setNumberOfClaims(1);
-			userStats.setMonthlyPoints(amount);
-			userStats.setAnnualPoints(amount);
-			userStats.setLastRequest(claim.getDateRequest());
-			userStatsRepository.save(userStats);
-			user.setUserStats(userStats);
-			userRepository.save(user);
-			
+
+		if (userStats.getLastRequest() == null || isInCurrentMonth(userStats.getLastRequest(), now)) {
+			userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
 		} else {
-			UserStats userStats = optUserStats.get();
-			if (Objects.isNull(userStats.getLastRequest())) {
-				userStats.setLastRequest(claim.getDateRequest());
-				userStatsRepository.save(userStats);
-				return;
-			}
-			if (now.isBefore(userStats.getLastRequest().plusHours(1))) {
-				throw new ClaimException();
-			}
-			if (userStats.getLastRequest().getMonth() == claim.getDateRequest().getMonth()) {
-				userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
-			} else {
-				userStats.setMonthlyPoints(amount);
-			}
-			userStats.setNumberOfClaims(userStats.getNumberOfClaims() + 1);
-			userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
-			userStats.setLastRequest(claim.getDateRequest());
-			userStatsRepository.save(userStats);
+			userStats.setMonthlyPoints(amount);
 		}
-		
-		
+		userStats.setNumberOfClaims(userStats.getNumberOfClaims() + 1);
+		userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
+		userStats.setLastRequest(now);
+
+		claimRepository.save(claim);
+		userStatsRepository.save(userStats);
 	}
 
 	@Override

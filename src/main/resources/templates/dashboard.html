@@ -494,11 +494,15 @@ function register(event) {
     		});
     })
     .fail(function(data) {
-    	
-        grecaptcha.reset();
-        
-        if(data.responseJSON.error == "InvalidReCaptcha"){ 
-            $("#captchaError").show().html(data.responseJSON.message);
+        if (window.grecaptcha) {
+            grecaptcha.reset();
+        }
+
+        const error = data.responseJSON;
+        if (error && error.message) {
+            $("#captchaError").show().text(error.message);
+        } else {
+            $("#captchaError").show().text("The claim could not be completed. Please try again.");
         }
     });
 }

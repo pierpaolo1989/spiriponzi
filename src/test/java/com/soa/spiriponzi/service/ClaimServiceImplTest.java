@@ -3,6 +3,7 @@ package com.soa.spiriponzi.service;
 import com.soa.spiriponzi.model.Claim;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
+import com.soa.spiriponzi.exception.ClaimException;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
@@ -49,6 +50,42 @@ class ClaimServiceImplTest {
         assertNotNull(user.getUserStats().getLastGameClaimAt());
         verify(userStatsRepository).save(user.getUserStats());
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void firstClaimCreditsPointsAndIncrementsClaimCountWhenLastRequestIsNull() {
+        String email = "player@example.com";
+        User user = User.builder().id(1L).email(email).build();
+        UserStats stats = UserStats.builder()
+                .annualPoints(1000)
+                .monthlyPoints(1000)
+                .numberOfClaims(0)
+                .build();
+        when(userRepository.findByEmail(email)).thenReturn(user);
+        when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
+
+        claimService.startClaim(email);
+
+        Claim claim = captureSavedClaim();
+        assertEquals(user, claim.getUser());
+        assertEquals(1000 + claim.getAmount(), stats.getAnnualPoints());
+        assertEquals(1000 + claim.getAmount(), stats.getMonthlyPoints());
+        assertEquals(1, stats.getNumberOfClaims());
+        assertEquals(claim.getDateRequest(), stats.getLastRequest());
+        verify(userStatsRepository).save(stats);
+    }
+
+    @Test
+    void claimDuringCooldownDoesNotPersistAClaim() {
+        String email = "player@example.com";
+        UserStats stats = UserStats.builder().lastRequest(LocalDateTime.now().minusMinutes(30)).build();
+        when(userRepository.findByEmail(email)).thenReturn(User.builder().email(email).build());
+        when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
+
+        assertThrows(ClaimException.class, () -> claimService.startClaim(email));
+
+        verify(claimRepository, never()).save(any(Claim.class));
+        verify(userStatsRepository, never()).save(stats);
     }
 
     @Test
