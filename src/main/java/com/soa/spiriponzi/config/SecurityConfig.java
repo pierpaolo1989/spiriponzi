@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,13 +33,18 @@ public class SecurityConfig {
                         .requestMatchers("/register/**", "/index", "faq", "/recover-password/**", "/menu/**",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
 
-                        // Tutte le altre pagine richiedono il ruolo USER
+                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/**").hasRole("USER")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler((request, response, authentication) -> {
+                            boolean isAdmin = authentication.getAuthorities()
+                                    .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                            String destination = isAdmin ? "/admin" : "/dashboard";
+                            response.sendRedirect(request.getContextPath() + destination);
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout

@@ -34,5 +34,6 @@ public interface AdRepository extends JpaRepository<Ad, Long> {
     """)
 	List<Object[]> findAdsWithCompletionStatus(@Param("userId") Long userId);
 	List<Ad> findByActiveTrue();
-	List<Ad> findByProposerIdAndDeletedIsFalse(Long userId);
+    long countByActiveTrueAndDeletedFalse();
+    List<Ad> findByProposerIdAndDeletedIsFalse(Long userId);
 }
