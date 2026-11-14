@@ -79,7 +79,15 @@ iframe {
 								</div>
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
-									<!--	<iframe src="https://web.bitlabs.ai/?uid=4jHuQ9EeNg_bMkw0NSAc3&token=fa47896b-dbff-47a7-bf0b-3e3b132174bb"></iframe>-->
+									<iframe
+										title="BitLabs surveys"
+										loading="lazy"
+										th:if="${!#strings.isEmpty(bitlabsToken)}"
+										th:src="@{https://web.bitlabs.ai/(uid=${bitlabsUid},token=${bitlabsToken})}">
+									</iframe>
+									<p th:if="${#strings.isEmpty(bitlabsToken)}">
+										BitLabs is not configured.
+									</p>
 								</div>
 							</div>
 						</div>

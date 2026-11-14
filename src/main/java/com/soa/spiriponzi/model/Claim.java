@@ -32,6 +32,8 @@ public class Claim {
 	private LocalDateTime dateRequest;
     @Column(nullable=false)
 	private double amount;
+    @Column(unique = true, length = 255)
+	private String externalTransactionId;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -3,6 +3,7 @@ package com.soa.spiriponzi.controller;
 import com.soa.spiriponzi.dto.ADDto;
 import com.soa.spiriponzi.service.WithdrawService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -31,6 +32,9 @@ public class AuthController {
 
 	private final UserService userService;
 	private final WithdrawService withdrawService;
+
+	@Value("${bitlabs.token:}")
+	private String bitlabsToken = "";
 
 	@GetMapping("index")
 	public String home(){
@@ -131,6 +135,8 @@ public class AuthController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
+		model.addAttribute("bitlabsUid", user.getId().toString());
+		model.addAttribute("bitlabsToken", bitlabsToken);
 		model.addAttribute("cpxAppId", CPX_APP_ID);
 		model.addAttribute("cpxExtUserId", user.getId().toString());
 		model.addAttribute("cpxEmail", user.getEmail());
