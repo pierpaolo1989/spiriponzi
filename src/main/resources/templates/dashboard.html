@@ -124,7 +124,7 @@
 								<!-- Card Body -->
 								<div class="card-body">
 									<div class="chart-area">
-										<form method="POST" enctype="utf8" class="text-center">
+										<form id="claimForm" method="POST" enctype="utf8" class="text-center">
 											<button class="btn btn-primary" id="claim_button">CLAIM</button>
 											<center>
 												<div class="g-recaptcha col-sm-5 text-center"
@@ -465,14 +465,14 @@ $(document).ready(function () {
         // Aggiorna i prezzi ogni 60 secondi
         setInterval(getCryptoPrices, 60000);
 
-	$('form').submit(function(event) {
+	$('#claimForm').submit(function(event) {
 		register(event);
 	});
 });
 
 function register(event) {
     event.preventDefault();
-    var formData= $('form').serialize();
+    var formData = $('#claimForm').serialize();
     $.post("/claims", formData, function(data) {
             startClaimCountdown(3600);
     		$.ajax({
