@@ -49,6 +49,7 @@ class AuthControllerTest {
     void publicPagesReturnTheirTemplates() {
         assertEquals("index", controller.home());
         assertEquals("faq", controller.faq());
+        assertEquals("terms", controller.terms());
         assertEquals("login", controller.loginForm());
         assertEquals("recover-password", controller.recoverPassword(new ExtendedModelMap()));
         assertEquals("register", controller.showRegistrationForm(new ExtendedModelMap(), null));

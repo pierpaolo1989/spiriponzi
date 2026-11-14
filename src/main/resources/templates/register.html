@@ -145,7 +145,7 @@
 										<div class="form-group mb-3">
 											<input id="terms" type="checkbox" th:field="*{terms}" /> <label
 												class="control-label small" for="terms"> I agree
-												with the <a href="#">terms and conditions</a> for
+												with the <a th:href="@{/terms}" target="_blank" rel="noopener noreferrer">terms and conditions</a> for
 												Registration.
 											</label>
 											<p class="error-message"

@@ -46,6 +46,11 @@ public class AuthController {
 		return "faq";
 	}
 
+	@GetMapping("/terms")
+	public String terms() {
+		return "terms";
+	}
+
 	@GetMapping("/login")
 	public String loginForm() {
 		return "login";
