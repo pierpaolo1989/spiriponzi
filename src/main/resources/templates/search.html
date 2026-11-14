@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Spiriponzi - Search</title>
+    <link rel="icon" type="image/svg" th:href="@{/img/favicon.ico}">
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <div th:replace="~{fragments/sidebar}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <div th:replace="~{fragments/navbar}"></div>
+            <div class="container-fluid">
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h1 class="h3 mb-1 text-gray-800">Search</h1>
+                        <p class="mb-0 text-muted" th:if="${!query.isBlank()}">
+                            <span th:text="${resultCount}">0</span>
+                            result(s) for "<span th:text="${query}"></span>"
+                        </p>
+                        <p class="mb-0 text-muted" th:if="${query.isBlank()}">
+                            Search app pages and available Surf Ads.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row" th:if="${!query.isBlank() and resultCount == 0}">
+                    <div class="col-12">
+                        <div class="card shadow mb-4">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-search fa-2x text-gray-300 mb-3"></i>
+                                <h5 class="text-gray-800">No results found</h5>
+                                <p class="mb-0 text-muted">Try another keyword, like "surveys", "wallet", or an ad title.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" th:if="${query.isBlank()}">
+                    <div class="col-12">
+                        <div class="card shadow mb-4">
+                            <div class="card-body">
+                                <h5 class="text-gray-800">What can I search for?</h5>
+                                <p class="mb-0 text-muted">Find app sections such as Surveys, Academy, or Withdraw, and search available Surf Ads by title.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section th:if="${!pageResults.isEmpty()}" class="mb-4">
+                    <h2 class="h5 mb-3 text-gray-800">App pages</h2>
+                    <div class="row">
+                        <div class="col-md-6 col-xl-4 mb-3" th:each="result : ${pageResults}">
+                            <a class="card shadow h-100 text-decoration-none" th:href="${result.url}">
+                                <div class="card-body">
+                                    <span class="badge badge-primary mb-2" th:text="${result.category}">Page</span>
+                                    <h3 class="h6 font-weight-bold text-gray-800" th:text="${result.title}">Page title</h3>
+                                    <p class="mb-0 text-muted" th:text="${result.description}">Description</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section th:if="${!adResults.isEmpty()}" class="mb-4">
+                    <h2 class="h5 mb-3 text-gray-800">Surf Ads</h2>
+                    <div class="row">
+                        <div class="col-md-6 col-xl-4 mb-3" th:each="result : ${adResults}">
+                            <a class="card shadow h-100 text-decoration-none" th:href="${result.url}">
+                                <div class="card-body">
+                                    <span class="badge badge-success mb-2" th:text="${result.category}">Surf ad</span>
+                                    <h3 class="h6 font-weight-bold text-gray-800" th:text="${result.title}">Ad title</h3>
+                                    <p class="mb-0 text-muted" th:text="${result.description}">Ad details</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div th:replace="~{fragments/footer}"></div>
+    </div>
+</div>
+<a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+</body>
+</html>

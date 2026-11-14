@@ -47,6 +47,10 @@
         .ad-card:hover {
             transform: scale(1.05);
         }
+		.ad-card:target {
+			outline: 3px solid #4e73df;
+			outline-offset: 3px;
+		}
         .countdown {
             font-size: 16px;
             font-weight: bold;
@@ -197,6 +201,7 @@
 							<div class="card-body ad-container" style="min-height: 600px;">
 
 								<div class="ad-card" th:each="ad, iter : ${ads}"
+									 th:id="'ad-' + ${ad.id}"
 									 th:data-url="${ad.url}"
 									 th:data-timer="${ad.timer}"
 									 th:data-id="${ad.id}"
