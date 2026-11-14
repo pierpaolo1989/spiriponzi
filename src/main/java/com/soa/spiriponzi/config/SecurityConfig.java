@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
                         .requestMatchers("/register/**", "/index", "faq", "/recover-password/**", "/menu/**",
+                                "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
 
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")

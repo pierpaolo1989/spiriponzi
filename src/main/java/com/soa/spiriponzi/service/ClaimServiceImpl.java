@@ -79,6 +79,15 @@ public class ClaimServiceImpl implements ClaimService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public long getClaimCooldownSeconds(String email) {
+		return userStatsRepository.findByUserEmail(email)
+				.map(UserStats::getLastRequest)
+				.map(lastRequest -> secondsUntil(lastRequest, 3600))
+				.orElse(0L);
+	}
+
+	@Override
 	@Transactional
 	public long getGameClaimCooldownSeconds(String email) {
 		UserStats userStats = getOrCreateLockedStats(email);
@@ -87,7 +96,7 @@ public class ClaimServiceImpl implements ClaimService {
 			userStats.setLastGameClaimAt(now);
 			userStatsRepository.save(userStats);
 		}
-		return secondsUntilGameClaim(userStats.getLastGameClaimAt(), now);
+		return secondsUntil(userStats.getLastGameClaimAt(), GAME_CLAIM_INTERVAL_SECONDS, now);
 	}
 
 	@Override
@@ -156,10 +165,15 @@ public class ClaimServiceImpl implements ClaimService {
 	}
 
 	private long secondsUntilGameClaim(LocalDateTime lastGameClaimAt, LocalDateTime now) {
-		long millisecondsRemaining = Duration.between(
-				now,
-				lastGameClaimAt.plusSeconds(GAME_CLAIM_INTERVAL_SECONDS)
-		).toMillis();
+		return secondsUntil(lastGameClaimAt, GAME_CLAIM_INTERVAL_SECONDS, now);
+	}
+
+	private long secondsUntil(LocalDateTime start, long intervalSeconds) {
+		return secondsUntil(start, intervalSeconds, LocalDateTime.now());
+	}
+
+	private long secondsUntil(LocalDateTime start, long intervalSeconds, LocalDateTime now) {
+		long millisecondsRemaining = Duration.between(now, start.plusSeconds(intervalSeconds)).toMillis();
 		return millisecondsRemaining <= 0 ? 0 : (millisecondsRemaining + 999) / 1000;
 	}
 

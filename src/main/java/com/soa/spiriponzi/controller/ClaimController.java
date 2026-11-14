@@ -51,6 +51,12 @@ public class ClaimController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/status")
+    public long getClaimCooldownSeconds() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return claimService.getClaimCooldownSeconds(authentication.getName());
+    }
+
     @GetMapping("/game/status")
     public long getGameClaimCooldownSeconds() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -386,64 +386,49 @@ $(document).ready(function () {
 });
 
 $(function () {
+    $('#claim_button').prop('disabled', true);
     $.ajax({
-        url: "/users/stats",
+        url: "/claims/status",
         type: 'GET',
-        contentType: "application/json",
-        success: function(data) {
-            let lastDate = Date.parse(data.lastRequest);
-            let currentDate = new Date();
-            let difference = currentDate.getTime() - lastDate;
-            let oneHour = 1000 * 60 * 60;
-
-            if (difference < oneHour) {
-                let remainingTime = oneHour - difference;
-                let remainingMinutes = Math.floor(remainingTime / 60000);
-                $('#claim_button').prop('disabled', true);
-                $('.g-recaptcha').css('pointer-events', 'none').css('opacity', '0.5'); // Disabilita il reCAPTCHA
-                let remainingSeconds = Math.floor((remainingTime % 60000) / 1000);
-                $('#countdown').text("00:" + remainingMinutes + ":" + ("0" + remainingSeconds).slice(-2));
-                $('#countdown').countdown(0, remainingMinutes, remainingSeconds);
-                $('#countdown').css('display', 'block');
+        success: function(remainingSeconds) {
+            if (remainingSeconds > 0) {
+                startClaimCountdown(remainingSeconds);
+            } else {
+                $('#claim_button').prop('disabled', false);
             }
-
+        },
+        error: function() {
+            $('#claim_button').prop('disabled', true);
+            $("#captchaError").show().text("Unable to load the claim timer. Please refresh the page.");
         }
     });
 });
 
-jQuery.fn.extend({
-    countdown: function (hour, min, sec) {
-        render(hour, min, sec);
+function startClaimCountdown(remainingSeconds) {
+    let secondsLeft = remainingSeconds;
+    $('#claim_button').prop('disabled', true);
+    $('.g-recaptcha').css('pointer-events', 'none').css('opacity', '0.5');
+    $('#countdown').css('display', 'block');
 
-        const timer = setInterval(() => {
-            if (hour === 0 && min === 0 && sec === 0) {
-                clearInterval(timer);
-                $('#claim_button').prop('disabled', false);
-                return;
-            }
+    const render = () => {
+        const hours = Math.floor(secondsLeft / 3600);
+        const minutes = Math.floor((secondsLeft % 3600) / 60);
+        const seconds = secondsLeft % 60;
+        $('#countdown').text(
+            [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':')
+        );
+    };
 
-            sec = dealSec(sec);
-            min = dealMin(min, sec);
-            hour = dealHour(hour, min, sec);
-            render(hour, min, sec);
-        }, 1000);
-    },
-});
-
-function dealSec(sec) {
-    return sec === 0 ? 59 : sec - 1;
-}
-
-function dealMin(min, sec) {
-    return sec === 59 ? (min === 0 ? 59 : min - 1) : min;
-}
-
-function dealHour(hour, min, sec) {
-    return min === 59 && sec === 59 ? hour - 1 : hour;
-}
-
-function render(hour, min, sec) {
-    $('#countdown').text(("00" + hour).slice(-2) + ":" + ("00" + min).slice(-2) + ":" + ("00" + sec).slice(-2));
+    render();
+    const timer = setInterval(() => {
+        secondsLeft -= 1;
+        render();
+        if (secondsLeft <= 0) {
+            clearInterval(timer);
+            $('#claim_button').prop('disabled', false);
+            $('.g-recaptcha').css('pointer-events', '').css('opacity', '');
+        }
+    }, 1000);
 }
 
 
@@ -489,9 +474,7 @@ function register(event) {
     event.preventDefault();
     var formData= $('form').serialize();
     $.post("/claims", formData, function(data) {
-        	$('#countdown').css('display','block');
-    		$('#countdown').countdown(1,0,0);
-    		$('.g-recaptcha').css('pointer-events', 'none').css('opacity', '0.5'); // Disabilita reCAPTCHA dopo claim
+            startClaimCountdown(3600);
     		$.ajax({
     		    url: "/users/stats",
     		    type: 'GET',

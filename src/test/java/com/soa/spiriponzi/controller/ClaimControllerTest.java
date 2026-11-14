@@ -113,6 +113,15 @@ class ClaimControllerTest {
     }
 
     @Test
+    void getClaimCooldownReturnsServiceValue() {
+        when(claimService.getClaimCooldownSeconds(ControllerTestSupport.EMAIL)).thenReturn(1800L);
+
+        assertEquals(1800, controller.getClaimCooldownSeconds());
+
+        verify(claimService).getClaimCooldownSeconds(ControllerTestSupport.EMAIL);
+    }
+
+    @Test
     void startGameClaimReturnsUpdatedUserStats() {
         UserStatsDto stats = UserStatsDto.builder()
                 .annualPoints(400)

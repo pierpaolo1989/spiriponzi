@@ -53,6 +53,26 @@ class ClaimServiceImplTest {
     }
 
     @Test
+    void claimCooldownReturnsSecondsFromServerSideTimestamp() {
+        String email = "player@example.com";
+        UserStats stats = UserStats.builder().lastRequest(LocalDateTime.now().minusMinutes(30)).build();
+        when(userStatsRepository.findByUserEmail(email)).thenReturn(Optional.of(stats));
+
+        long remaining = claimService.getClaimCooldownSeconds(email);
+
+        assertEquals(1800, remaining);
+    }
+
+    @Test
+    void claimCooldownIsZeroWhenNoRecentClaimExists() {
+        String email = "player@example.com";
+        UserStats stats = UserStats.builder().lastRequest(LocalDateTime.now().minusHours(2)).build();
+        when(userStatsRepository.findByUserEmail(email)).thenReturn(Optional.of(stats));
+
+        assertEquals(0, claimService.getClaimCooldownSeconds(email));
+    }
+
+    @Test
     void firstClaimCreditsPointsAndIncrementsClaimCountWhenLastRequestIsNull() {
         String email = "player@example.com";
         User user = User.builder().id(1L).email(email).build();
