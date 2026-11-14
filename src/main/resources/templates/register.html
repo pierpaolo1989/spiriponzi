@@ -13,22 +13,80 @@
 <!-- Custom styles for this template-->
 <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
 	<style>
+		body, html {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+		}
+
 		.container {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Opzionale per centrare anche orizzontalmente */
-    min-height: 100vh;
-}
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 100vh;
+			padding-top: 80px;
+			box-sizing: border-box;
+		}
 
         .row.justify-content-center {
             flex: 1;
         }
+
+		.navbar {
+			background-color: #4e73df;
+			padding: 0.75rem 1rem;
+			color: white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: fixed;
+			top: 0;
+			width: 100%;
+			z-index: 1030;
+			height: 80px;
+			box-sizing: border-box;
+		}
+
+		.navbar-content {
+			display: flex;
+			align-items: center;
+			gap: 2rem;
+			font-weight: bold;
+		}
+
+		.navbar a {
+			color: white;
+			text-decoration: none;
+			transition: color 0.2s;
+		}
+
+		.navbar a:hover {
+			color: #d1d1d1;
+		}
+
+		@media (max-width: 576px) {
+			.navbar-content {
+				gap: 1rem;
+				font-size: 0.875rem;
+			}
+		}
 	</style>
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
         crossorigin="anonymous"></script>
 </head>
 <body class="bg-gradient-primary">
-	
+
+	<!-- Navbar -->
+	<div class="navbar">
+		<div class="navbar-content">
+			<div class="sidebar-brand-icon">
+				<i class="fas fa-solid fa-coins"></i> &nbsp;Spiriponzi
+			</div>
+			<a th:href="@{/login}">Login</a>
+			<a th:href="@{/faq}">How it works?</a>
+		</div>
+	</div>
+
 	<div class="container">
 		<div class="row justify-content-center">
 

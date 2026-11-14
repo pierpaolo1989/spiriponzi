@@ -31,6 +31,137 @@
 	text-align: justify;
 }
 
+	.quiz-shell {
+		background: linear-gradient(145deg, #f8f9ff, #fff);
+		border: 1px solid #e8ebf8;
+		border-radius: 12px;
+		padding: 18px;
+	}
+
+	.quiz-meta, .quiz-actions {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.quiz-actions [hidden] {
+		display: none;
+	}
+
+	.quiz-meta {
+		color: #858796;
+		font-size: 12px;
+		font-weight: 700;
+	}
+
+	.quiz-score {
+		background: #eef1ff;
+		border-radius: 99px;
+		color: #4e5db2;
+		padding: 5px 10px;
+	}
+
+	.quiz-progress {
+		background-color: #e9ecf5;
+		border-radius: 99px;
+		height: 7px;
+		margin: 12px 0 18px;
+		overflow: hidden;
+	}
+
+	.quiz-progress-bar {
+		background: linear-gradient(90deg, #4e73df, #8b65d8);
+		border-radius: inherit;
+		height: 100%;
+		transition: width .3s ease;
+		width: 0;
+	}
+
+	.quiz-topic {
+		color: #6c63bd;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: .06em;
+		margin-bottom: 7px;
+		text-transform: uppercase;
+	}
+
+	.quiz-question {
+		color: #3a3b45;
+		font-size: 17px;
+		font-weight: 700;
+		line-height: 1.45;
+		margin-bottom: 16px;
+	}
+
+	.quiz-options {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.quiz-option {
+		background: #fff;
+		border: 1px solid #e3e6f0;
+		border-radius: 8px;
+		color: #5a5c69;
+		font-size: 13px;
+		margin-bottom: 8px;
+		padding: 10px 12px;
+		text-align: left;
+		transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
+		white-space: normal;
+	}
+
+	.quiz-option:not(:disabled):hover, .quiz-option:focus {
+		background: #f5f6ff;
+		border-color: #8093e8;
+		color: #3a3b45;
+		transform: translateY(-1px);
+	}
+
+	.quiz-option.is-correct {
+		background: #e8f7ef;
+		border-color: #1cc88a;
+		color: #16794f;
+	}
+
+	.quiz-option.is-incorrect {
+		background: #fff0ef;
+		border-color: #e74a3b;
+		color: #b83227;
+	}
+
+	.quiz-feedback {
+		border-radius: 8px;
+		font-size: 13px;
+		line-height: 1.5;
+		margin: 12px 0;
+	}
+
+	.quiz-feedback.is-visible {
+		background: #f1f3f9;
+		padding: 10px 12px;
+	}
+
+	.quiz-feedback strong {
+		color: #3a3b45;
+		display: block;
+		margin-bottom: 3px;
+	}
+
+	.quiz-hint {
+		color: #858796;
+		font-size: 11px;
+		margin: 12px 0 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.quiz-progress-bar, .quiz-option {
+			transition: none;
+		}
+	}
+
 	.crypto-overview {
 		background: linear-gradient(120deg, #f3f6ff, #f5fbff);
 		border: 1px solid #e8edfb;
@@ -271,16 +402,30 @@
 							<div class="card shadow mb-4">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">QUIZ</h6>
+									<h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-brain mr-1"></i> Crypto quick quiz</h6>
 								</div>
-								<!-- Card Body -->
 								<div class="card-body">
-									<div class="quiz-container" style="color: black;">
-										<h5><strong>Quiz: Test your Crypto Knowledge</strong></h5>
-										<div id="quiz-question" style="margin-top: 10px; font-weight: bold;"></div>
-										<ul id="quiz-options" style="list-style-type: none; padding-left: 0;"></ul>
-										<button id="next-question" class="btn btn-sm btn-primary mt-2" style="display: none;">Next</button>
-										<div id="quiz-feedback" class="mt-2"></div>
+									<div class="quiz-shell">
+										<div class="quiz-meta">
+											<span id="quiz-counter">Question 1 of 8</span>
+											<span class="quiz-score"><i class="fas fa-star mr-1" aria-hidden="true"></i><span id="quiz-score">0</span> points</span>
+										</div>
+										<div class="quiz-progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0">
+											<div class="quiz-progress-bar" id="quiz-progress"></div>
+										</div>
+										<div class="quiz-topic"><i class="fas fa-lightbulb mr-1" aria-hidden="true"></i>Learn as you play</div>
+										<h5 class="quiz-question" id="quiz-question" tabindex="-1"></h5>
+										<ul class="quiz-options" id="quiz-options"></ul>
+										<div class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></div>
+										<div class="quiz-actions">
+											<button id="quiz-restart" class="btn btn-sm btn-outline-primary" type="button" hidden>
+												<i class="fas fa-redo-alt mr-1" aria-hidden="true"></i>Play again
+											</button>
+											<button id="next-question" class="btn btn-sm btn-primary" type="button" hidden>
+												Next question <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i>
+											</button>
+										</div>
+										<p class="quiz-hint mb-0">Pick an answer to reveal a quick explanation.</p>
 									</div>
 								</div>
 							</div>
@@ -425,69 +570,147 @@
 	<script>
 
 		const quizData = [
-    {
-        question: "What is the maximum supply of Bitcoin?",
-        options: ["21 million", "100 million", "50 million", "Unlimited"],
-        answer: "21 million"
-    },
-    {
-        question: "What does 'HODL' mean in crypto slang?",
-        options: ["Hold On for Dear Life", "Hack Or Die Later", "High Order Digital Ledger", "None of the above"],
-        answer: "Hold On for Dear Life"
-    },
-    {
-        question: "Which is a layer-2 scaling solution for Ethereum?",
-        options: ["Polkadot", "Solana", "Arbitrum", "Litecoin"],
-        answer: "Arbitrum"
-    },
-    {
-        question: "What is a common use of stablecoins?",
-        options: ["Buying houses", "Avoiding crypto volatility", "Mining", "Creating NFTs"],
-        answer: "Avoiding crypto volatility"
-    }
-];
+			{
+				question: "What is Bitcoin's maximum supply?",
+				options: ["21 million BTC", "100 million BTC", "There is no limit", "21 billion BTC"],
+				answer: "21 million BTC",
+				explanation: "Bitcoin's protocol caps issuance at 21 million coins. New BTC is released through mining rewards."
+			},
+			{
+				question: "What does a private key let you do?",
+				options: ["Recover any lost crypto", "Authorize transactions from your wallet", "Change a blockchain's rules", "Make transactions anonymous"],
+				answer: "Authorize transactions from your wallet",
+				explanation: "A private key proves control of an address. Keep it secret: anyone who has it can move the funds."
+			},
+			{
+				question: "What is a stablecoin designed to do?",
+				options: ["Always increase in value", "Track the value of an asset, often a currency", "Earn a guaranteed yield", "Replace every blockchain token"],
+				answer: "Track the value of an asset, often a currency",
+				explanation: "Stablecoins aim to track a reference asset such as the US dollar, but their peg is not risk-free or guaranteed."
+			},
+			{
+				question: "What does a blockchain confirm?",
+				options: ["A transaction's inclusion in the ledger", "That an investment will be profitable", "A user's real-world identity", "That a token has no risk"],
+				answer: "A transaction's inclusion in the ledger",
+				explanation: "Consensus lets the network agree on a shared transaction history; it does not guarantee price or investment outcomes."
+			},
+			{
+				question: "What is a smart contract?",
+				options: ["A legal document stored in a wallet", "Code that runs on a blockchain when conditions are met", "A password manager", "A private blockchain address"],
+				answer: "Code that runs on a blockchain when conditions are met",
+				explanation: "Smart contracts are on-chain programs. Their behavior depends on their code and the network they run on."
+			},
+			{
+				question: "What is a seed phrase used for?",
+				options: ["Tracking a coin's price", "Restoring access to a wallet", "Paying network fees", "Encrypting a public address"],
+				answer: "Restoring access to a wallet",
+				explanation: "A seed phrase can regenerate wallet keys. Store it offline and never share it with anyone."
+			},
+			{
+				question: "What does a network fee usually pay for?",
+				options: ["The wallet provider's password reset", "Processing and including a transaction", "A guaranteed transaction price", "The token's market value"],
+				answer: "Processing and including a transaction",
+				explanation: "Network fees compensate validators or miners for processing transactions; the amount can change with network demand."
+			},
+			{
+				question: "What is diversification?",
+				options: ["Putting all funds into one asset", "Spreading exposure across different assets", "Buying only the newest token", "Avoiding all market research"],
+				answer: "Spreading exposure across different assets",
+				explanation: "Diversification spreads exposure, but it does not eliminate risk or guarantee a profit."
+			}
+		];
 
-let currentQuestionIndex = 0;
+		let currentQuestionIndex = 0;
+		let quizScore = 0;
+		let quizAnswered = false;
 
-function loadQuestion() {
-    const quiz = quizData[currentQuestionIndex];
-    $("#quiz-question").text(quiz.question);
-    $("#quiz-options").empty();
-    $("#quiz-feedback").text("");
-    $("#next-question").hide();
+		function updateQuizProgress(completed) {
+			const progress = Math.round((completed / quizData.length) * 100);
+			$('.quiz-progress').attr('aria-valuenow', completed);
+			$('#quiz-progress').css('width', progress + '%');
+			$('#quiz-counter').text(completed === quizData.length
+				? 'Quiz complete'
+				: 'Question ' + (currentQuestionIndex + 1) + ' of ' + quizData.length);
+		}
 
-    quiz.options.forEach(option => {
-        $("#quiz-options").append(`
-            <li>
-                <button class="btn btn-outline-secondary btn-block option-button" style="margin-top: 5px;">${option}</button>
-            </li>
-        `);
-    });
+		function loadQuestion() {
+			const quiz = quizData[currentQuestionIndex];
+			quizAnswered = false;
+			$('#quiz-question').text(quiz.question);
+			$('#quiz-options').empty();
+			$('#quiz-feedback').removeClass('is-visible').empty();
+			$('#next-question').prop('hidden', true);
+			$('#quiz-restart').prop('hidden', true);
+			updateQuizProgress(currentQuestionIndex);
 
-    $(".option-button").click(function() {
-        const selected = $(this).text();
-        const isCorrect = selected === quiz.answer;
+			quiz.options.forEach(option => {
+				const button = $('<button>', {
+					type: 'button',
+					class: 'btn btn-block quiz-option',
+					text: option
+				});
+				const item = $('<li>').append(button);
+				$('#quiz-options').append(item);
+			});
+		}
 
-        if (isCorrect) {
-            $("#quiz-feedback").html('<span class="text-success">✅ Correct!</span>');
-        } else {
-            $("#quiz-feedback").html('<span class="text-danger">❌ Incorrect. The correct answer is: <strong>' + quiz.answer + '</strong></span>');
-        }
+		$('#quiz-options').on('click', '.quiz-option', function() {
+			if (quizAnswered) {
+				return;
+			}
+			quizAnswered = true;
+			const quiz = quizData[currentQuestionIndex];
+			const selected = $(this).text();
+			const isCorrect = selected === quiz.answer;
+			const feedback = $('#quiz-feedback');
 
-        $(".option-button").prop("disabled", true);
-        $("#next-question").show();
-    });
-}
+			$('.quiz-option').prop('disabled', true);
+			$('.quiz-option').filter(function() {
+				return $(this).text() === quiz.answer;
+			}).addClass('is-correct');
 
-$("#next-question").click(function() {
-    currentQuestionIndex = (currentQuestionIndex + 1) % quizData.length;
-    loadQuestion();
-});
+			if (isCorrect) {
+				quizScore += 1;
+				$(this).addClass('is-correct');
+			} else {
+				$(this).addClass('is-incorrect');
+			}
+			$('#quiz-score').text(quizScore);
+			feedback.addClass('is-visible');
+			$('<strong>').text(isCorrect ? 'Correct!' : 'Not quite — the answer is ' + quiz.answer + '.')
+				.appendTo(feedback);
+			$('<span>').text(quiz.explanation).appendTo(feedback);
+			$('#next-question').text(currentQuestionIndex === quizData.length - 1
+				? 'See your result' : 'Next question');
+			$('#next-question').prop('hidden', false);
+		});
 
-// Load first question on page load
-$(document).ready(function () {
-    loadQuestion();
-});
+		$('#next-question').on('click', function() {
+			currentQuestionIndex += 1;
+			if (currentQuestionIndex < quizData.length) {
+				loadQuestion();
+				return;
+			}
+
+			updateQuizProgress(quizData.length);
+			$('#quiz-question').text('You scored ' + quizScore + ' out of ' + quizData.length + '!');
+			$('#quiz-options').empty();
+			$('#quiz-feedback').removeClass('is-visible').empty();
+			$('#next-question').prop('hidden', true);
+			$('#quiz-restart').prop('hidden', false).trigger('focus');
+		});
+
+		$('#quiz-restart').on('click', function() {
+			currentQuestionIndex = 0;
+			quizScore = 0;
+			$('#quiz-score').text(quizScore);
+			loadQuestion();
+			$('#quiz-question').trigger('focus');
+		});
+
+		$(document).ready(function () {
+			loadQuestion();
+		});
 
 $(function () {
     $('#claim_button').prop('disabled', true);

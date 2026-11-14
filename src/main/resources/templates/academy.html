@@ -27,8 +27,176 @@
     <!-- Custom styles for this template-->
     <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
     <style>
-        .justified {
-            text-align: justify;
+        .academy-hero {
+            background: radial-gradient(circle at 85% 20%, rgba(255, 255, 255, .16), transparent 28%),
+                linear-gradient(120deg, #172b4d, #3156a6 62%, #536fca);
+            border-radius: 14px;
+            color: #fff;
+            overflow: hidden;
+            padding: 28px;
+            position: relative;
+        }
+
+        .academy-kicker, .academy-section-kicker {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .academy-kicker {
+            color: #cbd7ff;
+        }
+
+        .academy-hero h1 {
+            color: #fff;
+            font-size: clamp(1.7rem, 3vw, 2.5rem);
+            font-weight: 800;
+            margin: 8px 0;
+        }
+
+        .academy-hero p {
+            color: #e0e7ff;
+            margin: 0;
+            max-width: 650px;
+        }
+
+        .academy-hero-icon {
+            align-items: center;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            font-size: 38px;
+            height: 88px;
+            justify-content: center;
+            width: 88px;
+        }
+
+        .academy-live-card {
+            border: 0;
+            border-radius: 12px;
+            height: 100%;
+        }
+
+        .academy-live-label {
+            color: #858796;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .academy-live-value {
+            color: #3a3b45;
+            font-size: 19px;
+            font-weight: 800;
+            margin-top: 5px;
+        }
+
+        .academy-live-detail {
+            color: #858796;
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .academy-market-up {
+            color: #16875d;
+        }
+
+        .academy-market-down {
+            color: #c0392b;
+        }
+
+        .academy-section-kicker {
+            color: #4e73df;
+        }
+
+        .academy-lesson {
+            border: 0;
+            border-left: 3px solid #4e73df;
+            border-radius: 9px;
+            height: 100%;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .academy-lesson:hover {
+            box-shadow: 0 .5rem 1.5rem rgba(58, 59, 69, .14) !important;
+            transform: translateY(-2px);
+        }
+
+        .academy-lesson-icon {
+            align-items: center;
+            background: #eef1ff;
+            border-radius: 9px;
+            color: #4e73df;
+            display: inline-flex;
+            height: 38px;
+            justify-content: center;
+            margin-bottom: 12px;
+            width: 38px;
+        }
+
+        .academy-lesson h3 {
+            color: #3a3b45;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .academy-lesson p, .academy-lesson li {
+            color: #6e707e;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .academy-lesson details {
+            border-top: 1px solid #eaecf4;
+            margin-top: 12px;
+            padding-top: 10px;
+        }
+
+        .academy-lesson summary {
+            color: #4e73df;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .academy-lesson details p {
+            margin: 9px 0 0;
+        }
+
+        .academy-refresh-note {
+            color: #858796;
+            font-size: 11px;
+        }
+
+        .academy-halving-progress {
+            background: #eaecf4;
+            border-radius: 99px;
+            height: 6px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .academy-halving-progress span {
+            background: linear-gradient(90deg, #4e73df, #8b65d8);
+            display: block;
+            height: 100%;
+            transition: width .3s ease;
+        }
+
+        .academy-insight {
+            background: #f5f7ff;
+            border: 1px solid #e6eaff;
+            border-radius: 10px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .academy-lesson, .academy-halving-progress span {
+                transition: none;
+            }
         }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
@@ -58,83 +226,210 @@
             <!-- Begin Page Content -->
             <div class="container-fluid">
 
-                <!-- Page Heading -->
-                <div
-                        class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">Academy</h1>
-                    <i class="fas fa-money fa-sm text-white-50"></i>
-                </div>
-
                 <!-- Summary -->
                 <div th:replace="~{fragments/summary}"></div>
 
-                <!-- Content Row -->
-                <div class="row">
-
-                    <!-- Content Column -->
-                    <div class="col-lg-8 mb-4 offset-lg-2 mt-4" id="lessons">
-
-                        <div class="d-flex justify-content-center mb-3">
-                            <small class="text-muted text-center">
-                                <strong>You can drag and drop the lessons to reorder them as you prefer</strong>
-                            </small>
+                <section class="academy-hero mb-4" aria-labelledby="academyTitle">
+                    <div class="row align-items-center">
+                        <div class="col-md-9">
+                            <span class="academy-kicker"><i class="fab fa-bitcoin mr-1"></i> Spiriponzi learning lab</span>
+                            <h1 id="academyTitle">Understand Bitcoin under the hood.</h1>
+                            <p>Go beyond the price: explore blocks, UTXOs, mining and fees, with a live snapshot from the Bitcoin network.</p>
                         </div>
-
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">
-                                    WHAT ARE MEMECOINS?
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="justified">
-                                    Memecoins are a type of cryptocurrency inspired by internet memes and jokes. Examples include Dogecoin (DOGE) and Shiba Inu (SHIB). While they often start as jokes, some memecoins gain real-world value and community support, making them interesting investment opportunities.
-                                    Unlike Bitcoin, memecoins often have an unlimited supply, making them more inflationary. Their value is largely driven by social media hype, celebrity endorsements, and community engagement. Some memecoins, like Dogecoin, have even been used for charity donations and online tipping.
-                                </p>
-                            </div>
+                        <div class="col-md-3 d-none d-md-flex justify-content-md-end">
+                            <div class="academy-hero-icon" aria-hidden="true"><i class="fab fa-bitcoin"></i></div>
                         </div>
-
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">
-                                    WHAT IS BITCOIN?</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="justified">
-                                        Bitcoin is the first decentralized digital currency, created by an unknown person or group using the pseudonym Satoshi Nakamoto in 2009. It allows peer-to-peer transactions without the need for a central authority, using blockchain technology to ensure security and transparency.
-                                        Bitcoin is often referred to as "digital gold" due to its limited supply of 21 million coins. It is mined using a process called proof-of-work (PoW), where powerful computers solve complex mathematical problems to validate transactions and secure the network.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">
-                                    WHAT IS ETHEREUM?</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="justified">
-                                    Ethereum is a decentralized global software platform powered by blockchain technology. It is most commonly known by investors for its native cryptocurrency, ether (ETH), and by developers for its use in blockchain and decentralized finance application development.
-                                    Anyone can use Ethereum—it's designed to be scalable, programmable, secure, and decentralized—to create any secured digital technology. Its token is designed to pay for work done supporting the blockchain, but participants can also use it to pay for tangible goods and services if accepted.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">
-                                    BLOCKCHAIN AND DECENTRALIZATION</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="justified">
-                                    In blockchain, decentralization refers to the transfer of control and decision-making from a centralized entity (individual, organization, or group thereof) to a distributed network. Decentralized networks strive to reduce the level of trust that participants must place in one another, and deter their ability to exert authority or control over one another in ways that degrade the functionality of the network.
-                                    Decentralization is not a new concept. When building a technology solution, three primary network architectures are typically considered: centralized, distributed, and decentralized. While blockchain technologies often make use of decentralized networks, a blockchain application itself cannot be categorized simply as being decentralized or not. Rather, decentralization is a sliding scale and should be applied to all aspects of a blockchain application. By decentralizing the management of and access to resources in an application, greater and fairer service can be achieved. Decentralization typically has some tradeoffs such as lower transaction throughput, but ideally, the tradeoffs are worth the improved stability and service levels they produce.
-                                </p>
-                            </div>
-                        </div>
-
                     </div>
-                </div>
+                </section>
+
+                <section class="mb-4" aria-labelledby="networkSnapshotTitle">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+                        <div>
+                            <div class="academy-section-kicker">Live network snapshot</div>
+                            <h2 class="h5 font-weight-bold text-gray-800 mb-0" id="networkSnapshotTitle">Bitcoin right now</h2>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary mt-2 mt-sm-0" id="refreshAcademy" type="button">
+                            <i class="fas fa-sync-alt mr-1" aria-hidden="true"></i>Refresh data &amp; insight
+                        </button>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6 col-xl-3 mb-3">
+                            <div class="card shadow-sm academy-live-card">
+                                <div class="card-body">
+                                    <div class="academy-live-label"><i class="fas fa-dollar-sign mr-1" aria-hidden="true"></i>BTC price</div>
+                                    <div class="academy-live-value" id="academyBtcPrice">Loading...</div>
+                                    <div class="academy-live-detail" id="academyBtcChange">24h change | loading</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3 mb-3">
+                            <div class="card shadow-sm academy-live-card">
+                                <div class="card-body">
+                                    <div class="academy-live-label"><i class="fas fa-chart-line mr-1" aria-hidden="true"></i>Market cap</div>
+                                    <div class="academy-live-value" id="academyBtcMarketCap">Loading...</div>
+                                    <div class="academy-live-detail">Approximate circulating market value</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3 mb-3">
+                            <div class="card shadow-sm academy-live-card">
+                                <div class="card-body">
+                                    <div class="academy-live-label"><i class="fas fa-cubes mr-1" aria-hidden="true"></i>Latest block</div>
+                                    <div class="academy-live-value" id="academyBlockHeight">Loading...</div>
+                                    <div class="academy-live-detail" id="academyHalvingInfo">Height | fetching network tip</div>
+                                    <div class="academy-halving-progress" role="progressbar" aria-label="Progress through current Bitcoin halving epoch" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="academyHalvingProgress">
+                                        <span id="academyHalvingBar"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3 mb-3">
+                            <div class="card shadow-sm academy-live-card">
+                                <div class="card-body">
+                                    <div class="academy-live-label"><i class="fas fa-tachometer-alt mr-1" aria-hidden="true"></i>Fee estimate</div>
+                                    <div class="academy-live-value" id="academyFeeEstimate">Loading...</div>
+                                    <div class="academy-live-detail">sat/vB | fastest target from mempool.space</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center">
+                        <span class="academy-refresh-note" id="academyDataStatus" role="status" aria-live="polite">Fetching live data from public APIs...</span>
+                        <span class="academy-refresh-note">
+                            Sources:
+                            <a href="https://www.coingecko.com/en/coins/bitcoin" target="_blank" rel="noopener noreferrer">CoinGecko</a>
+                            | <a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a>
+                        </span>
+                    </div>
+                </section>
+
+                <section class="academy-insight p-3 mb-4" aria-labelledby="academyInsightTitle">
+                    <div class="d-flex align-items-start">
+                        <div class="academy-lesson-icon flex-shrink-0 mb-0 mr-3"><i class="fas fa-lightbulb" aria-hidden="true"></i></div>
+                        <div>
+                            <div class="academy-section-kicker" id="academyInsightTitle">Field note</div>
+                            <p class="mb-0 mt-1 text-gray-700" id="academyInsight" aria-live="polite">Loading a Bitcoin concept...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-4" aria-labelledby="academyLessonsTitle">
+                    <div class="d-flex flex-wrap align-items-end justify-content-between mb-3">
+                        <div>
+                            <div class="academy-section-kicker">Technical guide</div>
+                            <h2 class="h5 font-weight-bold text-gray-800 mb-0" id="academyLessonsTitle">Bitcoin building blocks</h2>
+                        </div>
+                        <small class="academy-refresh-note mt-2">Drag cards to arrange your reading path</small>
+                    </div>
+
+                    <div class="row" id="lessons">
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-link" aria-hidden="true"></i></span>
+                                    <h3>Blocks, hashes &amp; Proof of Work</h3>
+                                    <p>Transactions are grouped into blocks. Each block commits to its contents and its parent, forming a chain that is expensive to rewrite.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>Miners vary a nonce and hash a block header with double SHA-256 until the result is below the network's difficulty target. Nodes independently validate the proof and every consensus rule.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-random" aria-hidden="true"></i></span>
+                                    <h3>UTXOs &amp; transaction flow</h3>
+                                    <p>Bitcoin does not keep a simple account balance. Wallets track unspent transaction outputs (UTXOs) that can be used as inputs to a new transaction.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>An output is identified by its transaction ID and output index (outpoint). Inputs spend previous outputs; new outputs assign value to spending conditions. The difference between inputs and outputs is the fee.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></span>
+                                    <h3>Mempool, fees &amp; confirmation</h3>
+                                    <p>Unconfirmed transactions wait in node mempools. Miners generally prioritize transactions by fee rate, measured in satoshis per virtual byte (sat/vB).</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>A fee estimator is a snapshot, not a promise: demand changes, nodes can have different mempools, and confirmation time is uncertain. A block confirmation means the transaction is included in that block.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-code-branch" aria-hidden="true"></i></span>
+                                    <h3>Nodes &amp; consensus</h3>
+                                    <p>Full nodes download and verify blocks and transactions against Bitcoin's rules. Mining proposes blocks; node validation decides whether those blocks are acceptable.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>Nodes follow the valid chain with the most accumulated proof of work. They do not blindly trust a miner: invalid transactions or blocks are rejected, even if they contain substantial work.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-cut" aria-hidden="true"></i></span>
+                                    <h3>Halving &amp; issuance</h3>
+                                    <p>The block subsidy decreases by half every 210,000 blocks. This changes new issuance; it does not guarantee a particular market price or outcome.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>Subsidy is determined by block height using integer satoshis. Transaction fees are separate and are also collected by the miner. The subsidy eventually rounds down to zero.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-key" aria-hidden="true"></i></span>
+                                    <h3>Keys, scripts &amp; self-custody</h3>
+                                    <p>A private key authorizes spending. Bitcoin outputs use locking conditions (scripts); a wallet manages keys and helps create transactions that satisfy those conditions.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>A seed phrase can regenerate wallet keys and must be kept offline and private. A public address is not a password; sharing a seed phrase or signing an unknown transaction can put funds at risk.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fas fa-coins" aria-hidden="true"></i></span>
+                                    <h3>Bitcoin vs. tokens &amp; memecoins</h3>
+                                    <p>Bitcoin has its own consensus network and a maximum issuance of 21 million BTC. Other tokens can use different chains, contracts, governance and supply rules.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>"Memecoin" describes a broad category, not one shared token design. Supply, upgrade controls, liquidity and security depend on the specific project; check its contract and chain rather than assuming a common rule.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="col-md-6 col-xl-4 mb-3 academy-lesson-item">
+                            <article class="card shadow-sm academy-lesson">
+                                <div class="card-body">
+                                    <span class="academy-lesson-icon"><i class="fab fa-ethereum" aria-hidden="true"></i></span>
+                                    <h3>How Ethereum differs</h3>
+                                    <p>Ethereum is a programmable blockchain whose execution layer runs smart contracts. Ether pays for computation and helps secure the network through proof of stake.</p>
+                                    <details>
+                                        <summary>Technical deep dive</summary>
+                                        <p>Bitcoin Script is intentionally limited, while Ethereum's virtual machine executes general-purpose smart-contract bytecode. Both systems have tradeoffs in design, trust assumptions and application scope.</p>
+                                    </details>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </section>
 
             </div>
             <!-- /.container-fluid -->
@@ -173,10 +468,165 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
 <script>
-		new Sortable(document.getElementById('lessons'), {
-			animation: 150,
-			ghostClass: 'sortable-ghost'
-		});
+    const academyInsights = [
+        "A Bitcoin transaction spends specific UTXOs. Your wallet's displayed balance is a convenient view assembled from those outputs.",
+        "A fee rate is measured in sat/vB, not simply in BTC. A larger transaction can pay a higher total fee at the same rate.",
+        "A block explorer is useful for inspection, but running your own node lets you verify chain data independently.",
+        "The block subsidy is encoded by block height. Transaction fees are separate and may become a larger part of miner revenue over time.",
+        "A confirmation count describes how many blocks build on top of a transaction's block; it is not an absolute guarantee against reorganization.",
+        "A seed phrase controls wallet recovery. Legitimate support teams do not need you to reveal it."
+    ];
+    let academyInsightIndex = 0;
+    let academyRefreshInProgress = false;
+
+    const academyUsdFormatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 2
+    });
+    const academyCompactUsdFormatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        notation: 'compact',
+        maximumFractionDigits: 2
+    });
+
+    async function fetchAcademyJson(url) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 10000);
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            if (!response.ok) {
+                throw new Error('Public API returned HTTP ' + response.status);
+            }
+            return await response.json();
+        } finally {
+            window.clearTimeout(timeout);
+        }
+    }
+
+    async function loadAcademyMarket() {
+        const marketData = await fetchAcademyJson(
+            'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&price_change_percentage=24h'
+        );
+        const bitcoin = Array.isArray(marketData) ? marketData[0] : null;
+        if (!bitcoin || !Number.isFinite(bitcoin.current_price) || !Number.isFinite(bitcoin.market_cap)) {
+            throw new Error('Bitcoin market data is incomplete.');
+        }
+
+        document.getElementById('academyBtcPrice').textContent = academyUsdFormatter.format(bitcoin.current_price);
+        document.getElementById('academyBtcMarketCap').textContent = academyCompactUsdFormatter.format(bitcoin.market_cap);
+
+        const change = bitcoin.price_change_percentage_24h;
+        const changeElement = document.getElementById('academyBtcChange');
+        if (Number.isFinite(change)) {
+            changeElement.textContent = (change > 0 ? '+' : '') + change.toFixed(2) + '% over 24h';
+            changeElement.classList.toggle('academy-market-up', change >= 0);
+            changeElement.classList.toggle('academy-market-down', change < 0);
+        } else {
+            changeElement.textContent = '24h change unavailable';
+            changeElement.classList.remove('academy-market-up', 'academy-market-down');
+        }
+    }
+
+    async function loadAcademyBlockHeight() {
+        const response = await fetchAcademyJson('https://mempool.space/api/blocks/tip/height');
+        const height = Number(response);
+        if (!Number.isSafeInteger(height) || height < 0) {
+            throw new Error('Bitcoin block height is invalid.');
+        }
+
+        const halvingInterval = 210000;
+        const nextHalvingHeight = (Math.floor(height / halvingInterval) + 1) * halvingInterval;
+        const currentEpochStart = nextHalvingHeight - halvingInterval;
+        const progress = ((height - currentEpochStart) / halvingInterval) * 100;
+        document.getElementById('academyBlockHeight').textContent = height.toLocaleString('en-US');
+        document.getElementById('academyHalvingInfo').textContent =
+            (nextHalvingHeight - height).toLocaleString('en-US') + ' blocks to next subsidy halving*';
+        document.getElementById('academyHalvingBar').style.width = Math.max(0, Math.min(100, progress)) + '%';
+        document.getElementById('academyHalvingProgress').setAttribute('aria-valuenow', progress.toFixed(1));
+    }
+
+    async function loadAcademyFees() {
+        const fees = await fetchAcademyJson('https://mempool.space/api/v1/fees/recommended');
+        if (!Number.isFinite(fees.fastestFee)) {
+            throw new Error('Bitcoin fee estimate is unavailable.');
+        }
+        document.getElementById('academyFeeEstimate').textContent = fees.fastestFee.toLocaleString('en-US');
+    }
+
+    function showAcademyApiError(selectors, message) {
+        selectors.forEach(selector => {
+            const element = document.querySelector(selector);
+            element.textContent = 'Unavailable';
+            element.classList.remove('academy-market-up', 'academy-market-down');
+        });
+        if (message) {
+            console.warn('Academy live data unavailable:', message);
+        }
+    }
+
+    async function refreshAcademyData() {
+        if (academyRefreshInProgress) {
+            return;
+        }
+        academyRefreshInProgress = true;
+        const button = document.getElementById('refreshAcademy');
+        const status = document.getElementById('academyDataStatus');
+        button.disabled = true;
+        button.querySelector('i').classList.add('fa-spin');
+        status.textContent = 'Refreshing public market and network data...';
+
+        const results = await Promise.allSettled([
+            loadAcademyMarket(),
+            loadAcademyBlockHeight(),
+            loadAcademyFees()
+        ]);
+        const labels = ['market data', 'block height', 'fee estimate'];
+        const failed = [];
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                failed.push(labels[index]);
+                if (index === 0) {
+                    showAcademyApiError(
+                        ['#academyBtcPrice', '#academyBtcMarketCap', '#academyBtcChange'],
+                        result.reason
+                    );
+                } else if (index === 1) {
+                    showAcademyApiError(['#academyBlockHeight', '#academyHalvingInfo'], result.reason);
+                    document.getElementById('academyHalvingBar').style.width = '0';
+                } else {
+                    showAcademyApiError(['#academyFeeEstimate'], result.reason);
+                }
+            }
+        });
+
+        const updatedAt = new Date().toLocaleTimeString();
+        status.textContent = failed.length
+            ? 'Updated ' + updatedAt + ' | unavailable: ' + failed.join(', ')
+            : 'All data updated at ' + updatedAt + ' | *halving block is a protocol estimate';
+        button.disabled = false;
+        button.querySelector('i').classList.remove('fa-spin');
+        academyRefreshInProgress = false;
+    }
+
+    document.getElementById('refreshAcademy').addEventListener('click', function() {
+        academyInsightIndex = (academyInsightIndex + 1) % academyInsights.length;
+        document.getElementById('academyInsight').textContent = academyInsights[academyInsightIndex];
+        refreshAcademyData();
+    });
+
+    document.getElementById('academyInsight').textContent = academyInsights[academyInsightIndex];
+    refreshAcademyData();
+    window.setInterval(refreshAcademyData, 300000);
+
+    if (window.Sortable) {
+        new Sortable(document.getElementById('lessons'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            draggable: '.academy-lesson-item'
+        });
+    }
 </script>
 </body>
 
