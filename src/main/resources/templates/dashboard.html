@@ -31,49 +31,161 @@
 	text-align: justify;
 }
 
-    /* Container per le informazioni delle criptovalute */
-    .crypto-container {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        margin-bottom: 15px;
-    }
+	.crypto-overview {
+		background: linear-gradient(120deg, #f3f6ff, #f5fbff);
+		border: 1px solid #e8edfb;
+		border-radius: 12px;
+		padding: 16px;
+		margin-bottom: 14px;
+	}
 
-    /* Icona delle criptovalute */
-    .crypto-icon {
-        width: 30px;
-        height: 30px;
-        margin-right: 15px;
-    }
+	.crypto-overview-label, .crypto-volume-label {
+		color: #858796;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: .06em;
+		text-transform: uppercase;
+	}
 
-    /* Stile per i prezzi */
-    #btc-price, #eth-price {
-        color: #333;
-    }
+	.crypto-sentiment {
+		color: #3a3b45;
+		font-size: 18px;
+		font-weight: 700;
+		margin-top: 3px;
+	}
 
-    .crypto-container strong {
-        font-size: 18px;
-        color: #444;
-    }
+	.crypto-sentiment-track {
+		background: linear-gradient(90deg, #e74a3b, #f6c23e 50%, #1cc88a);
+		border-radius: 99px;
+		height: 7px;
+		margin-top: 12px;
+		position: relative;
+	}
 
-    .crypto-container span {
-        font-size: 20px;
-        font-weight: bold;
-        color: #4CAF50; /* Colore verde per i prezzi */
-    }
+	.crypto-sentiment-marker {
+		background: #fff;
+		border: 2px solid #4e73df;
+		border-radius: 50%;
+		height: 15px;
+		left: 0;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 15px;
+	}
 
-    /* Responsive: se la pagina è più piccola, le icone si adattano */
-    @media (max-width: 768px) {
-        .crypto-icon {
-            width: 25px;
-            height: 25px;
-        }
+	.crypto-market-list {
+		display: flex;
+		flex-direction: column;
+	}
 
-        .crypto-container {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-    }
+	.crypto-market-row {
+		align-items: center;
+		border-bottom: 1px solid #eaecf4;
+		display: grid;
+		gap: 8px;
+		grid-template-columns: minmax(0, 1.4fr) minmax(76px, 1fr) minmax(65px, .8fr) 58px;
+		padding: 12px 0;
+	}
+
+	.crypto-market-row:last-child {
+		border-bottom: 0;
+	}
+
+	.crypto-asset {
+		align-items: center;
+		display: flex;
+		min-width: 0;
+	}
+
+	.crypto-icon {
+		border-radius: 50%;
+		height: 30px;
+		margin-right: 9px;
+		width: 30px;
+	}
+
+	.crypto-asset-name {
+		color: #3a3b45;
+		font-size: 13px;
+		font-weight: 700;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.crypto-asset-symbol {
+		color: #858796;
+		font-size: 10px;
+		font-weight: 700;
+		margin-left: 5px;
+		text-transform: uppercase;
+	}
+
+	.crypto-price {
+		color: #3a3b45;
+		font-size: 12px;
+		font-weight: 700;
+		white-space: nowrap;
+	}
+
+	.crypto-change {
+		border-radius: 5px;
+		font-size: 11px;
+		font-weight: 700;
+		padding: 4px 6px;
+		text-align: center;
+		white-space: nowrap;
+	}
+
+	.crypto-change.is-positive {
+		background: #e6f7ef;
+		color: #16875d;
+	}
+
+	.crypto-change.is-negative {
+		background: #fdecea;
+		color: #c0392b;
+	}
+
+	.crypto-volume {
+		color: #858796;
+		font-size: 11px;
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	.crypto-sparkline {
+		height: 24px;
+		width: 58px;
+	}
+
+	.crypto-sparkline polyline {
+		fill: none;
+		stroke: #1cc88a;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 2;
+	}
+
+	.crypto-sparkline.is-negative polyline {
+		stroke: #e74a3b;
+	}
+
+	.crypto-market-status {
+		color: #858796;
+		font-size: 11px;
+	}
+
+	@media (max-width: 576px) {
+		.crypto-market-row {
+			grid-template-columns: minmax(0, 1.3fr) minmax(72px, 1fr) 62px;
+		}
+
+		.crypto-volume, .crypto-sparkline {
+			display: none;
+		}
+	}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 	crossorigin="anonymous"></script>
@@ -229,33 +341,25 @@
 								</div>
 							</div>
 							<div class="card shadow mb-4">
-								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">Real-Time Cryptocurrency Prices</h6>
+								<div class="card-header py-3 d-flex align-items-center justify-content-between">
+									<h6 class="m-0 font-weight-bold text-primary">Crypto market</h6>
+									<span class="crypto-market-status" id="cryptoUpdated">Loading market data...</span>
 								</div>
 								<div class="card-body">
-									<!-- Sezione Bitcoin -->
-									<div id="btc-price" style="font-size: 20px; margin-bottom: 10px;">
-										<div class="crypto-container">
-											<img src="img/bitcoin-btc-logo.png" alt="Bitcoin" class="crypto-icon" />
-											<strong>BTC Price:</strong> &nbsp;$<span id="btcValue">Loading...</span>
+									<div class="crypto-overview" aria-live="polite">
+										<div class="crypto-overview-label">Market sentiment · Fear &amp; Greed</div>
+										<div class="crypto-sentiment" id="cryptoSentiment">Loading sentiment...</div>
+										<div class="crypto-sentiment-track" role="meter" aria-label="Crypto market sentiment" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="cryptoSentimentTrack">
+											<span class="crypto-sentiment-marker" id="cryptoSentimentMarker"></span>
 										</div>
 									</div>
-
-									<!-- Sezione Ethereum -->
-									<div id="eth-price" style="font-size: 20px;">
-										<div class="crypto-container">
-											<img src="img/ethereum-eth-logo.png" alt="Ethereum" class="crypto-icon" />
-											<strong>ETH Price:</strong> &nbsp;$<span id="ethValue">Loading...</span>
-										</div>
+									<div class="crypto-market-row crypto-overview-label" aria-hidden="true">
+										<span>Asset</span><span>Price (USD)</span><span>24h</span><span class="text-right">Volume</span>
 									</div>
-
-									<!-- Sezione Solana -->
-									<div id="solana-price" style="font-size: 20px;">
-										<div class="crypto-container">
-											<img src="img/tether-usdt-logo.png" alt="Tether" class="crypto-icon" />
-											<strong>USDT Price:</strong> &nbsp;$<span id="tetherValue">Loading...</span>
-										</div>
+									<div class="crypto-market-list" id="cryptoMarketList" aria-live="polite">
+										<div class="crypto-market-status py-3">Fetching prices and 7-day trends...</div>
 									</div>
+									<div class="crypto-market-status mt-2">Prices and 24h volume · mini charts show 7-day trend</div>
 								</div>
 							</div>
 						</div>
@@ -434,36 +538,138 @@ function startClaimCountdown(remainingSeconds) {
 
 $(document).ready(function () {
 
-	 // Funzione per recuperare i dati delle criptovalute
-        function getCryptoPrices() {
-            $.ajax({
-                url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd',
-                type: 'GET',
-                success: function(data) {
-                    const formatter = new Intl.NumberFormat('it-IT', {
-                style: 'decimal',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+	 const cryptoPriceFormatter = new Intl.NumberFormat('en-US', {
+	     style: 'currency',
+	     currency: 'USD',
+	     maximumFractionDigits: 2
+	 });
+	 const cryptoCompactFormatter = new Intl.NumberFormat('en-US', {
+	     style: 'currency',
+	     currency: 'USD',
+	     notation: 'compact',
+	     maximumFractionDigits: 1
+	 });
+	 const cryptoMarketUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,tether,binancecoin,ripple&order=market_cap_desc&sparkline=true&price_change_percentage=24h';
 
-            // Formatto e aggiorno i valori
-            $('#btcValue').text(formatter.format(data.bitcoin.usd));
-            $('#ethValue').text(formatter.format(data.ethereum.usd));
-            $('#tetherValue').text(formatter.format(data.tether.usd));
-                },
-                error: function() {
-                    $('#btcValue').text('Error');
-                    $('#ethValue').text('Error');
-                    $('#tetherValue').text('Error');
-                }
-            });
-        }
+	 function createCryptoSparkline(prices, isNegative) {
+	     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+	     svg.setAttribute('viewBox', '0 0 58 24');
+	     svg.setAttribute('class', 'crypto-sparkline' + (isNegative ? ' is-negative' : ''));
+	     svg.setAttribute('role', 'img');
+	     svg.setAttribute('aria-label', '7-day price trend');
+	     if (!Array.isArray(prices) || prices.length < 2) {
+	         return svg;
+	     }
 
-        // Richiama la funzione per ottenere i prezzi
-        getCryptoPrices();
+	     const values = prices.filter(Number.isFinite);
+	     const min = Math.min(...values);
+	     const range = Math.max(...values) - min || 1;
+	     const points = values.map((value, index) => {
+	         const x = (index / (values.length - 1)) * 56 + 1;
+	         const y = 22 - ((value - min) / range) * 20;
+	         return x.toFixed(1) + ',' + y.toFixed(1);
+	     }).join(' ');
+	     const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+	     line.setAttribute('points', points);
+	     svg.appendChild(line);
+	     return svg;
+	 }
 
-        // Aggiorna i prezzi ogni 60 secondi
-        setInterval(getCryptoPrices, 60000);
+	 function renderCryptoMarkets(coins) {
+	     const list = document.getElementById('cryptoMarketList');
+	     list.replaceChildren();
+
+	     coins.forEach(coin => {
+	         const row = document.createElement('div');
+	         row.className = 'crypto-market-row';
+
+	         const asset = document.createElement('div');
+	         asset.className = 'crypto-asset';
+	         const icon = document.createElement('img');
+	         icon.className = 'crypto-icon';
+	         icon.src = coin.image;
+	         icon.alt = '';
+	         icon.loading = 'lazy';
+	         const name = document.createElement('span');
+	         name.className = 'crypto-asset-name';
+	         name.textContent = coin.name;
+	         const symbol = document.createElement('span');
+	         symbol.className = 'crypto-asset-symbol';
+	         symbol.textContent = coin.symbol;
+	         name.appendChild(symbol);
+	         asset.append(icon, name);
+
+	         const price = document.createElement('span');
+	         price.className = 'crypto-price';
+	         price.textContent = cryptoPriceFormatter.format(coin.current_price);
+
+	         const change = document.createElement('span');
+	         const percent = coin.price_change_percentage_24h;
+	         const isNegative = Number.isFinite(percent) && percent < 0;
+	         change.className = 'crypto-change ' + (isNegative ? 'is-negative' : 'is-positive');
+	         change.textContent = Number.isFinite(percent)
+	             ? (percent > 0 ? '+' : '') + percent.toFixed(2) + '%'
+	             : '—';
+
+	         const volume = document.createElement('span');
+	         volume.className = 'crypto-volume';
+	         volume.textContent = Number.isFinite(coin.total_volume)
+	             ? cryptoCompactFormatter.format(coin.total_volume)
+	             : '—';
+	         volume.setAttribute('aria-label', '24-hour trading volume');
+
+	         row.append(asset, price, change, volume,
+	             createCryptoSparkline(coin.sparkline_in_7d?.price, isNegative));
+	         list.appendChild(row);
+	     });
+	 }
+
+	 function getCryptoPrices() {
+	     $.ajax({
+	         url: cryptoMarketUrl,
+	         type: 'GET',
+	         success: function(coins) {
+	             if (!Array.isArray(coins) || coins.length === 0) {
+	                 $('#cryptoMarketList').text('Market data is currently unavailable.');
+	                 $('#cryptoUpdated').text('No market data');
+	                 return;
+	             }
+	             renderCryptoMarkets(coins);
+	             $('#cryptoUpdated').text('Updated ' + new Date().toLocaleTimeString());
+	         },
+	         error: function() {
+	             $('#cryptoMarketList').text('Unable to load prices right now. Please try again later.');
+	             $('#cryptoUpdated').text('Market unavailable');
+	         }
+	     });
+	 }
+
+	 function getCryptoSentiment() {
+	     $.ajax({
+	         url: 'https://api.alternative.me/fng/?limit=1&format=json',
+	         type: 'GET',
+	         success: function(response) {
+	             const reading = response?.data?.[0];
+	             const value = Number(reading?.value);
+	             if (!Number.isFinite(value)) {
+	                 $('#cryptoSentiment').text('Sentiment unavailable');
+	                 return;
+	             }
+	             const classification = String(reading.value_classification || 'Market sentiment');
+	             $('#cryptoSentiment').text(classification + ' · ' + value + '/100');
+	             $('#cryptoSentimentTrack').attr('aria-valuenow', value);
+	             $('#cryptoSentimentMarker').css('left', Math.max(0, Math.min(100, value)) + '%');
+	         },
+	         error: function() {
+	             $('#cryptoSentiment').text('Sentiment data unavailable');
+	         }
+	     });
+	 }
+
+	 getCryptoPrices();
+	 getCryptoSentiment();
+	 setInterval(getCryptoPrices, 120000);
+	 setInterval(getCryptoSentiment, 900000);
 
 	$('#claimForm').submit(function(event) {
 		register(event);
