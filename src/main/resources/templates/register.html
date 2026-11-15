@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Spiriponzi - Registration</title>
 <link rel="icon" type="image/svg" href="img/favicon.ico">
 <link th:href="@{vendor/fontawesome-free/css/all.min.css}"
@@ -12,170 +13,110 @@
 
 <!-- Custom styles for this template-->
 <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
-	<style>
-		body, html {
-			margin: 0;
-			padding: 0;
-			height: 100%;
-		}
-
-		.container {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			min-height: 100vh;
-			padding-top: 80px;
-			box-sizing: border-box;
-		}
-
-        .row.justify-content-center {
-            flex: 1;
-        }
-
-		.navbar {
-			background-color: #4e73df;
-			padding: 0.75rem 1rem;
-			color: white;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			position: fixed;
-			top: 0;
-			width: 100%;
-			z-index: 1030;
-			height: 80px;
-			box-sizing: border-box;
-		}
-
-		.navbar-content {
-			display: flex;
-			align-items: center;
-			gap: 2rem;
-			font-weight: bold;
-		}
-
-		.navbar a {
-			color: white;
-			text-decoration: none;
-			transition: color 0.2s;
-		}
-
-		.navbar a:hover {
-			color: #d1d1d1;
-		}
-
-		@media (max-width: 576px) {
-			.navbar-content {
-				gap: 1rem;
-				font-size: 0.875rem;
-			}
-		}
-	</style>
+<link th:href="@{/css/public-pages.css}" rel="stylesheet" />
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
         crossorigin="anonymous"></script>
 </head>
 <body class="bg-gradient-primary">
 
-	<!-- Navbar -->
-	<div class="navbar">
-		<div class="navbar-content">
-			<div class="sidebar-brand-icon">
-				<i class="fas fa-solid fa-coins"></i> &nbsp;Spiriponzi
+	<nav class="public-navbar" aria-label="Main navigation">
+		<div class="public-navbar-content">
+			<a class="public-brand" th:href="@{/login}" aria-label="Spiriponzi home">
+				<img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
+				<span class="public-brand-copy">
+					<span class="public-brand-name">Spiriponzi</span>
+					<span class="public-brand-tagline">Sicilian slang for money</span>
+				</span>
+			</a>
+			<div class="public-nav-links">
+				<a th:href="@{/faq}">FAQ</a>
+				<a th:href="@{/terms}">Terms</a>
+				<a th:href="@{/login}">Login</a>
+				<a th:href="@{/register}" aria-current="page">Register</a>
 			</div>
-			<a th:href="@{/login}">Login</a>
-			<a th:href="@{/faq}">How it works?</a>
 		</div>
-	</div>
+	</nav>
 
-	<div class="container">
-		<div class="row justify-content-center">
-
-			<div class="col-xl-10 col-lg-12 col-md-9">
-
-				<div class="card o-hidden border-0 shadow-lg my-5">
-					<div class="card-body p-0">
-						<div class="row">
-							<div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-							<div class="col-lg-6">
-								<div class="p-5">
-									<div th:if="${param.success}">
-										<div class="alert alert-info">You've successfully
-											registered to our app!</div>
-									</div>
-									<div class="text-center">
-										<h1 class="h4 text-gray-900 mb-4">Registration</h1>
-									</div>
-									<form method="post" role="form" th:action="@{/register/save}"
-										th:object="${user}">
-										<div class="form-group mb-3">
-											<label class="form-label">Email *</label> <input
-												class="form-control" id="email" name="email"
-												placeholder="Enter email address" th:field="*{email}"
-												type="email" />
-											<p th:errors="*{email}" class="text-danger"
-												th:if="${#fields.hasErrors('email')}"></p>
-										</div>
-										<div class="form-group mb-3">
-											<label class="form-label">Password *</label> <input
-												class="form-control" id="password" name="password"
-												placeholder="Enter password" th:field="*{password}"
-												type="password" />
-											<p th:errors="*{password}" class="text-danger"
-												th:if="${#fields.hasErrors('password')}"></p>
-										</div>
-
-										<div class="form-group mb-3">
-											<label class="form-label">Confirm password *</label> <input
-												class="form-control" id="password" name="password"
-												placeholder="Confirm password" th:field="*{confirmPassword}"
-												type="password" />
-											<p th:errors="*{password}" class="text-danger"
-												th:if="${#fields.hasErrors('password')}"></p>
-										</div>
-
-										<div class="form-group mb-3">
-											<label class="form-label">Referral code (optional)</label>
-											<input class="form-control" id="referralCode" name="referralCode"
-												placeholder="Enter a friend's referral code"
-												th:field="*{referralCode}" />
-											<p th:errors="*{referralCode}" class="text-danger"
-												th:if="${#fields.hasErrors('referralCode')}"></p>
-										</div>
-
-										<div class="form-group mb-3">
-											<input id="terms" type="checkbox" th:field="*{terms}" /> <label
-												class="control-label small" for="terms"> I agree
-												with the <a th:href="@{/terms}" target="_blank" rel="noopener noreferrer">terms and conditions</a> for
-												Registration.
-											</label>
-											<p class="error-message"
-												th:each="error : ${#fields.errors('terms')}"
-												th:text="${error}">Validation error</p>
-										</div>
-
-										<div class="mb-3">
-											<button class="btn btn-primary" type="submit">Register</button>
-										</div>
-									</form>
-									<hr>
-									<div class="text-center">
-										<span class="small">Already registered? <a href="/"
-												th:href="@{/login}">Login here</a></span>
-									</div>
-									<div class="text-center">
-										<a class="small" th:href="@{/recover-password}">Forgot
-											Password?</a>
-									</div>
-								</div>
+	<main class="public-page registration-page">
+		<div class="card registration-card shadow-lg">
+			<div class="row no-gutters">
+				<div class="col-lg-5">
+					<aside class="registration-aside">
+						<img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
+						<h2>A little history.<br>A little spiriponzi.</h2>
+						<p>Named with a wink to Charles Ponzi and a Sicilian word for money. Join the community and start earning points.</p>
+					</aside>
+				</div>
+				<div class="col-lg-7">
+					<div class="registration-form-panel">
+						<div th:if="${param.success}">
+							<div class="alert alert-info">You've successfully registered to our app!</div>
+						</div>
+						<div class="text-center">
+							<h1 class="h4 text-gray-900 font-weight-bold mb-2">Create your account</h1>
+							<p class="text-muted mb-4">It only takes a minute to get started.</p>
+						</div>
+						<form method="post" role="form" th:action="@{/register/save}" th:object="${user}">
+							<div class="form-group mb-3">
+								<label class="form-label" for="email">Email *</label>
+								<input class="form-control" id="email" name="email"
+									placeholder="Enter email address" th:field="*{email}" type="email" />
+								<p th:errors="*{email}" class="text-danger form-error"
+									th:if="${#fields.hasErrors('email')}"></p>
 							</div>
+							<div class="form-group mb-3">
+								<label class="form-label" for="password">Password *</label>
+								<input class="form-control" id="password" name="password"
+									placeholder="Enter password" th:field="*{password}" type="password" />
+								<p th:errors="*{password}" class="text-danger form-error"
+									th:if="${#fields.hasErrors('password')}"></p>
+							</div>
+
+							<div class="form-group mb-3">
+								<label class="form-label" for="confirmPassword">Confirm password *</label>
+								<input class="form-control" id="confirmPassword" name="confirmPassword"
+									placeholder="Confirm password" th:field="*{confirmPassword}" type="password" />
+								<p th:errors="*{confirmPassword}" class="text-danger form-error"
+									th:if="${#fields.hasErrors('confirmPassword')}"></p>
+							</div>
+
+							<div class="form-group mb-3">
+								<label class="form-label" for="referralCode">Referral code (optional)</label>
+								<input class="form-control" id="referralCode" name="referralCode"
+									placeholder="Enter a friend's referral code" th:field="*{referralCode}" />
+								<p th:errors="*{referralCode}" class="text-danger form-error"
+									th:if="${#fields.hasErrors('referralCode')}"></p>
+							</div>
+
+							<div class="form-group mb-3">
+								<div class="terms-consent">
+									<input id="terms" type="checkbox" th:field="*{terms}" />
+									<label class="control-label small" for="terms">I agree with the
+										<a th:href="@{/terms}" target="_blank" rel="noopener noreferrer">terms and conditions</a>
+										to create an account.
+									</label>
+								</div>
+								<p class="error-message form-error"
+									th:each="error : ${#fields.errors('terms')}"
+									th:text="${error}">Validation error</p>
+							</div>
+
+							<div class="mb-3">
+								<button class="btn btn-primary btn-block btn-register" type="submit">Create account</button>
+							</div>
+						</form>
+						<hr>
+						<div class="text-center">
+							<span class="small">Already registered? <a th:href="@{/login}">Login here</a></span>
+						</div>
+						<div class="text-center mt-2">
+							<a class="small" th:href="@{/recover-password}">Forgot password?</a>
 						</div>
 					</div>
 				</div>
-
 			</div>
-
 		</div>
-	</div>
+	</main>
 	<!-- Bootstrap core JavaScript-->
 	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
 

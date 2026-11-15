@@ -14,121 +14,83 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
     <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
-
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        .container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding-top: 60px;
-        }
-
-        .row.justify-content-center {
-            flex: 1;
-        }
-
-        .navbar {
-            background-color: #4e73df;
-            padding: 0.75rem 1rem;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1030;
-        }
-
-        .navbar-content {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            font-weight: bold;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .navbar a:hover {
-            color: #d1d1d1;
-        }
-    </style>
+    <link th:href="@{/css/public-pages.css}" rel="stylesheet" />
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
         crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gradient-primary">
-
-<!-- Navbar -->
-<div class="navbar">
-    <div class="navbar-content">
-        <div class="sidebar-brand-icon">
-            <i class="fas fa-solid fa-coins"></i> &nbsp;Spiriponzi
-        </div>
-        <a th:href="@{/login}">Login</a>
-        <a th:href="@{/register}">Registration</a>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Outer Row -->
-    <div class="row justify-content-center">
-        <div class="col-xl-10 col-lg-12 col-md-9">
-            <div class="card o-hidden border-0 shadow-lg my-5">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h2 class="h4 text-primary font-weight-bold">Frequently Asked Questions</h2>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold text-dark">💰 What is a crypto faucet?</h5>
-                        <p>A crypto faucet is a website that gives out small amounts of cryptocurrency for free, typically in exchange for completing simple tasks or captcha verifications.</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold text-dark">🔒 Is Spiriponzi safe?</h5>
-                        <p>Yes, Spiriponzi uses secure protocols and does not require any sensitive information beyond your email address for registration.</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold text-dark">🕓 How often can I claim points?</h5>
-                        <p>You can claim points once every 60 minutes. Check back regularly to maximize your earnings!</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold text-dark">💸 How do I withdraw crypto?</h5>
-                        <p>Once you accumulate 3,000 points, you can request a withdrawal. We currently support Bitcoin (BTC) and Ethereum (ETH).</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold text-dark">🔁 Can I refer friends?</h5>
-                        <p>Yes! Share your referral link to earn bonus points every time someone signs up through it and starts claiming.</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold text-dark">📬 I didn’t receive my withdrawal, what should I do?</h5>
-                        <p>Withdrawals are processed within 48 hours. If it's been longer, please contact our support team via email or Telegram.</p>
-                    </div>
-
-                    <div class="text-center mt-5">
-                        <a th:href="@{/login}" class="btn btn-primary">Back to Login</a>
-                    </div>
-                </div>
-            </div>
+<nav class="public-navbar" aria-label="Main navigation">
+    <div class="public-navbar-content">
+        <a class="public-brand" th:href="@{/login}" aria-label="Spiriponzi home">
+            <img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
+            <span class="public-brand-copy">
+                <span class="public-brand-name">Spiriponzi</span>
+                <span class="public-brand-tagline">Sicilian slang for money</span>
+            </span>
+        </a>
+        <div class="public-nav-links">
+            <a th:href="@{/faq}" aria-current="page">FAQ</a>
+            <a th:href="@{/terms}">Terms</a>
+            <a th:href="@{/login}">Login</a>
+            <a th:href="@{/register}">Register</a>
         </div>
     </div>
-</div>
+</nav>
+
+<main class="public-page">
+    <header class="public-hero shadow">
+        <div class="small text-uppercase font-weight-bold mb-2">Spiriponzi</div>
+        <h1 class="h2">Frequently Asked Questions</h1>
+        <p>Find answers to common questions about using the platform.</p>
+    </header>
+
+    <section class="card shadow-sm public-section">
+        <div class="card-body">
+            <h2>💰 What is a crypto faucet?</h2>
+            <p class="mb-0">A crypto faucet is a website that gives out small amounts of cryptocurrency for free, typically in exchange for completing simple tasks or captcha verifications.</p>
+        </div>
+    </section>
+
+    <section class="card shadow-sm public-section">
+        <div class="card-body">
+            <h2>🔒 Is Spiriponzi safe?</h2>
+            <p class="mb-0">Yes, Spiriponzi uses secure protocols and does not require any sensitive information beyond your email address for registration.</p>
+        </div>
+    </section>
+
+    <section class="card shadow-sm public-section">
+        <div class="card-body">
+            <h2>🕓 How often can I claim points?</h2>
+            <p class="mb-0">You can claim points once every 60 minutes. Check back regularly to maximize your earnings!</p>
+        </div>
+    </section>
+
+    <section class="card shadow-sm public-section">
+        <div class="card-body">
+            <h2>💸 How do I withdraw crypto?</h2>
+            <p class="mb-0">Once you accumulate 3,000 points, you can request a withdrawal. We currently support Bitcoin (BTC) and Ethereum (ETH).</p>
+        </div>
+    </section>
+
+    <section class="card shadow-sm public-section">
+        <div class="card-body">
+            <h2>🔁 Can I refer friends?</h2>
+            <p class="mb-0">Yes! Share your referral link to earn bonus points every time someone signs up through it and starts claiming.</p>
+        </div>
+    </section>
+
+    <section class="card shadow-sm public-section">
+        <div class="card-body">
+            <h2>📬 I didn’t receive my withdrawal, what should I do?</h2>
+            <p class="mb-0">Withdrawals are processed within 48 hours. If it's been longer, please contact our support team via email or Telegram.</p>
+        </div>
+    </section>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/login}" class="btn btn-primary">Back to Login</a>
+    </div>
+</main>
 
 <!-- Scripts -->
 <script th:src="@{vendor/jquery/jquery.min.js}"></script>

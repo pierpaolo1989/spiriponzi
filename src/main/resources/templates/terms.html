@@ -13,113 +13,30 @@
     <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
-
-    <style>
-        body, html {
-            margin: 0;
-            min-height: 100%;
-        }
-
-        .terms-navbar {
-            align-items: center;
-            background-color: #4e73df;
-            box-sizing: border-box;
-            color: #fff;
-            display: flex;
-            height: 72px;
-            justify-content: center;
-            left: 0;
-            padding: .75rem 1rem;
-            position: fixed;
-            right: 0;
-            top: 0;
-            z-index: 1030;
-        }
-
-        .terms-navbar-content {
-            align-items: center;
-            display: flex;
-            font-weight: 700;
-            gap: 2rem;
-        }
-
-        .terms-navbar a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .terms-navbar a:hover, .terms-navbar a:focus {
-            color: #d1d1d1;
-        }
-
-        .terms-page {
-            margin: 0 auto;
-            max-width: 1000px;
-            padding: 104px 15px 40px;
-        }
-
-        .terms-hero {
-            background: linear-gradient(120deg, #263d75, #4e73df);
-            border-radius: 12px;
-            color: #fff;
-            margin-bottom: 1.5rem;
-            padding: 28px;
-        }
-
-        .terms-hero h1 {
-            color: #fff;
-            font-weight: 800;
-        }
-
-        .terms-hero p {
-            color: #e5ebff;
-            margin-bottom: 0;
-        }
-
-        .terms-section {
-            border: 0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-
-        .terms-section h2 {
-            color: #3a3b45;
-            font-size: 1rem;
-            font-weight: 800;
-        }
-
-        .terms-section p, .terms-section li {
-            color: #6e707e;
-            line-height: 1.65;
-        }
-
-        @media (max-width: 576px) {
-            .terms-navbar-content {
-                gap: 1rem;
-                font-size: .875rem;
-            }
-
-            .terms-hero {
-                padding: 22px;
-            }
-        }
-    </style>
+    <link th:href="@{/css/public-pages.css}" rel="stylesheet">
 </head>
 
 <body class="bg-gradient-primary">
-<nav class="terms-navbar" aria-label="Main navigation">
-    <div class="terms-navbar-content">
-        <a th:href="@{/login}" aria-label="Spiriponzi home">
-            <i class="fas fa-coins" aria-hidden="true"></i> Spiriponzi
+<nav class="public-navbar" aria-label="Main navigation">
+    <div class="public-navbar-content">
+        <a class="public-brand" th:href="@{/login}" aria-label="Spiriponzi home">
+            <img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
+            <span class="public-brand-copy">
+                <span class="public-brand-name">Spiriponzi</span>
+                <span class="public-brand-tagline">Sicilian slang for money</span>
+            </span>
         </a>
-        <a th:href="@{/login}">Login</a>
-        <a th:href="@{/faq}">FAQ</a>
-        <a th:href="@{/register}">Registration</a>
+        <div class="public-nav-links">
+            <a th:href="@{/faq}">FAQ</a>
+            <a th:href="@{/terms}" aria-current="page">Terms</a>
+            <a th:href="@{/login}">Login</a>
+            <a th:href="@{/register}">Register</a>
+        </div>
     </div>
 </nav>
 
-<main class="terms-page">
-    <header class="terms-hero shadow">
+<main class="public-page">
+    <header class="public-hero shadow">
         <div class="small text-uppercase font-weight-bold mb-2">Spiriponzi</div>
         <h1 class="h2">Terms and Conditions</h1>
         <p>Please read these terms before creating an account or using the platform.</p>
@@ -129,21 +46,21 @@
         These terms explain the general rules for using Spiriponzi. They do not constitute financial, investment, tax or legal advice.
     </div>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>1. Acceptance and eligibility</h2>
             <p>By creating an account or using Spiriponzi, you agree to these Terms and Conditions. If you do not agree, do not register or use the platform. You must be at least 18 years old, or the age of legal majority in your place of residence if higher, and legally able to enter into this agreement.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>2. Your account</h2>
             <p>Provide accurate registration information and keep your login credentials secure. You are responsible for activity carried out through your account. Do not share your password, create accounts to evade restrictions, or use another person's account without permission. Contact the platform if you believe your account has been accessed without authorization.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>3. Platform activities and points</h2>
             <p>Spiriponzi may offer activities such as hourly claims, games, surveys, referrals and advertisements. Availability and eligibility may vary. Points are platform rewards, not money, cryptocurrency, a deposit, or an investment, and have no guaranteed cash value. Points cannot be sold or transferred unless a feature explicitly allows it.</p>
@@ -151,7 +68,7 @@
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>4. Acceptable use</h2>
             <p>You agree not to:</p>
@@ -164,42 +81,42 @@
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>5. Ads, surveys and third-party services</h2>
             <p>Some activities link to or are provided by third parties. Those services have their own terms and privacy practices, and Spiriponzi does not control their availability, content, decisions or services. Review their terms before participating. Third-party activity may be unavailable or may not result in a reward.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>6. Cryptocurrency and financial risk</h2>
             <p>Cryptocurrency prices can change substantially, and transactions may be irreversible. Market data, educational material and network estimates shown on Spiriponzi are informational, may be delayed or inaccurate, and are not recommendations to buy, sell or hold any asset. You are responsible for verifying wallet addresses, network details and transaction information before authorizing a transfer.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>7. Availability and changes</h2>
             <p>We may update, suspend or discontinue features, activities or the platform, including to maintain security, comply with law, or address misuse. We may correct errors in points or activity records. We will make reasonable efforts to show material changes to these terms. Continued use after updated terms take effect means you accept them; if you do not, stop using the platform.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>8. Suspension and termination</h2>
             <p>We may restrict or suspend an account when we reasonably believe these terms have been breached, activity is fraudulent, or the platform's security or operation is at risk. Where appropriate and lawful, we will provide an explanation. You may stop using the platform and request account closure through the available support channel.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>9. Disclaimers and liability</h2>
             <p>The platform and its content are provided on an "as available" basis. To the extent permitted by applicable law, we do not guarantee uninterrupted or error-free service, the accuracy of third-party data, or any particular reward or outcome. Nothing in these terms excludes rights or liability that cannot lawfully be excluded or limited.</p>
         </div>
     </section>
 
-    <section class="card shadow-sm terms-section">
+    <section class="card shadow-sm public-section">
         <div class="card-body">
             <h2>10. Privacy and applicable law</h2>
             <p>Personal data is handled in accordance with applicable data-protection law. These terms do not replace any privacy notice that may apply. Mandatory consumer protections and other rights under the law applicable to you remain unaffected.</p>
