@@ -36,12 +36,12 @@ public class AuthController {
 	@Value("${bitlabs.token:}")
 	private String bitlabsToken = "";
 
-	@GetMapping("index")
+	@GetMapping({"/", "/index"})
 	public String home(){
 		return "index";
 	}
 
-	@GetMapping("faq")
+	@GetMapping("/faq")
 	public String faq(){
 		return "faq";
 	}
