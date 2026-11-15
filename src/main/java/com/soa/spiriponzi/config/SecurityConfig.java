@@ -30,7 +30,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
-                        .requestMatchers("/", "/register/**", "/index", "/faq", "/terms", "/recover-password/**", "/menu/**",
+                        .requestMatchers("/", "/register/**", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
                                 "/callbacks/bitlabs",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()

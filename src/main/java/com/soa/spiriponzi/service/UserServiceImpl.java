@@ -11,16 +11,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -28,14 +37,20 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private static final int REFERRAL_REWARD = 1000;
+    private static final Duration PASSWORD_RESET_TOKEN_TTL = Duration.ofMinutes(30);
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserStatsRepository userStatsRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final AdRepository adRepository;
     private final UserAdRepository userAdRepository;
+
+    @Value("${app.public-base-url:https://www.spiriponzi.cloud}")
+    private String publicBaseUrl;
 
     @Override
     @Transactional
@@ -151,15 +166,81 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public void recoverPassword(RecoverPasswordDto password) {
-		log.info("Sending email for password procedure. User with email: {}", password.getEmail());
-		ResetPasswordDto reset = ResetPasswordDto.builder().email(password.getEmail()).build();
-		try {
-			emailService.sendEmail(reset);
-		} catch (Exception e) {
-			log.error("Impossible to send email. Error: {}", e.getMessage(), e);
+		User user = userRepository.findByEmail(password.getEmail().trim());
+		if (user == null) {
+			return;
 		}
-		
+
+		byte[] randomBytes = new byte[32];
+		SECURE_RANDOM.nextBytes(randomBytes);
+		String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+		PasswordResetToken resetToken = new PasswordResetToken();
+		resetToken.setTokenHash(hashPasswordResetToken(token));
+		resetToken.setUser(user);
+		resetToken.setExpiresAt(LocalDateTime.now().plus(PASSWORD_RESET_TOKEN_TTL));
+
+		passwordResetTokenRepository.deleteAllByUserId(user.getId());
+		passwordResetTokenRepository.save(resetToken);
+
+		String resetUrl = UriComponentsBuilder.fromUriString(publicBaseUrl)
+				.path("/reset-password")
+				.queryParam("token", token)
+				.build()
+				.toUriString();
+		try {
+			emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
+		} catch (jakarta.mail.MessagingException | java.io.IOException | freemarker.template.TemplateException e) {
+			throw new IllegalStateException("Unable to send password reset email", e);
+		}
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isPasswordResetTokenValid(String token) {
+		if (token == null || token.isBlank()) {
+			return false;
+		}
+		return passwordResetTokenRepository.findByTokenHash(hashPasswordResetToken(token))
+				.filter(resetToken -> resetToken.getExpiresAt().isAfter(LocalDateTime.now()))
+				.isPresent();
+	}
+
+	@Override
+	@Transactional
+	public boolean resetPassword(String token, String newPassword) {
+		if (token == null || token.isBlank()) {
+			return false;
+		}
+
+		PasswordResetToken resetToken = passwordResetTokenRepository
+				.findWithLockByTokenHash(hashPasswordResetToken(token))
+				.orElse(null);
+		if (resetToken == null) {
+			return false;
+		}
+		if (!resetToken.getExpiresAt().isAfter(LocalDateTime.now())) {
+			passwordResetTokenRepository.delete(resetToken);
+			return false;
+		}
+
+		User user = resetToken.getUser();
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+		passwordResetTokenRepository.deleteAllByUserId(user.getId());
+		return true;
+	}
+
+	private String hashPasswordResetToken(String token) {
+		try {
+			byte[] digest = MessageDigest.getInstance("SHA-256")
+					.digest(token.getBytes(StandardCharsets.UTF_8));
+			return HexFormat.of().formatHex(digest);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("SHA-256 is not available", e);
+		}
 	}
 
     @Override

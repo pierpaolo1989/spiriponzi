@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.soa.spiriponzi.dto.RecoverPasswordDto;
+import com.soa.spiriponzi.dto.ResetPasswordFormDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
@@ -86,12 +87,12 @@ public class AuthController {
 	}
 	
 	@PostMapping("/recover-password/save")
-	public String registration(@Valid @ModelAttribute("passowrd") RecoverPasswordDto password,
+	public String recoverPassword(@Valid @ModelAttribute("password") RecoverPasswordDto password,
 			BindingResult result,
 			Model model){
-		User existing = userService.findByEmail(password.getEmail());
-		if (existing == null) {
-			result.rejectValue("email", null, "There is no account registered with this email");
+		if (password.getEmail() != null && password.getConfirmEmail() != null
+				&& !password.getEmail().trim().equalsIgnoreCase(password.getConfirmEmail().trim())) {
+			result.rejectValue("confirmEmail", null, "Email addresses do not match");
 		}
 		if (result.hasErrors()) {
 			model.addAttribute("password", password);
@@ -99,6 +100,34 @@ public class AuthController {
 		}
 		userService.recoverPassword(password);
 		return "redirect:/recover-password?success";
+	}
+
+	@GetMapping("/reset-password")
+	public String resetPasswordForm(@RequestParam(value = "token", required = false) String token, Model model) {
+		ResetPasswordFormDto password = new ResetPasswordFormDto();
+		password.setToken(token);
+		model.addAttribute("password", password);
+		model.addAttribute("validToken", userService.isPasswordResetTokenValid(token));
+		return "reset-password";
+	}
+
+	@PostMapping("/reset-password/save")
+	public String resetPassword(@Valid @ModelAttribute("password") ResetPasswordFormDto password,
+			BindingResult result, Model model) {
+		if (password.getPassword() != null && password.getConfirmPassword() != null
+				&& !password.getPassword().equals(password.getConfirmPassword())) {
+			result.rejectValue("confirmPassword", null, "Passwords do not match");
+		}
+		if (result.hasErrors()) {
+			model.addAttribute("validToken", userService.isPasswordResetTokenValid(password.getToken()));
+			return "reset-password";
+		}
+		if (!userService.resetPassword(password.getToken(), password.getPassword())) {
+			result.rejectValue("token", null, "This reset link is invalid or has expired.");
+			model.addAttribute("validToken", false);
+			return "reset-password";
+		}
+		return "redirect:/login?passwordReset";
 	}
 
 	@PostMapping("/user-data")

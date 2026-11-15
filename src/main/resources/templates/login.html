@@ -67,6 +67,9 @@
 								<div class="text-center">
 									<h2 class="h4 text-gray-900 font-weight-bold mb-2">Welcome back</h2>
 									<p class="text-muted mb-4">Sign in to continue your Spiriponzi journey.</p>
+									<div th:if="${param.passwordReset}" class="alert alert-success">
+										Your password has been updated. You can now sign in.
+									</div>
 								</div>
 								<form method="post" th:action="@{/login}" class="form-horizontal" role="form">
 									<div class="mb-3">

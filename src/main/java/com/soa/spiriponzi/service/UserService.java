@@ -27,6 +27,10 @@ public interface UserService {
 
 	void recoverPassword(RecoverPasswordDto password);
 
+	boolean isPasswordResetTokenValid(String token);
+
+	boolean resetPassword(String token, String newPassword);
+
 	List<ADDto> findAdsByUser(Long userId);
 
 	void createUserAd(User user, Long idAd);

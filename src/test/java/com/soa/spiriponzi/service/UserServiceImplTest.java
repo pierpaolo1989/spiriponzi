@@ -1,11 +1,14 @@
 package com.soa.spiriponzi.service;
 
 import com.soa.spiriponzi.dto.UserDto;
+import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.model.Ad;
+import com.soa.spiriponzi.model.PasswordResetToken;
 import com.soa.spiriponzi.model.Role;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.repository.AdRepository;
+import com.soa.spiriponzi.repository.PasswordResetTokenRepository;
 import com.soa.spiriponzi.repository.RoleRepository;
 import com.soa.spiriponzi.repository.UserAdRepository;
 import com.soa.spiriponzi.repository.UserRepository;
@@ -13,14 +16,19 @@ import com.soa.spiriponzi.repository.UserStatsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -31,29 +39,101 @@ class UserServiceImplTest {
 
     private UserRepository userRepository;
     private UserStatsRepository userStatsRepository;
+    private PasswordResetTokenRepository passwordResetTokenRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AdRepository adRepository;
     private UserAdRepository userAdRepository;
+    private EmailService emailService;
     private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
+        passwordResetTokenRepository = mock(PasswordResetTokenRepository.class);
         roleRepository = mock(RoleRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         adRepository = mock(AdRepository.class);
         userAdRepository = mock(UserAdRepository.class);
+        emailService = mock(EmailService.class);
         userService = new UserServiceImpl(
                 userRepository,
+                passwordResetTokenRepository,
                 userStatsRepository,
                 roleRepository,
                 passwordEncoder,
-                mock(EmailService.class),
+                emailService,
                 adRepository,
                 userAdRepository
         );
+        ReflectionTestUtils.setField(userService, "publicBaseUrl", "https://www.spiriponzi.cloud");
+    }
+
+    @Test
+    void recoverPasswordCreatesHashedExpiringTokenAndSendsResetEmail() throws Exception {
+        User user = User.builder().id(21L).email("person@example.com").build();
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(user);
+        RecoverPasswordDto request =
+                RecoverPasswordDto.builder()
+                        .email(user.getEmail()).confirmEmail(user.getEmail()).build();
+
+        userService.recoverPassword(request);
+
+        org.mockito.ArgumentCaptor<PasswordResetToken> tokenCaptor =
+                org.mockito.ArgumentCaptor.forClass(PasswordResetToken.class);
+        verify(passwordResetTokenRepository).deleteAllByUserId(user.getId());
+        verify(passwordResetTokenRepository).save(tokenCaptor.capture());
+        PasswordResetToken storedToken = tokenCaptor.getValue();
+        assertTrue(storedToken.getTokenHash().matches("[a-f0-9]{64}"));
+        assertTrue(storedToken.getExpiresAt().isAfter(java.time.LocalDateTime.now()));
+
+        org.mockito.ArgumentCaptor<String> urlCaptor =
+                org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(emailService).sendPasswordResetEmail(
+                org.mockito.ArgumentMatchers.eq(user.getEmail()), urlCaptor.capture());
+        assertTrue(urlCaptor.getValue().startsWith("https://www.spiriponzi.cloud/reset-password?token="));
+        assertFalse(urlCaptor.getValue().contains(storedToken.getTokenHash()));
+    }
+
+    @Test
+    void passwordResetRejectsUnknownToken() {
+        when(passwordResetTokenRepository.findWithLockByTokenHash(any())).thenReturn(Optional.empty());
+
+        assertFalse(userService.resetPassword("invalid", "new-password"));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void passwordResetChangesPasswordAndConsumesToken() throws Exception {
+        String rawToken = "single-use-reset-token";
+        String tokenHash = HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-256").digest(rawToken.getBytes(StandardCharsets.UTF_8)));
+        User user = User.builder().id(34L).email("person@example.com").password("old").build();
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setUser(user);
+        resetToken.setTokenHash(tokenHash);
+        resetToken.setExpiresAt(java.time.LocalDateTime.now().plusMinutes(10));
+        when(passwordResetTokenRepository.findWithLockByTokenHash(tokenHash))
+                .thenReturn(Optional.of(resetToken));
+        when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-password");
+
+        assertTrue(userService.resetPassword(rawToken, "new-password"));
+
+        assertEquals("encoded-new-password", user.getPassword());
+        verify(userRepository).save(user);
+        verify(passwordResetTokenRepository).deleteAllByUserId(user.getId());
+    }
+
+    @Test
+    void passwordResetRequestForUnknownEmailDoesNotSendEmail() throws Exception {
+        when(userRepository.findByEmail("missing@example.com")).thenReturn(null);
+
+        userService.recoverPassword(RecoverPasswordDto.builder()
+                .email("missing@example.com").confirmEmail("missing@example.com").build());
+
+        verify(emailService, never()).sendPasswordResetEmail(any(), any());
+        verify(passwordResetTokenRepository, never()).save(any(PasswordResetToken.class));
     }
 
     @Test

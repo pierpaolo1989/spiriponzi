@@ -2,6 +2,7 @@ package com.soa.spiriponzi.controller;
 
 import com.soa.spiriponzi.dto.ADDto;
 import com.soa.spiriponzi.dto.RecoverPasswordDto;
+import com.soa.spiriponzi.dto.ResetPasswordFormDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
@@ -18,6 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -118,28 +120,62 @@ class AuthControllerTest {
     }
 
     @Test
-    void recoverPasswordSendsRecoveryForExistingUser() {
-        RecoverPasswordDto dto = RecoverPasswordDto.builder().email(ControllerTestSupport.EMAIL).build();
+    void recoverPasswordRequestsRecoveryAndRedirects() {
+        RecoverPasswordDto dto = RecoverPasswordDto.builder()
+                .email(ControllerTestSupport.EMAIL)
+                .confirmEmail(ControllerTestSupport.EMAIL)
+                .build();
         BindingResult result = mock(BindingResult.class);
 
         assertEquals("redirect:/recover-password?success",
-                controller.registration(dto, result, new ExtendedModelMap()));
+                controller.recoverPassword(dto, result, new ExtendedModelMap()));
 
         verify(userService).recoverPassword(dto);
     }
 
     @Test
-    void recoverPasswordReturnsFormWhenUserDoesNotExist() {
-        when(userService.findByEmail(ControllerTestSupport.EMAIL)).thenReturn(null);
-        RecoverPasswordDto dto = RecoverPasswordDto.builder().email(ControllerTestSupport.EMAIL).build();
+    void recoverPasswordReturnsFormWhenEmailConfirmationDoesNotMatch() {
+        RecoverPasswordDto dto = RecoverPasswordDto.builder()
+                .email(ControllerTestSupport.EMAIL)
+                .confirmEmail("other@example.com")
+                .build();
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(true);
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertEquals("recover-password", controller.registration(dto, result, model));
+        assertEquals("recover-password", controller.recoverPassword(dto, result, model));
 
         assertSame(dto, model.get("password"));
-        verify(result).rejectValue("email", null, "There is no account registered with this email");
+        verify(result).rejectValue("confirmEmail", null, "Email addresses do not match");
+        verify(userService, never()).recoverPassword(dto);
+    }
+
+    @Test
+    void resetPasswordRedirectsAfterSuccessfulReset() {
+        ResetPasswordFormDto dto = new ResetPasswordFormDto();
+        dto.setToken("reset-token");
+        dto.setPassword("new-password");
+        dto.setConfirmPassword("new-password");
+        when(userService.resetPassword("reset-token", "new-password")).thenReturn(true);
+
+        assertEquals("redirect:/login?passwordReset",
+                controller.resetPassword(dto, mock(BindingResult.class), new ExtendedModelMap()));
+    }
+
+    @Test
+    void resetPasswordReturnsFormWhenPasswordsDoNotMatch() {
+        ResetPasswordFormDto dto = new ResetPasswordFormDto();
+        dto.setToken("reset-token");
+        dto.setPassword("new-password");
+        dto.setConfirmPassword("different-password");
+        BindingResult result = mock(BindingResult.class);
+        when(result.hasErrors()).thenReturn(true);
+
+        assertEquals("reset-password",
+                controller.resetPassword(dto, result, new ExtendedModelMap()));
+
+        verify(result).rejectValue("confirmPassword", null, "Passwords do not match");
+        verify(userService, never()).resetPassword("reset-token", "new-password");
     }
 
     @Test

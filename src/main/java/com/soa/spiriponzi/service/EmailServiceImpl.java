@@ -5,11 +5,10 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import com.soa.spiriponzi.dto.ResetPasswordDto;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -24,21 +23,26 @@ public class EmailServiceImpl implements EmailService {
 	private final Configuration configuration;
 	private final JavaMailSender javaMailSender;
 
+	@Value("${app.mail.from:info@spiriponzi.cloud}")
+	private String fromAddress;
+
 	@Override
-	public void sendEmail(ResetPasswordDto user) throws MessagingException, IOException, TemplateException {
+	public void sendPasswordResetEmail(String email, String resetUrl)
+			throws MessagingException, IOException, TemplateException {
 		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-		helper.setSubject("Welcome To Spiriponzi.io");
-		helper.setTo(user.getEmail());
-		String emailContent = getEmailContent(user);
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+		helper.setFrom(fromAddress);
+		helper.setSubject("Reset your Spiriponzi password");
+		helper.setTo(email);
+		String emailContent = getEmailContent(resetUrl);
 		helper.setText(emailContent, true);
 		javaMailSender.send(mimeMessage);
 	}
 
-	String getEmailContent(ResetPasswordDto user) throws IOException, TemplateException {
+	String getEmailContent(String resetUrl) throws IOException, TemplateException {
 		StringWriter stringWriter = new StringWriter();
 		Map<String, Object> model = new HashMap<>();
-		model.put("password", user);
+		model.put("resetUrl", resetUrl);
 		configuration.getTemplate("email.ftlh").process(model, stringWriter);
 		return stringWriter.getBuffer().toString();
 	}
