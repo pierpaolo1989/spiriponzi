@@ -839,3 +839,63 @@ body {
 		padding-top: 124px;
 	}
 }
+
+.public-nav-toggle {
+	align-items: center;
+	background: transparent;
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	border-radius: 0.4rem;
+	color: #fff;
+	cursor: pointer;
+	display: none;
+	font-size: 1.15rem;
+	height: 42px;
+	justify-content: center;
+	width: 42px;
+}
+
+.public-nav-toggle:hover,
+.public-nav-toggle:focus {
+	background: rgba(255, 255, 255, 0.14);
+	color: #fff;
+	outline: 2px solid rgba(255, 255, 255, 0.75);
+	outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+	.public-navbar-content {
+		flex-wrap: nowrap;
+		position: relative;
+	}
+
+	.public-nav-toggle {
+		display: inline-flex;
+		flex: 0 0 auto;
+	}
+
+	.public-nav-links,
+	.public-nav-links.is-open {
+		align-items: stretch;
+		background: linear-gradient(145deg, #182a52, #2d4d8e);
+		border-radius: 0.5rem;
+		box-shadow: 0 0.5rem 1.25rem rgba(20, 35, 70, 0.28);
+		display: none;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.5rem;
+		position: absolute;
+		right: 0;
+		top: calc(100% + 0.65rem);
+		width: min(16rem, calc(100vw - 2rem));
+		z-index: 1;
+	}
+
+	.public-nav-links.is-open {
+		display: flex;
+	}
+
+	.public-nav-links a {
+		font-size: 0.9rem;
+		padding: 0.7rem 0.85rem;
+	}
+}

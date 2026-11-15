@@ -4,10 +4,17 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="Learn how Spiriponzi works, how to earn platform points, and find answers about activities, rewards and your account.">
     <meta name="author" content="SOA Information technology">
 
     <title>Spiriponzi - FAQ</title>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Spiriponzi">
+    <meta property="og:title" content="Spiriponzi - FAQ">
+    <meta property="og:description" content="Learn how Spiriponzi works, how to earn platform points, and find answers about activities, rewards and your account.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Spiriponzi - FAQ">
+    <meta name="twitter:description" content="Learn how Spiriponzi works, how to earn platform points, and find answers about activities, rewards and your account.">
 
     <link rel="icon" type="image/svg" href="img/favicon.ico">
     <link th:href="@{vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
@@ -15,6 +22,7 @@
 
     <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
     <link th:href="@{/css/public-pages.css}" rel="stylesheet" />
+    <script defer th:src="@{/js/public-navbar.js}"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
         crossorigin="anonymous"></script>
 </head>
@@ -23,13 +31,17 @@
 <nav class="public-navbar" aria-label="Main navigation">
     <div class="public-navbar-content">
         <a class="public-brand" th:href="@{/login}" aria-label="Spiriponzi home">
-            <img th:src="@{/img/main_page.jpg}" alt="" aria-hidden="true">
+            <img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
             <span class="public-brand-copy">
                 <span class="public-brand-name">Spiriponzi</span>
                 <span class="public-brand-tagline">Sicilian slang for money</span>
             </span>
         </a>
-        <div class="public-nav-links">
+        <button class="public-nav-toggle" type="button" aria-label="Open navigation menu"
+            aria-expanded="false" aria-controls="publicNavLinks">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="public-nav-links" id="publicNavLinks">
             <a th:href="@{/faq}" aria-current="page">FAQ</a>
             <a th:href="@{/terms}">Terms</a>
             <a th:href="@{/login}">Login</a>
