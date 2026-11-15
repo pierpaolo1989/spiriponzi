@@ -1,64 +1,146 @@
 <!DOCTYPE html>
-<html lang="en"
-  xmlns:th="http://www.thymeleaf.org"
->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Registration and Login System</title>
-<link th:href="@{vendor/fontawesome-free/css/all.min.css}"
-	rel="stylesheet" type="text/css">
-
-<!-- Custom fonts for this template-->
-<link
-	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-	rel="stylesheet">
-
-
-<link rel="icon" type="image/svg" href="img/favicon.ico">
-
-<!-- Custom styles for this template-->
-<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
-	crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Discover Spiriponzi: earn points through hourly claims, games, surveys and other activities.">
+    <title>Spiriponzi - Earn points, have fun</title>
+    <link rel="icon" type="image/svg" th:href="@{/img/favicon.ico}">
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+    <link th:href="@{/css/public-pages.css}" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
+        crossorigin="anonymous"></script>
 </head>
 <body class="bg-gradient-primary">
-<div class="container">
-   <div class="row justify-content-center">
+<nav class="public-navbar" aria-label="Main navigation">
+    <div class="public-navbar-content">
+        <a class="public-brand" th:href="@{/index}" aria-label="Spiriponzi home">
+            <img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
+            <span class="public-brand-copy">
+                <span class="public-brand-name">Spiriponzi</span>
+                <span class="public-brand-tagline">Sicilian slang for money</span>
+            </span>
+        </a>
+        <div class="public-nav-links">
+            <a th:href="@{/faq}">How it works</a>
+            <a th:href="@{/terms}">Terms</a>
+            <a th:href="@{/login}">Login</a>
+            <a th:href="@{/register}" aria-current="page">Join us</a>
+        </div>
+    </div>
+</nav>
 
-			<div class="col-xl-10 col-lg-12 col-md-9">
+<main class="public-page landing-page">
+    <section class="landing-hero">
+        <div class="landing-hero-copy">
+            <span class="landing-eyebrow">A little fun, a little spiriponzi</span>
+            <h1>Small activities.<br>Points that add up.</h1>
+            <p>Spiriponzi is a rewards platform where you can collect points by making hourly claims, playing games, completing surveys and exploring other activities. The name playfully nods to Charles Ponzi and to “spiriponzi”, Sicilian slang for money; it is not affiliated with him or his schemes.</p>
+            <div class="landing-hero-actions">
+                <a class="btn btn-light" th:href="@{/register}">
+                    Create your free account <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>
+                </a>
+                <a class="btn btn-outline-light" th:href="@{/faq}">See how it works</a>
+            </div>
+        </div>
+        <div class="landing-hero-art" aria-hidden="true">
+            <img th:src="@{/img/spiriponzi-mark.svg}" alt="">
+        </div>
+    </section>
 
-				<div class="card o-hidden border-0 shadow-lg my-5">
-					<div class="card-body p-0">
-						<!-- Nested Row within Card Body -->
-						<div class="row">
-							<div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-							<div class="col-lg-6">
-								<div class="p-5">
-									<div class="text-center">
-										<h1 class="h4 text-gray-900 mb-4">Welcome to Spiriponzi !</h1>
-									</div>
-									<hr>
-									<div class="container-fluid" style="text-align:justify;">
-										Lorem Ipsum è un testo segnaposto utilizzato nel settore della tipografia e della stampa. 
-										Lorem Ipsum è considerato il testo segnaposto standard sin dal sedicesimo secolo, quando un anonimo tipografo 
-										prese una cassetta di caratteri e li assemblò per preparare un testo campione. È sopravvissuto non solo a più di 
-										cinque secoli, ma anche al passaggio alla videoimpaginazione, pervenendoci sostanzialmente inalterato. Fu reso popolare, 
-										negli anni ’60, con la diffusione dei fogli di caratteri trasferibili “Letraset”, che contenevano passaggi del Lorem Ipsum, 
-										e più recentemente da software di impaginazione come Aldus PageMaker, che includeva versioni del Lorem Ipsum.
-									</div>
-									<hr>
-									<div class="text-center">
-										<a th:href="@{/register}">Create account</a>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+    <div class="landing-section-heading">
+        <h2>What can you do on Spiriponzi?</h2>
+        <p>Pick up points while taking part in simple activities.</p>
+    </div>
 
-			</div>
+    <div class="row">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <section class="card shadow-sm landing-feature">
+                <div class="card-body">
+                    <span class="landing-feature-icon"><i class="fas fa-clock" aria-hidden="true"></i></span>
+                    <h3>Hourly claims</h3>
+                    <p>Come back regularly to make a claim and collect points.</p>
+                </div>
+            </section>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <section class="card shadow-sm landing-feature">
+                <div class="card-body">
+                    <span class="landing-feature-icon"><i class="fas fa-gamepad" aria-hidden="true"></i></span>
+                    <h3>Games and quizzes</h3>
+                    <p>Take a break, play and discover something new along the way.</p>
+                </div>
+            </section>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <section class="card shadow-sm landing-feature">
+                <div class="card-body">
+                    <span class="landing-feature-icon"><i class="fas fa-list-check" aria-hidden="true"></i></span>
+                    <h3>Surveys and activities</h3>
+                    <p>Explore available partner offers and activities to earn points.</p>
+                </div>
+            </section>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <section class="card shadow-sm landing-feature">
+                <div class="card-body">
+                    <span class="landing-feature-icon"><i class="fas fa-user-friends" aria-hidden="true"></i></span>
+                    <h3>Invite friends</h3>
+                    <p>Share your referral code and take part in the community.</p>
+                </div>
+            </section>
+        </div>
+    </div>
 
-		</div>
-</div>
+    <section class="landing-how" aria-labelledby="landing-how-title">
+        <div class="landing-section-heading mt-0">
+            <h2 id="landing-how-title">Getting started is easy</h2>
+            <p>Three simple steps to explore the platform.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="landing-step">
+                    <span class="landing-step-number">1</span>
+                    <div>
+                        <h3>Create an account</h3>
+                        <p>Sign up with your email and accept the terms.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="landing-step">
+                    <span class="landing-step-number">2</span>
+                    <div>
+                        <h3>Choose activities</h3>
+                        <p>Browse claims, games and other available ways to collect points.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="landing-step">
+                    <span class="landing-step-number">3</span>
+                    <div>
+                        <h3>Track your points</h3>
+                        <p>Check your balance and review the platform's withdrawal requirements.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-cta">
+        <div>
+            <h2>Ready to give it a try?</h2>
+            <p>Join Spiriponzi and start exploring the activities.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/register}">Create account</a>
+    </section>
+
+    <p class="landing-disclaimer">
+        Points are platform rewards and are not money or an investment. Any conversion or withdrawal is subject to the requirements and conditions shown by the platform; availability and value are not guaranteed. Read the <a th:href="@{/terms}">Terms and Conditions</a>.
+    </p>
+</main>
 </body>
 </html>
