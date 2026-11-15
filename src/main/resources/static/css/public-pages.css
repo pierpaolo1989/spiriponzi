@@ -39,8 +39,10 @@ body {
 }
 
 .public-brand img {
+	border-radius: 50%;
 	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.24));
 	height: 44px;
+	object-fit: cover;
 	width: 44px;
 }
 
@@ -164,9 +166,13 @@ body {
 	align-items: center;
 	box-sizing: border-box;
 	display: flex;
+	justify-content: center;
 	min-height: 100vh;
-	padding-bottom: 24px;
-	padding-top: 76px;
+	padding: 108px 15px 40px;
+}
+
+.recover-password-page > .row {
+	width: 100%;
 }
 
 .login-card {
@@ -547,14 +553,15 @@ body {
 }
 
 .landing-section-heading h2 {
-	color: #3a3b45;
+	color: #fff;
 	font-size: 1.6rem;
 	font-weight: 800;
 	margin-bottom: 0.5rem;
 }
 
 .landing-section-heading p {
-	color: #858796;
+	color: #e5ebff;
+	font-weight: 600;
 	margin-bottom: 0;
 }
 
@@ -676,7 +683,8 @@ body {
 }
 
 .landing-disclaimer a {
-	color: #fff;
+	color: #ffe08a;
+	font-weight: 700;
 	text-decoration: underline;
 }
 
