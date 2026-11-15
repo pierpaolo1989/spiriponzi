@@ -10181,6 +10181,19 @@ a:focus {
   height: auto;
 }
 
+.topbar-brand-mark {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-right: 1rem;
+}
+
+.topbar-brand-mark img {
+  border-radius: 50%;
+  height: 38px;
+  object-fit: cover;
+  width: 38px;
+}
+
 .topbar .topbar-divider {
   width: 0;
   border-right: 1px solid #e3e6f0;
