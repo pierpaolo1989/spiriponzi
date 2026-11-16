@@ -11,7 +11,7 @@ SELECT 'microeconomia.info - microeconomics exercises with solutions', 20, 10, '
 WHERE NOT EXISTS (SELECT 1 FROM ads WHERE url = 'https://microeconomia.info');
 
 INSERT INTO ads(title, reward, timer, url, active)
-SELECT 'Unofficial website about Civitella del Lago - historical village near Orvieto (Italy)', 20, 10, 'https://civitelladelago.com', true
+SELECT 'Unofficial website about Civitella del Lago - historical village near Orvieto (Italy)', 20, 10, 'https://civitelladellago.com', true
 WHERE NOT EXISTS (SELECT 1 FROM ads WHERE url = 'https://civitelladellago.com');
 
 INSERT INTO ads(title, reward, timer, url, active)
