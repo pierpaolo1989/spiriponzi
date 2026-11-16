@@ -32,6 +32,7 @@ public class SecurityConfig {
                         // Pagine accessibili senza login
                         .requestMatchers("/", "/register/**", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
                                 "/callbacks/bitlabs",
+                                "/callbacks/cpx",
                                 "/sitemap.xml",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
