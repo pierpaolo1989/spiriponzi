@@ -42,13 +42,12 @@ public class ClaimController {
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try {
-        	claimService.startClaim(authentication.getName());
+        	ClaimDto claim = claimService.startClaim(authentication.getName());
+            return ResponseEntity.ok(claim);
 		} catch (ClaimException e) {
 			return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
 					.body(new ErrorResponse("ClaimCooldown", e.getMessage(), HttpStatus.TOO_MANY_REQUESTS.value()));
 		}
-        
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/status")

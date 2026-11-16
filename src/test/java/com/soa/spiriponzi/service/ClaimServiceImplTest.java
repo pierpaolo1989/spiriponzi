@@ -36,6 +36,8 @@ class ClaimServiceImplTest {
         userRepository = mock(UserRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
         claimService = new ClaimServiceImpl(claimRepository, userRepository, userStatsRepository);
+        org.mockito.Mockito.when(claimRepository.save(any(Claim.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -84,9 +86,12 @@ class ClaimServiceImplTest {
         when(userRepository.findByEmail(email)).thenReturn(user);
         when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
 
-        claimService.startClaim(email);
+        var result = claimService.startClaim(email);
 
         Claim claim = captureSavedClaim();
+        assertEquals(claim.getId(), result.getId());
+        assertEquals(claim.getAmount(), result.getAmount());
+        assertEquals(claim.getDateRequest(), result.getDate());
         assertEquals(user, claim.getUser());
         assertEquals(1000 + claim.getAmount(), stats.getAnnualPoints());
         assertEquals(1000 + claim.getAmount(), stats.getMonthlyPoints());

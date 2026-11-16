@@ -44,10 +44,13 @@ class ClaimControllerTest {
     void startClaimChecksCaptchaAndStartsClaimForAuthenticatedUser() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter("g-recaptcha-response")).thenReturn("captcha-response");
+        ClaimDto claim = ClaimDto.builder().id(1L).amount(42).build();
+        when(claimService.startClaim(ControllerTestSupport.EMAIL)).thenReturn(claim);
 
         var response = controller.startClaim(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(claim, response.getBody());
         verify(captchaService).processResponse("captcha-response");
         verify(claimService).startClaim(ControllerTestSupport.EMAIL);
     }

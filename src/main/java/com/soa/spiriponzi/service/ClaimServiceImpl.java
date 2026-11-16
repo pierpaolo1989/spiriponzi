@@ -37,7 +37,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	@Transactional
-	public void startClaim(String email) {
+	public ClaimDto startClaim(String email) {
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -74,8 +74,13 @@ public class ClaimServiceImpl implements ClaimService {
 		userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
 		userStats.setLastRequest(now);
 
-		claimRepository.save(claim);
+		Claim savedClaim = claimRepository.save(claim);
 		userStatsRepository.save(userStats);
+		return ClaimDto.builder()
+				.id(savedClaim.getId())
+				.amount(savedClaim.getAmount())
+				.date(savedClaim.getDateRequest())
+				.build();
 	}
 
 	@Override

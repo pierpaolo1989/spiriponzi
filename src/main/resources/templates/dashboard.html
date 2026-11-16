@@ -170,6 +170,76 @@
 		margin-bottom: 14px;
 	}
 
+	.claim-reward {
+		align-items: center;
+		background: linear-gradient(120deg, #f3f6ff, #e9fff7);
+		border: 1px solid #d9f2e7;
+		border-radius: 12px;
+		box-shadow: 0 6px 18px rgba(28, 200, 138, .12);
+		display: none;
+		gap: 12px;
+		margin: 16px auto 0;
+		max-width: 460px;
+		padding: 14px 16px;
+		text-align: left;
+	}
+
+	.claim-reward.is-visible {
+		display: flex;
+		animation: claim-reward-pop .45s ease-out both;
+	}
+
+	.claim-reward-icon {
+		align-items: center;
+		background: #e6f7ef;
+		border-radius: 50%;
+		color: #16875d;
+		display: flex;
+		flex: 0 0 42px;
+		height: 42px;
+		justify-content: center;
+		width: 42px;
+	}
+
+	.claim-reward-copy {
+		color: #858796;
+		flex: 1;
+		font-size: 12px;
+	}
+
+	.claim-reward-copy strong {
+		color: #3a3b45;
+		display: block;
+		font-size: 14px;
+	}
+
+	.claim-reward-amount {
+		background: #e6f7ef;
+		border-radius: 99px;
+		color: #16875d;
+		font-size: 17px;
+		font-weight: 800;
+		padding: 7px 11px;
+		white-space: nowrap;
+	}
+
+	.claim-reward-amount small {
+		font-size: 10px;
+		font-weight: 700;
+	}
+
+	@keyframes claim-reward-pop {
+		from {
+			opacity: 0;
+			transform: translateY(8px) scale(.97);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
 	.crypto-overview-label, .crypto-volume-label {
 		color: #858796;
 		font-size: 11px;
@@ -313,8 +383,24 @@
 			grid-template-columns: minmax(0, 1.3fr) minmax(72px, 1fr) 62px;
 		}
 
+		.claim-reward {
+			gap: 8px;
+			padding: 12px;
+		}
+
+		.claim-reward-amount {
+			font-size: 15px;
+			padding: 6px 9px;
+		}
+
 		.crypto-volume, .crypto-sparkline {
 			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.claim-reward.is-visible {
+			animation: none;
 		}
 	}
 </style>
@@ -362,7 +448,7 @@
 							<div class="card shadow mb-4">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">ROLL THE FAUCET</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Roll the faucet</h6>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body">
@@ -379,6 +465,11 @@
 											<div id="countdown"
 												style="display: none; color: black; font-size: 30px; font-weight: bold; margin-top: 2%;">01:00:00</div>
 										</form>
+										<div id="claimReward" class="claim-reward" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true">
+											<span class="claim-reward-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
+											<span class="claim-reward-copy"><strong>Claim completed!</strong>Points added to your balance</span>
+											<span class="claim-reward-amount"><span id="claimRewardAmount">+0</span> <small>points</small></span>
+										</div>
 										<div class="text-center"
 											style="color: black; font-size: 30px; font-weight: bold;">
 											<span><strong>You can claim every hour !!!</strong></span>
@@ -402,7 +493,7 @@
 							<div class="card shadow mb-4">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-brain mr-1"></i> CRYPTO QUICK QUIZ</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Crypto quick quiz</h6>
 								</div>
 								<div class="card-body">
 									<div class="quiz-shell">
@@ -437,7 +528,7 @@
 						<div class="col-lg-6 mb-4">
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">WHY SPIRIPONZI?</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Why Spiriponzi?</h6>
 								</div>
 								<div class="card-body">
 									<p class="justified">Spiriponzi is an Italian term meaning
@@ -471,8 +562,8 @@
 						<div class="col-lg-6 mb-4">
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">HOW TO EARN
-										MONEY WITH SPIRIPONZI?</h6>
+									<h6 class="m-0 font-weight-bold text-primary">How to earn
+										money with Spiriponzi?</h6>
 								</div>
 								<div class="card-body">
 									<p class="justified">You can earn money in the following
@@ -902,7 +993,13 @@ $(document).ready(function () {
 function register(event) {
     event.preventDefault();
     var formData = $('#claimForm').serialize();
+    $('#claimReward').removeClass('is-visible').attr('aria-hidden', 'true');
     $.post("/claims", formData, function(data) {
+            const reward = Number(data.amount);
+            if (Number.isInteger(reward) && reward > 0) {
+                $('#claimRewardAmount').text('+' + new Intl.NumberFormat().format(reward));
+                $('#claimReward').attr('aria-hidden', 'false').addClass('is-visible');
+            }
             startClaimCountdown(3600);
     		$.ajax({
     		    url: "/users/stats",

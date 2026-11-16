@@ -7,7 +7,7 @@ import com.soa.spiriponzi.dto.UserStatsDto;
 
 public interface ClaimService {
 	
-	void startClaim(String email);
+	ClaimDto startClaim(String email);
 	long getClaimCooldownSeconds(String email);
 	long getGameClaimCooldownSeconds(String email);
 	UserStatsDto startGameClaim(String email);
