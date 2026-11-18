@@ -68,4 +68,17 @@ class SearchControllerTest {
         assertEquals(List.of(), model.get("pageResults"));
         assertEquals(List.of(), model.get("adResults"));
     }
+
+    @Test
+    void offerwallIsSearchable() {
+        when(userService.findAdsByUser(12L)).thenReturn(List.of());
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.search("offerwall", model);
+
+        var pageResults = (List<?>) model.get("pageResults");
+        assertEquals(1, pageResults.size());
+        assertEquals("Offerwall", ((com.soa.spiriponzi.dto.SearchResultDto) pageResults.get(0)).getTitle());
+        assertEquals("/offerwall", ((com.soa.spiriponzi.dto.SearchResultDto) pageResults.get(0)).getUrl());
+    }
 }

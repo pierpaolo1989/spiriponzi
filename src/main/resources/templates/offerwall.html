@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Discover partner offers and earn points on Spiriponzi.">
+<meta name="author" content="SOA Information technology">
+<title>Spiriponzi - Offerwall</title>
+<link rel="icon" type="image/svg" th:href="@{/img/favicon.ico}">
+<link th:href="@{vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+	rel="stylesheet">
+<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+<style>
+	.offerwall-frame {
+		display: block;
+		width: 100%;
+		min-height: 720px;
+		border: 0;
+	}
+
+	@media (max-width: 767.98px) {
+		.offerwall-frame {
+			min-height: 620px;
+		}
+	}
+</style>
+</head>
+<body id="page-top">
+	<div id="wrapper">
+		<div th:replace="~{fragments/sidebar}"></div>
+		<div id="content-wrapper" class="d-flex flex-column">
+			<div id="content">
+				<div th:replace="~{fragments/navbar}"></div>
+				<div class="container-fluid">
+					<div class="d-sm-flex align-items-center justify-content-between mb-4">
+						<h1 class="h3 mb-0 text-gray-800">Offerwall</h1>
+						<i class="fas fa-gift fa-sm text-primary" aria-hidden="true"></i>
+					</div>
+					<div th:replace="~{fragments/summary}"></div>
+					<div class="card shadow mb-4">
+						<div class="card-body">
+							<p class="mb-3">Complete partner offers to earn points. Rewards are credited after Offerwall.GG confirms a conversion.</p>
+							<p class="small text-muted">Fractional rewards are rounded down to whole points. Reversed offers deduct the same number of points that was originally credited.</p>
+							<div th:if="${offerwallEnabled}">
+								<iframe class="offerwall-frame"
+									title="Offerwall.GG"
+									loading="lazy"
+									referrerpolicy="strict-origin-when-cross-origin"
+									th:src="${offerwallUrl}">
+								</iframe>
+								<p class="small text-muted mt-2 mb-0">
+									<a target="_blank" rel="noopener noreferrer"
+										th:href="${offerwallUrl}">
+										Open the offerwall in a new tab
+									</a>
+								</p>
+							</div>
+							<div class="alert alert-info mb-0" role="status" th:unless="${offerwallEnabled}">
+								<p>Offerwall.GG is not configured yet. Add its public and secret keys, enable "Require signature" on the placement, then set <code>OFFERWALL_REQUIRE_SIGNATURE=true</code>.</p>
+								<p class="mb-0">Configure the placement callback as an HTTP POST using form fields at <code th:text="${offerwallCallbackUrl}"></code>.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div th:replace="~{fragments/footer}"></div>
+		</div>
+	</div>
+	<a class="scroll-to-top rounded" href="#page-top" aria-label="Scroll to top">
+		<i class="fas fa-angle-up" aria-hidden="true"></i>
+	</a>
+	<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+	<script th:src="@{/js/sb-admin-2.min.js}"></script>
+</body>
+</html>

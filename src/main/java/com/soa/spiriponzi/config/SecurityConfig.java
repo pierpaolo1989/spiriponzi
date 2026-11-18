@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/register/**", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
                                 "/callbacks/bitlabs",
                                 "/callbacks/cpx",
+                                "/callbacks/offerwall",
                                 "/sitemap.xml",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()

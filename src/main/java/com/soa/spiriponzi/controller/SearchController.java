@@ -24,6 +24,7 @@ public class SearchController {
             new SearchResultDto("Surf Ads", "View available ads and earn points.", "Page", "/surf-ads"),
             new SearchResultDto("Create Ads", "Create and manage your own ads.", "Page", "/create-ads"),
             new SearchResultDto("Surveys", "Find surveys available through our partners.", "Page", "/survey"),
+            new SearchResultDto("Offerwall", "Complete partner offers and earn points.", "Page", "/offerwall"),
             new SearchResultDto("Withdraw", "Review withdrawal options and requests.", "Page", "/withdraw-requests"),
             new SearchResultDto("Reports", "Review your activity and earnings.", "Page", "/report"),
             new SearchResultDto("Academy", "Learn about cryptocurrency and blockchain.", "Page", "/academy"),

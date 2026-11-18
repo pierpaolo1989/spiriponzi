@@ -19,6 +19,7 @@ import com.soa.spiriponzi.dto.ResetPasswordFormDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
+import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.UserService;
 
 import jakarta.validation.Valid;
@@ -33,9 +34,13 @@ public class AuthController {
 
 	private final UserService userService;
 	private final WithdrawService withdrawService;
+	private final OfferwallService offerwallService;
 
 	@Value("${bitlabs.token:}")
 	private String bitlabsToken = "";
+
+	@Value("${app.public-base-url:https://www.spiriponzi.cloud}")
+	private String publicBaseUrl = "";
 
 	@GetMapping({"/", "/index"})
 	public String home(){
@@ -176,6 +181,21 @@ public class AuthController {
 		model.addAttribute("cpxEmail", user.getEmail());
 		model.addAttribute("cpxUsername", user.getEmail());
 		return "survey";
+	}
+
+	@GetMapping({"/offerwall", "/adgem"})
+	public String offerwall(Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final User user = userService.findByEmail(authentication.getName());
+		model.addAttribute("user", user);
+		boolean enabled = offerwallService.isConfigured();
+		model.addAttribute("offerwallEnabled", enabled);
+		model.addAttribute("offerwallCallbackUrl",
+				publicBaseUrl.replaceAll("/+$", "") + "/callbacks/offerwall");
+		if (enabled) {
+			model.addAttribute("offerwallUrl", offerwallService.createSignedWallUrl(user.getId().toString()));
+		}
+		return "offerwall";
 	}
 
 	@GetMapping("/academy")

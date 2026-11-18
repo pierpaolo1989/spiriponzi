@@ -8,11 +8,13 @@ import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.WithdrawService;
+import com.soa.spiriponzi.service.OfferwallService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.BindingResult;
 import org.springframework.ui.ExtendedModelMap;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.when;
 class AuthControllerTest {
 
     private UserService userService;
+    private OfferwallService offerwallService;
     private AuthController controller;
     private final User user = User.builder()
             .id(10L)
@@ -38,7 +41,8 @@ class AuthControllerTest {
     void setUp() {
         ControllerTestSupport.authenticate();
         userService = mock(UserService.class);
-        controller = new AuthController(userService, mock(WithdrawService.class));
+        offerwallService = mock(OfferwallService.class);
+        controller = new AuthController(userService, mock(WithdrawService.class), offerwallService);
         when(userService.findByEmail(ControllerTestSupport.EMAIL)).thenReturn(user);
     }
 
@@ -224,6 +228,15 @@ class AuthControllerTest {
         assertEquals("withdraw-requests", controller.withdrawRequests(model));
         assertEquals("report", controller.report(model));
         assertEquals("games", controller.games(model));
+        when(offerwallService.isConfigured()).thenReturn(true);
+        when(offerwallService.createSignedWallUrl("10"))
+                .thenReturn("https://offerwall.gg/wall/public-key?userId=10&signature=signature");
+        ReflectionTestUtils.setField(controller, "publicBaseUrl", "https://www.spiriponzi.cloud");
+        assertEquals("offerwall", controller.offerwall(model));
+        assertEquals(true, model.get("offerwallEnabled"));
+        assertEquals("https://offerwall.gg/wall/public-key?userId=10&signature=signature",
+                model.get("offerwallUrl"));
+        assertEquals("https://www.spiriponzi.cloud/callbacks/offerwall", model.get("offerwallCallbackUrl"));
         when(userService.getOrCreateReferralCode(10L)).thenReturn("REFERRAL123");
         assertEquals("profile", controller.profile(model));
         assertSame(user, model.get("user"));
