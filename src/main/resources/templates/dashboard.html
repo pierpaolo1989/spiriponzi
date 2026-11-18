@@ -31,6 +31,38 @@
 	text-align: justify;
 }
 
+	.red-flag-list {
+		display: grid;
+		gap: 0.65rem;
+	}
+
+	.red-flag-item {
+		align-items: flex-start;
+		background: #fff7f5;
+		border-left: 3px solid #e74a3b;
+		border-radius: 0.35rem;
+		display: flex;
+		gap: 0.7rem;
+		padding: 0.65rem 0.75rem;
+	}
+
+	.red-flag-item i {
+		color: #e74a3b;
+		margin-top: 0.2rem;
+	}
+
+	.red-flag-item strong {
+		color: #3a3b45;
+		display: block;
+		font-size: 0.85rem;
+	}
+
+	.red-flag-item p {
+		color: #6c757d;
+		font-size: 0.8rem;
+		margin: 0.15rem 0 0;
+	}
+
 	.quiz-shell {
 		background: linear-gradient(145deg, #f8f9ff, #fff);
 		border: 1px solid #e8ebf8;
@@ -525,7 +557,7 @@
 
 					<div class="row">
 						<!-- Colonna con spiegazione Spiriponzi -->
-						<div class="col-lg-6 mb-4">
+						<div class="col-lg-6 mb-4 d-flex flex-column">
 							<div class="card shadow mb-4">
 								<div class="card-header py-3">
 									<h6 class="m-0 font-weight-bold text-primary">Why Spiriponzi?</h6>
@@ -554,6 +586,51 @@
 										similar deception to take in $1 million (approximately $35
 										million in 2022).
 									</p>
+								</div>
+							</div>
+							<div class="card shadow mb-4 flex-grow-1 red-flag-card">
+								<div class="card-header py-3 d-flex align-items-center justify-content-between">
+									<h6 class="m-0 font-weight-bold text-danger">
+										<i class="fas fa-flag mr-1" aria-hidden="true"></i> Red flag radar
+									</h6>
+									<span class="badge badge-danger">Scam alert</span>
+								</div>
+								<div class="card-body">
+									<p class="small text-muted">If an investment pitch sounds too good to be true, let the red flags do the talking:</p>
+									<div class="red-flag-list">
+										<div class="red-flag-item">
+											<i class="fas fa-chart-line" aria-hidden="true"></i>
+											<div>
+												<strong>“Guaranteed returns. Zero risk.”</strong>
+												<p>High returns paired with "zero risk" deserve scrutiny. Check who guarantees them and how the money is made.</p>
+											</div>
+										</div>
+										<div class="red-flag-item">
+											<i class="fas fa-hourglass-half" aria-hidden="true"></i>
+											<div>
+												<strong>“Decide now or miss your chance!”</strong>
+												<p>Real opportunities can survive a night of research. Pressure is often part of the scam.</p>
+											</div>
+										</div>
+										<div class="red-flag-item">
+											<i class="fas fa-key" aria-hidden="true"></i>
+											<div>
+												<strong>“Send your seed phrase so we can help.”</strong>
+												<p>Your recovery phrase unlocks your wallet. Keep it secret—even from “support.”</p>
+											</div>
+										</div>
+										<div class="red-flag-item">
+											<i class="fas fa-unlock-alt" aria-hidden="true"></i>
+											<div>
+												<strong>“Pay a fee to unlock your profits.”</strong>
+												<p>An advance payment to withdraw supposed earnings is a classic warning sign.</p>
+											</div>
+										</div>
+									</div>
+									<div class="alert alert-warning small mt-3 mb-0" role="note">
+										<i class="fas fa-lightbulb mr-1" aria-hidden="true"></i>
+										Pause, verify claims using independent sources, and never share your keys.
+									</div>
 								</div>
 							</div>
 						</div>
