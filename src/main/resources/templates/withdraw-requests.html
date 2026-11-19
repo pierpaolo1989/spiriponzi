@@ -1,343 +1,172 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="">
-	<meta name="author" content="">
-
-	<title>Spiriponzi - Withdrawals</title>
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
-		crossorigin="anonymous"></script>
-
-	<link rel="icon" type="image/svg" href="img/favicon.ico">
-
-	<!-- Custom fonts for this template-->
-	<link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-	<link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-	<!-- Custom styles for this template-->
-	<link href="css/sb-admin-2.min.css" rel="stylesheet">
-
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-	<link rel="stylesheet" href="css/datatables-custom.css">
-
-	<style>
-		.modal-backdrop.show {
-            opacity: 0.8 !important;
-        }
-
-        .modal-dialog {
-            margin-top: 10vh;
-        }
-
-        .modal-content {
-            border-radius: 1rem;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        }
-    .status-dot {
-        transition: transform 0.2s;
-    }
-
-    .status-dot:hover {
-        transform: scale(1.2);
-        cursor: pointer;
-    }
-	</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>Spiriponzi - Withdrawals</title>
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
 </head>
-
 <body id="page-top">
 <div id="wrapper">
-	<div th:replace="~{fragments/sidebar}"></div>
-
-	<div id="content-wrapper" class="d-flex flex-column">
-		<div id="content">
-			<div th:replace="~{fragments/navbar}"></div>
-
-			<div class="container-fluid">
-				<div class="d-sm-flex align-items-center justify-content-between mb-4">
-					<h1 class="h3 mb-0 text-gray-800">Withdraw Requests</h1>
-				</div>
-
-				<div th:replace="~{fragments/summary}"></div>
-
-				<hr class="divider">
-
-				<div class="alert alert-warning col-lg-6 offset-lg-3" role="alert">
-					<ul>
-						<li>You can submit a withdraw request when you reach <strong>3000</strong> points!</li>
-						<li>The conversion rate depends on market condition</li>
-						<li>It's possible to convert points in <strong>BTC</strong> or <strong>ETH</strong></li>
-					</ul>
-				</div>
-
-				<div class="row" style="margin-top: 3%;">
-					<div class="col-lg-10 offset-lg-1">
-						<div class="card shadow mb-4">
-							<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h6 class="m-0 font-weight-bold text-primary">Withdrawal history</h6>
-								<button class="btn btn-primary btn-sm" id="start_withdraw" data-toggle="modal" data-target="#withdrawalModal">START WITHDRAW</button>
-							</div>
-							<div class="card-body">
-								<div class="table-responsive">
-									<table id="table_menu" class="display table table-striped styled-datatable" style="min-height: 300px;">
-										<thead>
-										<tr>
-											<th>Id</th>
-											<th>Currency</th>
-											<th>Amount</th>
-											<th>Date</th>
-											<th>Status</th>
-											<th>Transaction ID</th>
-										</tr>
-										</thead>
-										<tbody>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div th:replace="~{fragments/footer}"></div>
-		</div>
-	</div>
+    <div th:replace="~{fragments/sidebar}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <div th:replace="~{fragments/navbar}"></div>
+            <div class="container-fluid">
+                <h1 class="h3 mb-4 text-gray-800">Withdrawals</h1>
+                <div th:replace="~{fragments/summary}"></div>
+                <div class="alert alert-info">
+                    Minimum 3,000 points. 3,000 points = EUR 0.50; amounts are rounded down to the cent.
+                    A fixed EUR 0.10 fee applies to BTC, ETH and PayPal. Payments are reviewed and sent manually.
+                    BTC and ETH are paid on their respective mainnets at the exchange rate available when paid.
+                </div>
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h2 class="h5">Request a withdrawal</h2>
+                        <form id="withdraw-form">
+                            <label for="points">Points</label>
+                            <input id="points" class="form-control mb-2" type="number" min="3000" max="2147483647" step="1" required>
+                            <label for="method">Payment method</label>
+                            <select id="method" class="form-control mb-2" required>
+                                <option value="">Choose a payment method</option>
+                                <option value="BTC">Bitcoin mainnet</option>
+                                <option value="ETH">Ethereum mainnet</option>
+                                <option value="PAYPAL">PayPal (EUR)</option>
+                            </select>
+                            <label for="destination">Wallet address or PayPal email</label>
+                            <input id="destination" class="form-control mb-2" maxlength="254" required autocomplete="off">
+                            <div id="wallet-data" th:data-btc="${user.btcWallet}" th:data-eth="${user.ethWallet}" hidden></div>
+                            <p class="small">Check the destination and network carefully: blockchain transfers are irreversible.</p>
+                            <p id="quote" aria-live="polite"></p>
+                            <div class="g-recaptcha mb-2" th:attr="data-sitekey=${@captchaSettings.getSite()}"
+                                 data-callback="captchaCompleted" data-expired-callback="captchaExpired"></div>
+                            <div id="withdraw-error" class="alert alert-danger" role="alert" hidden></div>
+                            <button id="submit-withdraw" class="btn btn-primary" type="submit">Submit request</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h2 class="h5">Withdrawal history</h2>
+                        <div id="history-error" class="alert alert-danger" hidden>Could not load withdrawal history.</div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead><tr><th>ID</th><th>Method</th><th>Points</th><th>Date</th><th>Status</th><th>Transaction reference</th></tr></thead>
+                                <tbody id="history"></tbody>
+                            </table>
+                        </div>
+                        <button id="history-previous" type="button" class="btn btn-sm btn-secondary" disabled>Previous</button>
+                        <span id="history-page"></span>
+                        <button id="history-next" type="button" class="btn btn-sm btn-secondary" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+            <div th:replace="~{fragments/footer}"></div>
+        </div>
+    </div>
 </div>
-
-<!-- Modal -->
-<!-- Modal -->
-<div class="modal fade" id="withdrawalModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">Withdrawal</h5>
-				<button class="close" type="button" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form enctype="utf8" class="text-center">
-					<div class="mb-3">
-						<input type="number" id="username" name="username" class="form-control" placeholder="Amount *" />
-					</div>
-					<div class="mb-3">
-						<select class="form-select form-control" aria-label="Default select example" id="wallet-destination">
-							<option selected>Choose wallet destination</option>
-							<option value="BTC">BTC</option>
-							<option value="ETH">ETH</option>
-						</select>
-					</div>
-					<div id="wallet-data"
-						 th:data-btc="${user.btcWallet}"
-						 th:data-eth="${user.ethWallet}"
-						 style="display:none;"></div>
-					<div class="mb-3" id="wallet-address-group" style="display: none;">
-						<input type="text" id="wallet-address" name="wallet-address" class="form-control" placeholder="Wallet Address *" />
-					</div>
-					<div class="mb-3">
-						<div style="text-align: center;">
-							<div class="g-recaptcha"
-								 style="margin-top: 3%;"
-								 th:attr="data-sitekey=${@captchaSettings.getSite()}"
-								 data-callback="recaptchaCallback"></div>
-							<span id="captchaError" class="alert alert-danger col-sm-4"
-								  style="display: none"></span>
-						</div>
-					</div>
-				</form>
-				<div id="withdraw-error" class="alert alert-danger text-center" style="display: none;"></div>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-				<button class="btn btn-primary" id="proceed_withdraw" disabled>Proceed</button>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Bootstrap core JavaScript-->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Core plugin JavaScript-->
-<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-<!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
-
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
-<!-- DataTables -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
-	const walletData = document.getElementById('wallet-data');
-const userBTCWallet = walletData.dataset.btc || '';
-const userETHWallet = walletData.dataset.eth || '';
-let captchaCompleted = false;
-
-function recaptchaCallback() {
-    captchaCompleted = true;
-    checkFields();
-}
-
-function onWalletChange() {
-    const wallet = document.getElementById('wallet-destination').value;
-    const walletAddressGroup = document.getElementById('wallet-address-group');
-    const walletAddress = document.getElementById('wallet-address');
-
-    if (wallet === "BTC" || wallet === "ETH") {
-        walletAddressGroup.style.display = "block";
-
-        // Setta subito il valore visibile nell'input
-        walletAddress.value = (wallet === "BTC") ? userBTCWallet : userETHWallet;
-    } else {
-        walletAddressGroup.style.display = "none";
-        walletAddress.value = "";
+    let captchaToken = '';
+    function captchaCompleted(token) { captchaToken = token; }
+    function captchaExpired() { captchaToken = ''; }
+    const form = document.getElementById('withdraw-form');
+    const points = document.getElementById('points');
+    const method = document.getElementById('method');
+    const destination = document.getElementById('destination');
+    const quote = document.getElementById('quote');
+    const error = document.getElementById('withdraw-error');
+    let historyPage = 0;
+    function updateQuote() {
+        const value = Number(points.value);
+        if (!Number.isInteger(value) || value < 3000 || value > 2147483647) {
+            quote.textContent = 'Enter at least 3,000 whole points.';
+            return;
+        }
+        const cents = Math.floor(value / 60);
+        quote.textContent = `Gross EUR ${(cents / 100).toFixed(2)}; fee EUR 0.10; net EUR ${((cents - 10) / 100).toFixed(2)}.`;
     }
-
-    checkFields(); // Poi ricalcola se abilitare il bottone
-}
-
-function checkFields() {
-    const amount = document.getElementById('username').value;
-    const wallet = document.getElementById('wallet-destination').value;
-    const walletAddress = document.getElementById('wallet-address');
-    const proceedButton = document.getElementById('proceed_withdraw');
-
-    if (amount && (wallet === "BTC" || wallet === "ETH") && walletAddress.value && captchaCompleted) {
-        proceedButton.disabled = false;
-    } else {
-        proceedButton.disabled = true;
-    }
-}
-
-document.getElementById('username').addEventListener('input', checkFields);
-document.getElementById('wallet-destination').addEventListener('change', onWalletChange);
-document.getElementById('wallet-address').addEventListener('input', checkFields);
-
-$(document).ready(function () {
-    $('#table_menu').DataTable({
-        ajax: {
-            url: '/withdraws',
-            dataSrc: ''
-        },
-        columns: [
-            { data: 'id',
-              className: 'text-center align-middle',},
-            { data: 'currency' ,
-             className: 'text-center align-middle',},
-            { data: 'amount',
-              className: 'text-center align-middle',},
-            {
-                data: 'dateRequest',
-                 className: 'text-center align-middle',
-                render: function (data) {
-                    const dateObj = new Date(data);
-                    const day = String(dateObj.getDate()).padStart(2, '0');
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const year = dateObj.getFullYear();
-                    const hours = String(dateObj.getHours()).padStart(2, '0');
-                    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-                    return `${day}/${month}/${year} ${hours}:${minutes}`;
-                }
-            },
-          {
-    data: 'status',
-    className: 'text-center align-middle',
-    render: function (data) {
-        const color = data === 'PENDING' ? 'red' : 'green';
-        const tooltip = data === 'PENDING' ? 'Pending' : 'Completed';
-        return `
-            <div class="d-flex justify-content-center align-items-center" data-toggle="tooltip" title="${tooltip}">
-                <span class="status-dot" style="
-                    display:inline-block;
-                    width:14px;
-                    height:14px;
-                    border-radius:50%;
-                    background-color:${color};
-                "></span>
-            </div>`;
-    }
-},
-            {
-                data: 'transactionId',
-                 className: 'text-center align-middle',
-                render: function (data) {
-                    return data && data.trim() !== '' ? data : '-';
-                }
+    points.addEventListener('input', updateQuote);
+    method.addEventListener('change', () => {
+        const wallets = document.getElementById('wallet-data').dataset;
+        destination.value = method.value === 'BTC' ? (wallets.btc || '') :
+            method.value === 'ETH' ? (wallets.eth || '') : '';
+    });
+    updateQuote();
+    async function loadHistory() {
+        const response = await fetch(`/withdraws?page=${historyPage}&size=20`);
+        if (!response.ok) throw new Error('History request failed');
+        const records = await response.json();
+        const body = document.getElementById('history');
+        body.replaceChildren();
+        for (const record of records) {
+            const row = body.insertRow();
+            for (const value of [record.id, record.currency, record.amount, record.dateRequest, record.status, record.transactionId]) {
+                row.insertCell().textContent = value == null ? '-' : String(value);
             }
-        ],
-        language: {
-            emptyTable: "No pending or completed requests"
+        }
+        document.getElementById('history-page').textContent = `Page ${historyPage + 1}`;
+        document.getElementById('history-previous').disabled = historyPage === 0;
+        document.getElementById('history-next').disabled = records.length < 20;
+        document.getElementById('history-error').hidden = true;
+    }
+    async function changeHistoryPage(page) {
+        const previousPage = historyPage;
+        historyPage = page;
+        try {
+            await loadHistory();
+        } catch (ex) {
+            historyPage = previousPage;
+            document.getElementById('history-error').hidden = false;
+        }
+    }
+    document.getElementById('history-previous').addEventListener('click', () => changeHistoryPage(historyPage - 1));
+    document.getElementById('history-next').addEventListener('click', () => changeHistoryPage(historyPage + 1));
+    changeHistoryPage(0);
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        error.hidden = true;
+        if (!captchaToken) {
+            error.textContent = 'Complete the CAPTCHA before submitting.';
+            error.hidden = false;
+            return;
+        }
+        const button = document.getElementById('submit-withdraw');
+        button.disabled = true;
+        try {
+            const response = await fetch('/withdraws', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [document.querySelector('meta[name="_csrf_header"]').content]: document.querySelector('meta[name="_csrf"]').content
+                },
+                body: JSON.stringify({
+                    amount: Number(points.value),
+                    currency: document.getElementById('method').value,
+                    destination: document.getElementById('destination').value,
+                    captchaResponse: captchaToken
+                })
+            });
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || 'The withdrawal could not be submitted. Check your points and destination.');
+            }
+            window.location.reload();
+        } catch (ex) {
+            error.textContent = ex.message;
+            error.hidden = false;
+            captchaToken = '';
+            if (window.grecaptcha) grecaptcha.reset();
+            button.disabled = false;
         }
     });
-});
-
-$('#withdrawalModal').on('shown.bs.modal', function () {
-    document.getElementById('withdraw-error').style.display = 'none';
-    document.getElementById('proceed_withdraw').style.display = 'inline-block';
-    checkFields(); // ripristina lo stato del bottone
-});
-
-	document.getElementById('proceed_withdraw').addEventListener('click', function () {
-	const amount = parseFloat(document.getElementById('username').value);
-	const currency = document.getElementById('wallet-destination').value;
-
-	if (!amount || isNaN(amount)) {
-		alert("Please enter a valid amount.");
-		return;
-	}
-
-	if (currency !== "BTC" && currency !== "ETH") {
-		alert("Please select a valid currency.");
-		return;
-	}
-
-	const data = {
-		amount: amount,
-		currency: currency
-	};
-
-	// Esegui la chiamata POST AJAX
-	$.ajax({
-		type: "POST",
-		url: "/withdraws",
-		contentType: "application/json",
-		data: JSON.stringify(data),
-		success: function (response) {
-			alert("Withdrawal request sent successfully!");
-			$('#withdrawalModal').modal('hide');
-			// Eventuale reset form
-			document.getElementById('username').value = '';
-			document.getElementById('wallet-destination').value = '';
-			document.getElementById('wallet-address').value = '';
-			document.getElementById('wallet-address-group').style.display = 'none';
-			captchaCompleted = false;
-			grecaptcha.reset(); // reset del captcha
-			checkFields();
-		},
-		error: function (err) {
-   const errorBox = document.getElementById('withdraw-error');
-    const proceedButton = document.getElementById('proceed_withdraw');
-    let errorMessage = "An error occurred during the withdrawal request";
-
-    if (err.responseJSON && err.responseJSON.errorCode === 'INSUFFICIENT_POINTS') {
-        errorMessage = "You don't have enough annual points for this withdrawal";
-    } else if (err.responseJSON && err.responseJSON.errorCode === 'BELOW_MINIMUM') {
-        errorMessage = "The withdrawal amount is below the minimum threshold";
-    }
-
-    errorBox.innerText = errorMessage;
-    errorBox.style.display = 'block';
-    proceedButton.style.display = 'none';
-		}
-	});
-});
 </script>
 </body>
-
 </html>

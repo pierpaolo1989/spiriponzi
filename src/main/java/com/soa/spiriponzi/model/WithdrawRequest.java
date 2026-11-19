@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.model;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,5 +42,13 @@ public class WithdrawRequest {
     private String transactionId;
     @Column
     private String currency;
+    @Column(length = 254)
+    private String destination;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal grossEur;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal feeEur;
+    @Column(precision = 30, scale = 18)
+    private BigDecimal paidAmount;
 
 }

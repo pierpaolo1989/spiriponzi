@@ -211,7 +211,7 @@ class UserServiceImplTest {
                 .build();
         Ad ad = Ad.builder().id(5L).active(true).reward(20).build();
         when(adRepository.findById(5L)).thenReturn(Optional.of(ad));
-        when(userStatsRepository.findByUserEmail(user.getEmail())).thenReturn(Optional.of(stats));
+        when(userStatsRepository.findWithLockByUserEmail(user.getEmail())).thenReturn(Optional.of(stats));
 
         userService.createUserAd(user, 5L);
 

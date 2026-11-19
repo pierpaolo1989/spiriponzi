@@ -2,6 +2,7 @@ package com.soa.spiriponzi.controller;
 
 import com.soa.spiriponzi.dto.WithdrawDto;
 import com.soa.spiriponzi.service.WithdrawService;
+import com.soa.spiriponzi.service.CaptchaService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +19,14 @@ class WihdrawControllerTest {
 
     private WithdrawService withdrawService;
     private WihdrawController controller;
+    private CaptchaService captchaService;
 
     @BeforeEach
     void setUp() {
         ControllerTestSupport.authenticate();
         withdrawService = mock(WithdrawService.class);
-        controller = new WihdrawController(withdrawService);
+        captchaService = mock(CaptchaService.class);
+        controller = new WihdrawController(withdrawService, captchaService);
     }
 
     @AfterEach
@@ -43,11 +46,24 @@ class WihdrawControllerTest {
 
     @Test
     void startWithdrawRequestDelegatesAndReturnsSuccess() {
-        WithdrawDto request = WithdrawDto.builder().amount(15).currency("BTC").build();
+        when(captchaService.getReCaptchaSite()).thenReturn("site-key");
+        when(captchaService.getReCaptchaSecret()).thenReturn("secret-key");
+        WithdrawDto request = WithdrawDto.builder().amount(15).currency("BTC").captchaResponse("token").build();
 
         ResponseEntity<Void> response = controller.startWithdrawRequest(request);
 
         assertEquals(200, response.getStatusCode().value());
         verify(withdrawService).startRequest(ControllerTestSupport.EMAIL, request);
+        verify(captchaService).processResponse("token");
+    }
+
+    @Test
+    void rejectsWithdrawalsWhenOnlyTestCaptchaIsConfigured() {
+        when(captchaService.getReCaptchaSite()).thenReturn("6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI");
+        when(captchaService.getReCaptchaSecret()).thenReturn("secret-key");
+        var exception = org.junit.jupiter.api.Assertions.assertThrows(
+                org.springframework.web.server.ResponseStatusException.class,
+                () -> controller.startWithdrawRequest(WithdrawDto.builder().build()));
+        assertEquals(503, exception.getStatusCode().value());
     }
 }

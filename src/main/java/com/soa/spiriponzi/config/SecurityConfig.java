@@ -27,7 +27,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
+                    String method = request.getMethod();
+                    String path = request.getServletPath();
+                    return !("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method)
+                            || "TRACE".equals(method))
+                            && (path.equals("/withdraws") || path.startsWith("/admin/"));
+                }))
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
                         .requestMatchers("/", "/register/**", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",

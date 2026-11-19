@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.dto;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -18,5 +19,10 @@ public class WithdrawDto {
     private String transactionId;
     @NotNull
     private String currency;
+    private String destination;
+    private BigDecimal grossEur;
+    private BigDecimal feeEur;
+    private BigDecimal paidAmount;
+    private String captchaResponse;
 
 }

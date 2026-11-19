@@ -76,6 +76,11 @@
 			<version>0.16.2</version>
 		</dependency>
 		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15to18</artifactId>
+			<version>1.69</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.ua-parser</groupId>
 			<artifactId>uap-java</artifactId>
 			<version>${uap-java.version}</version>

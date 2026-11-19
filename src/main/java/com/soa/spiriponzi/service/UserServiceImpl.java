@@ -282,8 +282,8 @@ public class UserServiceImpl implements UserService {
         userAdRepository.save(userAd);
 
         //Update user stats
-        Optional<UserStats> optUserStats = userStatsRepository.findByUserEmail(user.getEmail());
-        UserStats userStats = optUserStats.get();
+        UserStats userStats = userStatsRepository.findWithLockByUserEmail(user.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "User has no point balance"));
         int amount = (int) ad.getReward();
         LocalDateTime lastRequest = userStats.getLastRequest();
         LocalDate today = LocalDate.now();

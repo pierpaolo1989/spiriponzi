@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spiriponzi - Gestione prelievi</title>
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+</head>
+<body>
+<main class="container-fluid py-4">
+    <a th:href="@{/admin}">Torna alla dashboard</a>
+    <h1 class="h3 my-3">Gestione prelievi</h1>
+    <p>Approvare non invia denaro. Verifica l'indirizzo, la rete, il saldo e il cambio prima di pagare
+        manualmente. Poi registra l'importo effettivamente inviato e l'ID della transazione.</p>
+    <p>La commissione trattenuta è fissa; le commissioni effettive del wallet o di PayPal possono essere diverse.
+        Verifica il costo reale prima di procedere.</p>
+    <p>Una richiesta con saldo negativo dopo uno storno non può essere approvata.
+        I pagamenti esterni sono irreversibili: controlla di nuovo il saldo prima di inviarli.
+        Un pagamento già inviato va registrato anche se nel frattempo il saldo è diventato negativo.</p>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <p th:if="${withdrawals.empty}">Nessuna richiesta da gestire.</p>
+    <div class="card shadow mb-3" th:each="w : ${withdrawals.content}">
+        <div class="card-body">
+            <h2 class="h5" th:text="|Richiesta #${w.id} - ${w.status}|"></h2>
+            <p>
+                Utente: <strong th:text="${w.user.email}"></strong><br>
+                Punti disponibili attuali: <strong th:text="${w.user.userStats != null ? w.user.userStats.annualPoints : 'Non disponibile'}"></strong><br>
+                Data: <span th:text="${w.dateRequest}"></span><br>
+                Punti: <span th:text="${w.amount}"></span><br>
+                Metodo: <strong th:text="${w.currency}"></strong><br>
+                Destinazione: <strong th:text="${w.destination != null ? w.destination : 'Non disponibile - richiesta precedente'}"></strong><br>
+                Lordo EUR: <span th:text="${w.grossEur}"></span>;
+                commissione EUR: <span th:text="${w.feeEur}"></span>;
+                netto EUR: <strong th:text="${w.grossEur != null and w.feeEur != null ? w.grossEur.subtract(w.feeEur) : 'Non disponibile'}"></strong>
+            </p>
+            <div th:if="${w.destination != null and w.grossEur != null and w.feeEur != null}">
+                <div th:if="${w.status == 'PENDING'}" class="d-flex">
+                    <form th:action="@{/admin/withdrawals/{id}/approve(id=${w.id})}" method="post" class="mr-2">
+                        <button class="btn btn-primary" type="submit">Approva</button>
+                    </form>
+                    <form th:action="@{/admin/withdrawals/{id}/reject(id=${w.id})}" method="post">
+                        <button class="btn btn-danger" type="submit">Rifiuta e restituisci punti</button>
+                    </form>
+                </div>
+                <form th:if="${w.status == 'APPROVED'}"
+                      th:action="@{/admin/withdrawals/{id}/complete(id=${w.id})}" method="post">
+                    <p class="text-danger">Registra solo dopo aver effettivamente inviato e verificato il pagamento.
+                        Per BTC/ETH inserisci la quantità crypto; per PayPal l'importo netto in EUR.</p>
+                    <label th:for="|paid-${w.id}|">Importo inviato</label>
+                    <input class="form-control mb-2" th:id="|paid-${w.id}|" type="number" name="paidAmount" min="0.000000000000000001" step="any" required>
+                    <label th:for="|reference-${w.id}|">ID transazione / riferimento PayPal</label>
+                    <input class="form-control mb-2" th:id="|reference-${w.id}|" name="reference" maxlength="128" required>
+                    <button class="btn btn-success" type="submit">Registra pagamento effettuato</button>
+                </form>
+                <form th:if="${w.status == 'APPROVED'}"
+                      th:action="@{/admin/withdrawals/{id}/reject(id=${w.id})}" method="post" class="mt-3">
+                    <label><input type="checkbox" required> Confermo che il pagamento non è stato inviato.</label>
+                    <button class="btn btn-danger" type="submit">Annulla e restituisci punti</button>
+                </form>
+            </div>
+            <p th:if="${w.destination == null or w.grossEur == null or w.feeEur == null}" class="text-warning">
+                Richiesta precedente: mancano i dati di prenotazione. Gestiscila e riconciliala manualmente.</p>
+            <form th:if="${w.status == 'PENDING' and (w.destination == null or w.grossEur == null or w.feeEur == null)}"
+                  th:action="@{/admin/withdrawals/{id}/archive-legacy(id=${w.id})}" method="post">
+                <label><input type="checkbox" required> Ho verificato la richiesta precedente e gli eventuali pagamenti esterni.
+                    L'archiviazione non modifica i punti.</label>
+                <button class="btn btn-warning" type="submit">Archivia richiesta precedente</button>
+            </form>
+        </div>
+    </div>
+    <nav>
+        <a th:if="${withdrawals.hasPrevious()}" th:href="@{/admin/withdrawals(page=${withdrawals.number - 1})}">Precedente</a>
+        <span th:text="|Pagina ${withdrawals.number + 1} di ${withdrawals.totalPages == 0 ? 1 : withdrawals.totalPages}|"></span>
+        <a th:if="${withdrawals.hasNext()}" th:href="@{/admin/withdrawals(page=${withdrawals.number + 1})}">Successiva</a>
+    </nav>
+</main>
+</body>
+</html>
