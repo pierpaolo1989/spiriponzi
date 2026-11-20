@@ -210,7 +210,7 @@ class UserServiceImplTest {
                 .lastRequest(null)
                 .build();
         Ad ad = Ad.builder().id(5L).active(true).reward(20).build();
-        when(adRepository.findById(5L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(5L)).thenReturn(Optional.of(ad));
         when(userStatsRepository.findWithLockByUserEmail(user.getEmail())).thenReturn(Optional.of(stats));
 
         userService.createUserAd(user, 5L);
@@ -219,5 +219,60 @@ class UserServiceImplTest {
         assertEquals(70, stats.getMonthlyPoints());
         verify(userStatsRepository).save(stats);
         verify(userAdRepository).save(any(com.soa.spiriponzi.model.UserAd.class));
+    }
+
+    @Test
+    void surfedUserAdConsumesRemainingBudgetAndCreditsViewer() {
+        User owner = User.builder().id(8L).email("owner@example.com").build();
+        User viewer = User.builder().id(4L).email("player@example.com").build();
+        UserStats stats = UserStats.builder().annualPoints(50).monthlyPoints(50).build();
+        Ad ad = Ad.builder().id(5L).active(true).reward(20).budget(40).proposer(owner).build();
+        when(adRepository.findWithLockById(5L)).thenReturn(Optional.of(ad));
+        when(userStatsRepository.findWithLockByUserEmail(viewer.getEmail())).thenReturn(Optional.of(stats));
+
+        userService.createUserAd(viewer, 5L);
+
+        assertEquals(20, ad.getBudget());
+        assertEquals(70, stats.getAnnualPoints());
+        assertEquals(70, stats.getMonthlyPoints());
+        verify(adRepository).save(ad);
+        verify(userAdRepository).save(any(com.soa.spiriponzi.model.UserAd.class));
+    }
+
+    @Test
+    void surfedUserAdRejectsWhenRemainingBudgetCannotCoverReward() {
+        User owner = User.builder().id(8L).email("owner@example.com").build();
+        User viewer = User.builder().id(4L).email("player@example.com").build();
+        Ad ad = Ad.builder().id(5L).active(true).reward(20).budget(0).proposer(owner).build();
+        when(adRepository.findWithLockById(5L)).thenReturn(Optional.of(ad));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> userService.createUserAd(viewer, 5L)
+        );
+
+        assertEquals(409, exception.getStatusCode().value());
+        verify(userAdRepository, never()).save(any(com.soa.spiriponzi.model.UserAd.class));
+        verify(userStatsRepository, never()).save(any(UserStats.class));
+    }
+
+    @Test
+    void surfedUserAdRejectsSecondClaimOnSameDayWithoutSpendingBudget() {
+        User owner = User.builder().id(8L).email("owner@example.com").build();
+        User viewer = User.builder().id(4L).email("player@example.com").build();
+        Ad ad = Ad.builder().id(5L).active(true).reward(20).budget(40).proposer(owner).build();
+        when(adRepository.findWithLockById(5L)).thenReturn(Optional.of(ad));
+        when(userAdRepository.existsByAdIdAndUserIdAndCompletedAt(5L, 4L, java.time.LocalDate.now()))
+                .thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> userService.createUserAd(viewer, 5L)
+        );
+
+        assertEquals(409, exception.getStatusCode().value());
+        assertEquals(40, ad.getBudget());
+        verify(userAdRepository, never()).save(any(com.soa.spiriponzi.model.UserAd.class));
+        verify(userStatsRepository, never()).save(any(UserStats.class));
     }
 }

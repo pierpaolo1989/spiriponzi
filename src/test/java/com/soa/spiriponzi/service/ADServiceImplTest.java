@@ -42,7 +42,7 @@ class ADServiceImplTest {
                 .reward(10)
                 .proposer(owner)
                 .build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
         when(userStatsRepository.findWithLockByUserEmail(owner.getEmail())).thenReturn(Optional.of(owner.getUserStats()));
 
         assertEquals(80, adService.updateBudget(owner, 10L, 20));
@@ -57,7 +57,7 @@ class ADServiceImplTest {
     void updateBudgetRefundsTheDifferenceWhenBudgetIsReduced() {
         User owner = userWithCoins(1L, 0, 80);
         Ad ad = Ad.builder().id(10L).reward(10).budget(20).proposer(owner).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
         when(userStatsRepository.findWithLockByUserEmail(owner.getEmail())).thenReturn(Optional.of(owner.getUserStats()));
 
         assertEquals(90, adService.updateBudget(owner, 10L, 10));
@@ -71,7 +71,7 @@ class ADServiceImplTest {
     void updateBudgetRejectsAmountBelowReward() {
         User owner = userWithCoins(1L, 0, 100);
         Ad ad = Ad.builder().id(10L).reward(10).proposer(owner).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -86,7 +86,7 @@ class ADServiceImplTest {
     void updateBudgetRejectsAmountThatIsNotMultipleOfReward() {
         User owner = userWithCoins(1L, 0, 100);
         Ad ad = Ad.builder().id(10L).reward(10).proposer(owner).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -100,7 +100,7 @@ class ADServiceImplTest {
     void updateBudgetRejectsAmountAboveAvailableBalance() {
         User owner = userWithCoins(1L, 0, 100);
         Ad ad = Ad.builder().id(10L).reward(5).proposer(owner).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
         when(userStatsRepository.findWithLockByUserEmail(owner.getEmail())).thenReturn(Optional.of(owner.getUserStats()));
 
         ResponseStatusException exception = assertThrows(
@@ -118,7 +118,7 @@ class ADServiceImplTest {
         User owner = userWithCoins(1L, 100, 100);
         User anotherUser = userWithCoins(2L, 100, 100);
         Ad ad = Ad.builder().id(10L).reward(5).proposer(owner).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
         when(userStatsRepository.findWithLockByUserEmail(owner.getEmail())).thenReturn(Optional.of(owner.getUserStats()));
 
         ResponseStatusException exception = assertThrows(
@@ -133,7 +133,7 @@ class ADServiceImplTest {
     void toggleActivePublishesAndPausesAd() {
         User owner = userWithCoins(1L, 0, 100);
         Ad ad = Ad.builder().id(10L).proposer(owner).active(false).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
 
         assertTrue(adService.toggleActive(owner, 10L));
         assertTrue(ad.isActive());
@@ -148,7 +148,7 @@ class ADServiceImplTest {
         User owner = userWithCoins(1L, 0, 100);
         User anotherUser = userWithCoins(2L, 0, 100);
         Ad ad = Ad.builder().id(10L).proposer(owner).active(false).build();
-        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adRepository.findWithLockById(10L)).thenReturn(Optional.of(ad));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,

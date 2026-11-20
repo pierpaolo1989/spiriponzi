@@ -16,8 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findWithLockById(Long id);
     List<User> findTop5ByOrderByIdDesc();
 
-    @Query("select coalesce(sum(u.balance), 0) from User u")
-    double sumBalances();
+    @Query("select coalesce(sum(stats.annualPoints), 0) from User u left join u.userStats stats")
+    long sumAnnualPoints();
 
     Optional<User> findByReferralCode(String referralCode);
     boolean existsByReferralCode(String referralCode);

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
+import java.util.List;
+import org.springframework.data.domain.PageRequest;
 
 @Controller
 @RequestMapping("/admin")
@@ -32,14 +34,15 @@ public class AdminController {
     @GetMapping
     public String dashboard(Model model) {
         model.addAttribute("totalUsers", userRepository.count());
-        model.addAttribute("totalBalance", userRepository.sumBalances());
+        model.addAttribute("totalBalance", userRepository.sumAnnualPoints());
         model.addAttribute("activeAds", adRepository.countByActiveTrueAndDeletedFalse());
         model.addAttribute("totalClaims", claimRepository.count());
         model.addAttribute("totalClaimAmount", claimRepository.sumClaimAmounts());
         model.addAttribute("pendingWithdrawals",
                 withdrawRepository.countByStatus(WithdrawStatus.PENDING.name()));
         model.addAttribute("recentUsers", userRepository.findTop5ByOrderByIdDesc());
-        model.addAttribute("recentWithdrawals", withdrawRepository.findTop10ByOrderByDateRequestDesc());
+        model.addAttribute("pendingWithdrawalRequests", withdrawRepository.findByStatusInOrderByDateRequestAsc(
+                List.of(WithdrawStatus.PENDING.name()), PageRequest.of(0, 5)));
         return "admin/dashboard";
     }
 

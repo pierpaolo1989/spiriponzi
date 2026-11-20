@@ -8,13 +8,90 @@
 	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 		crossorigin="anonymous"></script>
+	<style>
+		.admin-sidebar .sidebar-brand-icon img {
+			height: 2.4rem;
+			width: 2.4rem;
+		}
+
+		.admin-sidebar .sidebar-brand-text {
+			font-size: 1rem;
+			font-weight: 800;
+			letter-spacing: .02em;
+		}
+
+		.admin-brand-label {
+			display: block;
+			font-size: .55rem;
+			letter-spacing: .18em;
+			opacity: .75;
+		}
+
+		.admin-logout-btn {
+			border: 1px solid rgba(255, 255, 255, .55);
+			border-radius: 999px;
+			color: #fff;
+			font-weight: 700;
+			padding: .45rem 1.15rem;
+			transition: background-color .15s ease, color .15s ease, transform .15s ease;
+		}
+
+		.admin-logout-btn:hover,
+		.admin-logout-btn:focus {
+			background: #fff;
+			color: #224abe;
+			transform: translateY(-1px);
+		}
+
+		.admin-table-card {
+			border: 0;
+			border-radius: .65rem;
+			overflow: hidden;
+		}
+
+		.admin-table-card .card-header {
+			align-items: center;
+			background: #fff;
+			border-bottom: 1px solid #eaecf4;
+			display: flex;
+			justify-content: space-between;
+			padding: 1rem 1.25rem;
+		}
+
+		.admin-table {
+			margin-bottom: 0;
+		}
+
+		.admin-table thead th {
+			background: #f8f9fc;
+			border-bottom: 1px solid #eaecf4;
+			border-top: 0;
+			color: #6e707e;
+			font-size: .7rem;
+			letter-spacing: .04em;
+			text-transform: uppercase;
+			white-space: nowrap;
+		}
+
+		.admin-table tbody td {
+			vertical-align: middle;
+		}
+
+		.admin-points-badge {
+			background: #eef1ff;
+			color: #3b56a6;
+			font-size: .8rem;
+			font-weight: 700;
+			white-space: nowrap;
+		}
+	</style>
 </head>
 <body id="page-top">
 <div id="wrapper">
-	<nav class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion">
+	<nav class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion admin-sidebar">
 		<a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
-			<div class="sidebar-brand-icon"><i class="fas fa-coins"></i></div>
-			<div class="sidebar-brand-text mx-3">Admin</div>
+			<div class="sidebar-brand-icon"><img th:src="@{/img/spiriponzi-mark.svg}" alt="Spiriponzi"></div>
+			<div class="sidebar-brand-text mx-3">Spiriponzi<span class="admin-brand-label">ADMIN</span></div>
 		</a>
 		<hr class="sidebar-divider">
 		<div class="sidebar-heading">Amministrazione</div>
@@ -31,7 +108,9 @@
 		<hr class="sidebar-divider d-none d-md-block">
 		<div class="text-center">
 			<form th:action="@{/logout}" method="post">
-				<button class="btn btn-sm btn-light" type="submit">Esci</button>
+				<button class="btn btn-sm admin-logout-btn" type="submit">
+					<i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Esci
+				</button>
 			</form>
 		</div>
 	</nav>
@@ -64,8 +143,8 @@
 						<div class="card border-left-success shadow h-100 py-2">
 							<div class="card-body"><div class="row no-gutters align-items-center">
 								<div class="col mr-2">
-									<div class="text-xs font-weight-bold text-success text-uppercase mb-1">Saldo totale utenti</div>
-									<div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${#numbers.formatDecimal(totalBalance, 1, 2)}">0.00</div>
+									<div class="text-xs font-weight-bold text-success text-uppercase mb-1">Punti disponibili utenti</div>
+									<div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalBalance}">0</div>
 								</div><div class="col-auto"><i class="fas fa-wallet fa-2x text-gray-300"></i></div>
 							</div></div>
 						</div>
@@ -114,16 +193,22 @@
 
 				<div class="row">
 					<div class="col-lg-5 mb-4">
-						<div class="card shadow mb-4">
-							<div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Ultimi utenti</h6></div>
+						<div class="card shadow mb-4 admin-table-card">
+							<div class="card-header">
+								<h6 class="m-0 font-weight-bold text-primary">Ultimi utenti</h6>
+								<span class="badge badge-light">5 recenti</span>
+							</div>
 							<div class="card-body table-responsive">
-								<table class="table table-sm">
-									<thead><tr><th>ID</th><th>Email</th><th>Saldo</th></tr></thead>
+								<table class="table table-sm table-hover admin-table">
+									<thead><tr><th>ID</th><th>Utente</th><th class="text-right">Punti</th></tr></thead>
 									<tbody>
 									<tr th:each="user : ${recentUsers}">
 										<td th:text="${user.id}">1</td>
 										<td th:text="${user.email}">utente@example.com</td>
-										<td th:text="${#numbers.formatDecimal(user.balance, 1, 2)}">0.00</td>
+										<td class="text-right">
+											<span class="badge admin-points-badge"
+												  th:text="${user.userStats != null ? user.userStats.annualPoints : 0} + ' punti'">0 punti</span>
+										</td>
 									</tr>
 									<tr th:if="${#lists.isEmpty(recentUsers)}"><td colspan="3" class="text-center text-muted">Nessun utente registrato</td></tr>
 									</tbody>
@@ -132,20 +217,29 @@
 						</div>
 					</div>
 					<div class="col-lg-7 mb-4">
-						<div class="card shadow mb-4">
-							<div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Ultime richieste di prelievo</h6></div>
+						<div class="card shadow mb-4 admin-table-card">
+							<div class="card-header">
+								<h6 class="m-0 font-weight-bold text-primary">Prelievi da approvare</h6>
+								<a th:href="@{/admin/withdrawals}" class="btn btn-sm btn-outline-primary">
+									Gestisci prelievi<i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>
+								</a>
+							</div>
 							<div class="card-body table-responsive">
-								<table class="table table-sm">
-									<thead><tr><th>Data</th><th>Utente</th><th>Importo</th><th>Valuta</th><th>Stato</th></tr></thead>
+								<table class="table table-sm table-hover admin-table">
+									<thead><tr><th>Data</th><th>Utente</th><th>Punti</th><th>Metodo</th><th>Netto stimato</th><th></th></tr></thead>
 									<tbody>
-									<tr th:each="withdrawal : ${recentWithdrawals}">
-										<td th:text="${withdrawal.dateRequest}">2026-01-01</td>
+									<tr th:each="withdrawal : ${pendingWithdrawalRequests.content}">
+										<td class="text-nowrap" th:text="${withdrawal.dateRequest}">2026-01-01</td>
 										<td th:text="${withdrawal.user.email}">utente@example.com</td>
-										<td th:text="${#numbers.formatDecimal(withdrawal.amount, 1, 2)}">0.00</td>
-										<td th:text="${withdrawal.currency}">BTC</td>
-										<td th:text="${withdrawal.status}">PENDING</td>
+										<td class="text-nowrap" th:text="${withdrawal.amount}">0</td>
+										<td><span class="badge badge-warning" th:text="${withdrawal.currency}">BTC</span></td>
+										<td class="text-nowrap"
+											th:text="${withdrawal.grossEur != null and withdrawal.feeEur != null ? #numbers.formatDecimal(withdrawal.grossEur.subtract(withdrawal.feeEur), 1, 2) + ' EUR' : 'Da verificare'}">Da verificare</td>
+										<td>
+											<a th:href="@{/admin/withdrawals}" class="btn btn-sm btn-outline-primary">Apri</a>
+										</td>
 									</tr>
-									<tr th:if="${#lists.isEmpty(recentWithdrawals)}"><td colspan="5" class="text-center text-muted">Nessun prelievo registrato</td></tr>
+									<tr th:if="${pendingWithdrawalRequests.empty}"><td colspan="6" class="text-center text-muted py-4">Nessun prelievo in attesa di approvazione</td></tr>
 									</tbody>
 								</table>
 							</div>

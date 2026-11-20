@@ -28,7 +28,7 @@
       </div>
 
       <div class="text-muted small mb-1 text-left">
-        Budget: <span class="ad-budget-value" th:text="${ad.budget > 0 ? ad.budget + ' coins' : 'Not set'}">Not set</span>
+        Remaining budget: <span class="ad-budget-value" th:text="${ad.budget + ' coins'}">0 coins</span>
       </div>
 
       <div class="countdown justify-content-start">

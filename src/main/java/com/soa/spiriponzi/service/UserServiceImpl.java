@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -267,7 +268,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void createUserAd(User user, Long idAd) {
-        var ad = adRepository.findById(idAd)
+        var ad = adRepository.findWithLockById(idAd)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
         if (!ad.isActive() || ad.isDeleted()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad is not available");
@@ -275,18 +276,31 @@ public class UserServiceImpl implements UserService {
         if (ad.getProposer() != null && ad.getProposer().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot surf your own ad");
         }
+        double reward = ad.getReward();
+        if (!Double.isFinite(reward) || reward <= 0
+                || reward > Integer.MAX_VALUE
+                || BigDecimal.valueOf(reward).stripTrailingZeros().scale() > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad reward must be a positive whole number of points");
+        }
+        if (ad.getProposer() != null
+                && (!Double.isFinite(ad.getBudget()) || ad.getBudget() < reward)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ad budget is exhausted");
+        }
+        LocalDate today = LocalDate.now();
+        if (userAdRepository.existsByAdIdAndUserIdAndCompletedAt(ad.getId(), user.getId(), today)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already viewed this ad today");
+        }
+
         UserAd userAd = new UserAd();
         userAd.setAd(ad);
         userAd.setUser(user);
-        userAd.setCompletedAt(LocalDate.now());
-        userAdRepository.save(userAd);
+        userAd.setCompletedAt(today);
 
         //Update user stats
         UserStats userStats = userStatsRepository.findWithLockByUserEmail(user.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "User has no point balance"));
-        int amount = (int) ad.getReward();
+        int amount = BigDecimal.valueOf(reward).intValueExact();
         LocalDateTime lastRequest = userStats.getLastRequest();
-        LocalDate today = LocalDate.now();
         if (lastRequest == null
                 || (lastRequest.getYear() == today.getYear() && lastRequest.getMonth() == today.getMonth())) {
             userStats.setMonthlyPoints(userStats.getMonthlyPoints() + amount);
@@ -295,5 +309,12 @@ public class UserServiceImpl implements UserService {
         }
         userStats.setAnnualPoints(userStats.getAnnualPoints() + amount);
         userStatsRepository.save(userStats);
+        if (ad.getProposer() != null) {
+            ad.setBudget(BigDecimal.valueOf(ad.getBudget())
+                    .subtract(BigDecimal.valueOf(reward))
+                    .doubleValue());
+            adRepository.save(ad);
+        }
+        userAdRepository.save(userAd);
     }
 }

@@ -294,7 +294,7 @@
             const initialBudget = currentBudget >= reward ? currentBudget : reward;
             input.value = Math.min(Math.ceil(initialBudget / reward) * reward, maxBudget);
             document.getElementById('adBudgetLimits').textContent =
-                `Minimum: ${reward} coins (reward per view). Maximum valid budget: ${maxBudget} coins (available: ${balance} coins).`;
+                `Reward per view: ${reward} coins. Current remaining budget: ${currentBudget} coins. Set the new total remaining budget; the difference is deducted from or refunded to your balance. Maximum: ${maxBudget} coins.`;
             error.textContent = balance < reward
                 ? "Your available balance is lower than this ad's minimum budget."
                 : "";
@@ -561,7 +561,7 @@
 			<div class="modal-body">
 				<p id="adBudgetLimits" class="mb-3"></p>
 				<div class="form-group mb-0">
-					<label for="adBudgetInput">Coins to allocate</label>
+					<label for="adBudgetInput">Target remaining budget</label>
 					<input type="number" class="form-control" id="adBudgetInput" min="0" step="any" required>
 					<small id="adBudgetError" class="form-text text-danger"></small>
 				</div>

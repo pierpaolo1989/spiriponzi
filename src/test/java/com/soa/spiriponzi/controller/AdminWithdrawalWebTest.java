@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.http.MediaType;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -85,6 +87,30 @@ class AdminWithdrawalWebTest {
                         .session(session).param("_csrf", token.group(1)))
                 .andExpect(status().is3xxRedirection());
         verify(service).approve(1L);
+    }
+
+    @Test
+    void adminDashboardShowsUserPointsAndPendingWithdrawals() throws Exception {
+        User user = User.builder().id(8L).email("points@example.com")
+                .userStats(UserStats.builder().annualPoints(1234).build()).build();
+        WithdrawRequest pending = WithdrawRequest.builder().id(12L).user(user).amount(3000)
+                .currency("PAYPAL").status("PENDING")
+                .grossEur(new BigDecimal("0.50")).feeEur(new BigDecimal("0.10")).build();
+        when(users.sumAnnualPoints()).thenReturn(1234L);
+        when(users.findTop5ByOrderByIdDesc()).thenReturn(List.of(user));
+        when(withdrawals.findByStatusInOrderByDateRequestAsc(
+                List.of("PENDING"), PageRequest.of(0, 5)))
+                .thenReturn(new PageImpl<>(List.of(pending)));
+
+        MvcResult page = mvc.perform(get("/admin").servletPath("/admin").session(session("ROLE_ADMIN")))
+                .andExpect(status().isOk()).andReturn();
+
+        String html = page.getResponse().getContentAsString();
+        assertTrue(html.contains("spiriponzi-mark.svg"));
+        assertTrue(html.contains("1234 punti"));
+        assertTrue(html.contains("Prelievi da approvare"));
+        assertTrue(html.contains("points@example.com"));
+        assertTrue(html.contains("Gestisci prelievi"));
     }
 
     @Test

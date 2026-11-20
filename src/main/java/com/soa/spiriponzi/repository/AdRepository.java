@@ -30,7 +30,11 @@ public interface AdRepository extends JpaRepository<Ad, Long> {
            END AS completed
     FROM Ad a
     WHERE a.proposer IS NULL
-       OR (a.active = true AND a.proposer.id <> :userId AND a.deleted = false)
+       OR (a.active = true
+           AND a.proposer.id <> :userId
+           AND a.deleted = false
+           AND a.reward > 0
+           AND a.budget >= a.reward)
     """)
 	List<Object[]> findAdsWithCompletionStatus(@Param("userId") Long userId);
 	List<Ad> findByActiveTrue();

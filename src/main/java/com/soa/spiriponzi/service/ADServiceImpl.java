@@ -55,8 +55,9 @@ public class ADServiceImpl implements ADService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(User user, Long id) {
-		Optional<Ad> optional = adRepository.findById(id);
+		Optional<Ad> optional = adRepository.findWithLockById(id);
 		if (optional.isPresent()) {
 			var ad = optional.get();
 			if (Objects.isNull(ad.getProposer()) || !ad.getProposer().getId().equals(user.getId())) {
@@ -70,8 +71,9 @@ public class ADServiceImpl implements ADService {
 	}
 
 	@Override
+	@Transactional
 	public boolean toggleActive(User user, Long id) {
-		Ad ad = adRepository.findById(id)
+		Ad ad = adRepository.findWithLockById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
 		if (Objects.isNull(ad.getProposer()) || !ad.getProposer().getId().equals(user.getId())) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Operation not admitted");
@@ -90,7 +92,7 @@ public class ADServiceImpl implements ADService {
 	@Override
 	@Transactional
 	public double updateBudget(User user, Long id, double budget) {
-		Ad ad = adRepository.findById(id)
+		Ad ad = adRepository.findWithLockById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
 		if (Objects.isNull(ad.getProposer()) || !ad.getProposer().getId().equals(user.getId())) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Operation not admitted");
@@ -98,7 +100,9 @@ public class ADServiceImpl implements ADService {
 		var userStats = userStatsRepository.findWithLockByUserEmail(user.getEmail())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has no coin balance"));
 		double reward = ad.getReward();
-		if (!Double.isFinite(reward) || reward <= 0 || !Double.isFinite(budget)) {
+		if (!Double.isFinite(reward) || reward <= 0
+				|| BigDecimal.valueOf(reward).stripTrailingZeros().scale() > 0
+				|| !Double.isFinite(budget)) {
 			throw new ResponseStatusException(
 					HttpStatus.BAD_REQUEST,
 					"Budget must be a multiple of the ad reward and no greater than your available balance"
