@@ -217,22 +217,17 @@ iframe {
 
 	<div class="modal fade" id="gameClaimModal" tabindex="-1" role="dialog"
 		 aria-labelledby="gameClaimModalLabel" aria-hidden="true"
-		 data-backdrop="static" data-keyboard="false">
+		 data-backdrop="false" data-keyboard="true">
 		<div class="modal-dialog modal-dialog-centered" role="document">
 			<div class="modal-content">
 				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title" id="gameClaimModalLabel">Game reward available</h5>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
 				</div>
 				<div class="modal-body text-center">
 					<p>Your game is paused. Claim 100 coins to continue playing.</p>
-					<div class="mb-3" role="complementary" aria-label="Advertisement">
-						<ins class="adsbygoogle"
-							 style="display:block"
-							 data-ad-client="ca-pub-3177939731250769"
-							 data-ad-slot="3421201727"
-							 data-ad-format="auto"
-							 data-full-width-responsive="true"></ins>
-					</div>
 					<p id="gameClaimError" class="text-danger" role="alert"></p>
 				</div>
 				<div class="modal-footer justify-content-center">
@@ -263,7 +258,6 @@ iframe {
 		let gameClaimSecondsRemaining = null;
 		let gameClaimTimer = null;
 		let gameClaimModalShown = false;
-		let gameClaimAdInitialized = false;
 
 		function updateGameClaimCountdown() {
 			const countdown = document.getElementById('gameClaimCountdown');
@@ -280,7 +274,7 @@ iframe {
 			claimButton.disabled = false;
 			if (!gameClaimModalShown) {
 				gameClaimModalShown = true;
-				$('#gameClaimModal').modal({ backdrop: 'static', keyboard: false });
+				$('#gameClaimModal').modal({ backdrop: false, keyboard: true });
 			}
 		}
 
@@ -324,14 +318,6 @@ iframe {
 		document.addEventListener('DOMContentLoaded', () => {
 			const claimButton = document.getElementById('gameClaimButton');
 			const claimError = document.getElementById('gameClaimError');
-
-			$('#gameClaimModal').on('shown.bs.modal', () => {
-				if (!gameClaimAdInitialized) {
-					window.adsbygoogle = window.adsbygoogle || [];
-					window.adsbygoogle.push({});
-					gameClaimAdInitialized = true;
-				}
-			});
 
 			claimButton.addEventListener('click', async () => {
 				claimButton.disabled = true;
