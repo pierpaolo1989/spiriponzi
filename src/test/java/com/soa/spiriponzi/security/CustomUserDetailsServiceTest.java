@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +32,24 @@ class CustomUserDetailsServiceTest {
         assertEquals("admin", admin.getUsername());
         assertTrue(passwordEncoder.matches("local-test-password", admin.getPassword()));
         assertTrue(admin.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")));
+    }
+
+    @Test
+    void configuredAdminCanAuthenticateRepeatedlyAfterCredentialsAreErased() {
+        CustomUserDetailsService service =
+                new CustomUserDetailsService(userRepository, passwordEncoder, "admin", "local-test-password");
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(service);
+        provider.setPasswordEncoder(passwordEncoder);
+        ProviderManager manager = new ProviderManager(provider);
+
+        for (int attempt = 0; attempt < 3; attempt++) {
+            var authentication = manager.authenticate(
+                    UsernamePasswordAuthenticationToken.unauthenticated("admin", "local-test-password"));
+            assertTrue(authentication.isAuthenticated());
+            assertTrue(authentication.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")));
+        }
     }
 
     @Test

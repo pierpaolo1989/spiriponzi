@@ -52,6 +52,19 @@ or attempts a game claim. The server stores and enforces the cooldown per accoun
 including across sessions and concurrent requests; it does not verify active play.
 Existing accounts keep their last game claim timestamp when the interval changes.
 
+### Render overview in the admin dashboard
+
+The optional Render panel lists the first 100 services accessible to a workspace
+API key. It reports whether each service is suspended, not its health or uptime.
+It does not show usage or billing amounts; use the link to the Render workspace
+Billing page for official charges, quotas and invoices.
+
+Create a workspace-scoped Render API key with read access to services, then set
+`RENDER_API_KEY` in the Render service's Environment settings and redeploy or
+restart. Never commit or share the key. If unset, the rest of the admin dashboard
+still works and the panel reports that it is not configured. Refresh the panel
+with its button; it does not refresh automatically.
+
 ### Sign in with Google
 
 Google sign-in is optional and disabled by default. It creates accounts only

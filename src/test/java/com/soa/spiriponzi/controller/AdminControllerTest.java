@@ -6,6 +6,7 @@ import com.soa.spiriponzi.repository.AdRepository;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.WithdrawRepository;
+import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +33,8 @@ class AdminControllerTest {
     private ClaimRepository claimRepository;
     @Mock
     private WithdrawRepository withdrawRepository;
+    @Mock
+    private RenderService renderService;
     @InjectMocks
     private AdminController adminController;
 

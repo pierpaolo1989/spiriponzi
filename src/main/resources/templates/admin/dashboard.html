@@ -129,6 +129,23 @@
 					</div>
 				</div>
 
+				<div class="card shadow mb-4 admin-table-card">
+					<div class="card-header">
+						<h6 class="m-0 font-weight-bold text-primary">Servizi Render</h6>
+						<button class="btn btn-sm btn-outline-primary" type="button" id="render-refresh">Aggiorna</button>
+					</div>
+					<div class="card-body">
+						<p class="small text-muted">Elenco dei primi 100 servizi accessibili con la chiave configurata.
+							Lo stato indica solo se il servizio è sospeso, non se è operativo.</p>
+						<p id="render-status" role="status" aria-live="polite"
+							th:data-url="@{/admin/render/services}">Caricamento servizi Render...</p>
+						<ul id="render-services" class="mb-3"></ul>
+						<p class="small text-muted mb-2">Consumi, costi e fatture non sono disponibili in questo pannello.
+							Consulta i dati ufficiali nel workspace Render.</p>
+						<a href="https://dashboard.render.com/" target="_blank" rel="noopener noreferrer">Apri Render e seleziona Billing</a>
+					</div>
+				</div>
+
 				<div class="row">
 					<div class="col-xl-4 col-md-6 mb-4">
 						<div class="card border-left-primary shadow h-100 py-2">
@@ -254,5 +271,47 @@
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/sb-admin-2.min.js}"></script>
+<script>
+	(() => {
+		const status = document.getElementById('render-status');
+		const list = document.getElementById('render-services');
+		const button = document.getElementById('render-refresh');
+		async function loadRenderServices() {
+			button.disabled = true;
+			list.replaceChildren();
+			status.textContent = 'Caricamento servizi Render...';
+			try {
+				const response = await fetch(status.dataset.url, { cache: 'no-store' });
+				if (response.status === 503) {
+					status.textContent = 'Render non configurato: imposta RENDER_API_KEY sul server.';
+					return;
+				}
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}`);
+				}
+				const services = await response.json();
+				if (!Array.isArray(services)) {
+					throw new Error('Risposta non valida');
+				}
+				for (const service of services) {
+					const item = document.createElement('li');
+					const state = service.suspended === 'suspended' ? 'Sospeso' : 'Non sospeso';
+					item.textContent = `${service.name} (${service.type}) — ${state}`;
+					list.appendChild(item);
+				}
+				status.textContent = services.length === 0
+					? 'Nessun servizio accessibile con questa chiave.'
+					: `Aggiornato alle ${new Date().toLocaleTimeString('it-IT')}.`;
+			} catch (error) {
+				console.error('Impossibile caricare i servizi Render:', error);
+				status.textContent = 'Impossibile caricare i servizi Render. Controlla configurazione, permessi e log del server.';
+			} finally {
+				button.disabled = false;
+			}
+		}
+		button.addEventListener('click', loadRenderServices);
+		loadRenderServices();
+	})();
+</script>
 </body>
 </html>

@@ -21,10 +21,8 @@ import java.util.stream.Collectors;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final String adminUsername;
-    private final String adminPassword;
-    private final UserDetails adminUserDetails;
+    private final String adminPasswordHash;
 
     public CustomUserDetailsService(
             UserRepository userRepository,
@@ -32,21 +30,17 @@ public class CustomUserDetailsService implements UserDetailsService {
             @Value("${app.admin.username:admin}") String adminUsername,
             @Value("${app.admin.password:}") String adminPassword) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.adminUsername = adminUsername;
-        this.adminPassword = adminPassword;
-        this.adminUserDetails = adminPassword.isBlank()
-                ? null
-                : org.springframework.security.core.userdetails.User.withUsername(adminUsername)
-                        .password(passwordEncoder.encode(adminPassword))
-                        .authorities("ROLE_ADMIN")
-                        .build();
+        this.adminPasswordHash = adminPassword.isBlank() ? null : passwordEncoder.encode(adminPassword);
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        if (adminUserDetails != null && adminUsername.equals(email)) {
-            return adminUserDetails;
+        if (adminPasswordHash != null && adminUsername.equals(email)) {
+            return org.springframework.security.core.userdetails.User.withUsername(adminUsername)
+                    .password(adminPasswordHash)
+                    .authorities("ROLE_ADMIN")
+                    .build();
         }
 
         User user = userRepository.findByEmail(email);

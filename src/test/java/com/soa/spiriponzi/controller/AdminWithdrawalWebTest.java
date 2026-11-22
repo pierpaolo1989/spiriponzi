@@ -18,6 +18,7 @@ import com.soa.spiriponzi.service.WithdrawServiceImpl;
 import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.CaptchaService;
+import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -57,6 +58,7 @@ class AdminWithdrawalWebTest {
     @MockBean private UserService userService;
     @MockBean private OfferwallService offerwallService;
     @MockBean private CaptchaService captchaService;
+    @MockBean private RenderService renderService;
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
 
     private MockHttpSession session(String role) {
@@ -128,6 +130,24 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("Prelievi da approvare"));
         assertTrue(html.contains("points@example.com"));
         assertTrue(html.contains("Gestisci prelievi"));
+        assertTrue(html.contains("Servizi Render"));
+        assertTrue(html.contains("/admin/render/services"));
+    }
+
+    @Test
+    void renderServicesAreRestrictedToAdmins() throws Exception {
+        when(renderService.listServices()).thenReturn(List.of(
+                new RenderService.RenderServiceInfo("web", "web_service", "not_suspended")));
+        mvc.perform(get("/admin/render/services").servletPath("/admin/render/services"))
+                .andExpect(status().is3xxRedirection());
+        mvc.perform(get("/admin/render/services").servletPath("/admin/render/services").session(session("ROLE_USER")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/admin/render/services").servletPath("/admin/render/services").session(session("ROLE_ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Cache-Control", "no-store"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].name").value("web"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].suspended").value("not_suspended"));
     }
 
     @Test
