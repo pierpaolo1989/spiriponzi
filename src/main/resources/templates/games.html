@@ -9,6 +9,8 @@
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="">
 <meta name="author" content="">
+<meta name="_csrf" th:content="${_csrf.token}">
+<meta name="_csrf_header" th:content="${_csrf.headerName}">
 
 <title>Spiriponzi - Games</title>
 
@@ -94,7 +96,7 @@
 					<!-- Content Row -->
 					<div class="d-flex justify-content-center mb-3">
 						<span class="text-muted text-center">
-							<strong>Play to earn: every 60 seconds you can claim 100 coins</strong>
+							<strong>Play to earn: every hour you can claim 50 coins</strong>
 						</span>
 					</div>
 					<div class="text-center text-primary mb-3" role="status" aria-live="polite">
@@ -209,7 +211,7 @@
 					</button>
 				</div>
 				<div class="modal-body text-center">
-					<p>Your game is paused. Claim 100 coins to continue playing.</p>
+					<p>Your game reward is ready. Claim 50 coins.</p>
 					<div class="my-4" style="width: 100%; margin-left: auto; margin-right: auto; position: relative;">
 						<span class="small text-muted d-block mb-2">Advertisement</span>
 						<iframe title="Advertisement" data-aa="2462874"
@@ -220,7 +222,7 @@
 				</div>
 				<div class="modal-footer justify-content-center">
 					<button type="button" class="btn btn-primary" id="gameClaimButton">
-						Claim 100 coins
+						Claim 50 coins
 					</button>
 				</div>
 			</div>
@@ -251,14 +253,15 @@
 			const countdown = document.getElementById('gameClaimCountdown');
 			const claimButton = document.getElementById('gameClaimButton');
 			if (gameClaimSecondsRemaining > 0) {
-				const minutes = Math.floor(gameClaimSecondsRemaining / 60);
+				const hours = Math.floor(gameClaimSecondsRemaining / 3600);
+				const minutes = Math.floor((gameClaimSecondsRemaining % 3600) / 60);
 				const seconds = gameClaimSecondsRemaining % 60;
-				countdown.textContent = `Next 100-coin claim in ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+				countdown.textContent = `Next 50-coin claim in ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 				claimButton.disabled = true;
 				return;
 			}
 
-			countdown.textContent = 'Your 100-coin game claim is ready.';
+			countdown.textContent = 'Your 50-coin game claim is ready.';
 			claimButton.disabled = false;
 			if (!gameClaimModalShown) {
 				gameClaimModalShown = true;
@@ -311,7 +314,13 @@
 				claimButton.disabled = true;
 				claimError.textContent = '';
 				try {
-					const response = await fetch('/claims/game', { method: 'POST' });
+					const response = await fetch('/claims/game', {
+						method: 'POST',
+						headers: {
+							[document.querySelector('meta[name="_csrf_header"]').content]:
+								document.querySelector('meta[name="_csrf"]').content
+						}
+					});
 					if (!response.ok) {
 						const message = await response.text();
 						throw new Error(message || `Claim failed: ${response.status}`);

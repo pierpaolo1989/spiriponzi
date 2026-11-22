@@ -28,8 +28,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ClaimServiceImpl implements ClaimService {
 
-	private static final int GAME_CLAIM_AMOUNT = 100;
-	private static final long GAME_CLAIM_INTERVAL_SECONDS = 60;
+	private static final int GAME_CLAIM_AMOUNT = 50;
+	private static final long GAME_CLAIM_INTERVAL_SECONDS = 60 * 60;
 
 	private final ClaimRepository claimRepository;
 	private final UserRepository userRepository;
@@ -113,7 +113,7 @@ public class ClaimServiceImpl implements ClaimService {
 		if (lastGameClaimAt == null) {
 			userStats.setLastGameClaimAt(now);
 			userStatsRepository.save(userStats);
-			throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Wait 60 seconds before claiming game coins");
+			throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Wait 1 hour before claiming game coins");
 		}
 		if (secondsUntilGameClaim(lastGameClaimAt, now) > 0) {
 			throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Wait before claiming game coins again");
@@ -159,6 +159,12 @@ public class ClaimServiceImpl implements ClaimService {
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+		}
+		user = userRepository.findWithLockById(user.getId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+		existingStats = userStatsRepository.findWithLockByUserEmail(email);
+		if (existingStats.isPresent()) {
+			return existingStats.get();
 		}
 		UserStats userStats = new UserStats();
 		userStats.setUser(user);

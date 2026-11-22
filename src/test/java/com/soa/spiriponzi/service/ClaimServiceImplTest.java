@@ -41,14 +41,15 @@ class ClaimServiceImplTest {
     }
 
     @Test
-    void gameClaimCooldownStartsAtSixtySecondsWhenFirstVisited() {
+    void gameClaimCooldownStartsAtOneHourWhenFirstVisited() {
         User user = User.builder().id(1L).email("player@example.com").build();
         when(userStatsRepository.findWithLockByUserEmail(user.getEmail())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(user);
+        when(userRepository.findWithLockById(user.getId())).thenReturn(Optional.of(user));
 
         long remaining = claimService.getGameClaimCooldownSeconds(user.getEmail());
 
-        assertEquals(60, remaining);
+        assertEquals(3600, remaining);
         assertNotNull(user.getUserStats().getLastGameClaimAt());
         verify(userStatsRepository).save(user.getUserStats());
         verify(userRepository).save(user);
@@ -114,7 +115,7 @@ class ClaimServiceImplTest {
     }
 
     @Test
-    void gameClaimAwardsOneHundredCoinsAndUpdatesStatsAfterCooldown() {
+    void gameClaimAwardsFiftyCoinsAndUpdatesStatsAfterCooldown() {
         String email = "player@example.com";
         LocalDateTime now = LocalDateTime.now();
         User user = User.builder().id(1L).email(email).build();
@@ -124,19 +125,20 @@ class ClaimServiceImplTest {
                 .numberOfClaims(4)
                 .withdrawals(1)
                 .lastRequest(now.minusMinutes(2))
-                .lastGameClaimAt(now.minusSeconds(61))
+                .lastGameClaimAt(now.minusHours(1))
                 .build();
         when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
         when(userRepository.findByEmail(email)).thenReturn(user);
 
         var result = claimService.startGameClaim(email);
 
-        assertEquals(400, result.getAnnualPoints());
-        assertEquals(125, result.getMonthlyPoints());
+        assertEquals(350, result.getAnnualPoints());
+        assertEquals(75, result.getMonthlyPoints());
         assertEquals(5, result.getNumberOfClaims());
         assertEquals(1, result.getWithdrawals());
-        assertEquals(100, captureSavedClaim().getAmount());
-        assertEquals(60, claimService.getGameClaimCooldownSeconds(email));
+        assertEquals(50, captureSavedClaim().getAmount());
+        assertEquals(3600, claimService.getGameClaimCooldownSeconds(email));
+        assertThrows(ResponseStatusException.class, () -> claimService.startGameClaim(email));
         verify(userStatsRepository).save(stats);
     }
 
@@ -156,14 +158,14 @@ class ClaimServiceImplTest {
 
         var result = claimService.startGameClaim(email);
 
-        assertEquals(100, result.getMonthlyPoints());
-        assertEquals(400, result.getAnnualPoints());
+        assertEquals(50, result.getMonthlyPoints());
+        assertEquals(350, result.getAnnualPoints());
     }
 
     @Test
-    void gameClaimIsRejectedBeforeSixtySecondsHavePassed() {
+    void gameClaimIsRejectedJustBeforeOneHourHasPassed() {
         String email = "player@example.com";
-        UserStats stats = UserStats.builder().lastGameClaimAt(LocalDateTime.now().minusSeconds(30)).build();
+        UserStats stats = UserStats.builder().lastGameClaimAt(LocalDateTime.now().minusHours(1).plusMinutes(1)).build();
         when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
 
         ResponseStatusException exception = assertThrows(
@@ -174,6 +176,36 @@ class ClaimServiceImplTest {
         assertEquals(429, exception.getStatusCode().value());
         verify(claimRepository, never()).save(any(Claim.class));
         verify(userRepository, never()).findByEmail(email);
+    }
+
+    @Test
+    void gameClaimWithoutPriorStatusStartsCooldownAndRejectsClaim() {
+        String email = "player@example.com";
+        UserStats stats = UserStats.builder().build();
+        when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> claimService.startGameClaim(email));
+
+        assertEquals(429, exception.getStatusCode().value());
+        assertNotNull(stats.getLastGameClaimAt());
+        verify(userStatsRepository).save(stats);
+        verify(claimRepository, never()).save(any(Claim.class));
+    }
+
+    @Test
+    void gameClaimRechecksStatsAfterLockingUser() {
+        String email = "player@example.com";
+        User user = User.builder().id(1L).email(email).build();
+        UserStats stats = UserStats.builder().lastGameClaimAt(LocalDateTime.now()).build();
+        when(userStatsRepository.findWithLockByUserEmail(email))
+                .thenReturn(Optional.empty(), Optional.of(stats));
+        when(userRepository.findByEmail(email)).thenReturn(user);
+        when(userRepository.findWithLockById(user.getId())).thenReturn(Optional.of(user));
+
+        assertEquals(3600, claimService.getGameClaimCooldownSeconds(email));
+        verify(userStatsRepository, never()).save(any(UserStats.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     private Claim captureSavedClaim() {

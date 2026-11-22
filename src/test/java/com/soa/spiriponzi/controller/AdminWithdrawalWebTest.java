@@ -235,6 +235,10 @@ class AdminWithdrawalWebTest {
         assertTrue(modal >= 0 && advertisement > modal && claim > advertisement);
         assertTrue(html.contains("https://acceptable.a-ads.com/2462874/?size=Adaptive"));
         assertTrue(html.contains(".game-embed iframe"));
+        assertTrue(html.contains("every hour you can claim 50 coins"));
+        assertTrue(html.contains("Claim 50 coins"));
+        assertTrue(html.contains("name=\"_csrf\""));
+        assertTrue(html.contains("name=\"_csrf_header\""));
         assertTrue(html.contains("z-index: 1040;"));
         assertTrue(html.split("class=\"game-embed\"", -1).length == 5);
         org.junit.jupiter.api.Assertions.assertFalse(html.contains("adsbygoogle"));

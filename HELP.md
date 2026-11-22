@@ -44,6 +44,14 @@ before accepting withdrawal requests. The bundled Google test keys are rejected 
 withdrawals by default. `WITHDRAWALS_ALLOW_TEST_CAPTCHA=true` permits them only for
 local testing; never enable it in production.
 
+### Game rewards
+
+The games page offers 50 points per claim, no more than once every hour.
+The first countdown starts when the account first requests its game claim status
+or attempts a game claim. The server stores and enforces the cooldown per account,
+including across sessions and concurrent requests; it does not verify active play.
+Existing accounts keep their last game claim timestamp when the interval changes.
+
 ### Sign in with Google
 
 Google sign-in is optional and disabled by default. It creates accounts only

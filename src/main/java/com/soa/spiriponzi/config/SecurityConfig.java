@@ -40,7 +40,7 @@ public class SecurityConfig {
                     String path = request.getServletPath();
                     return !("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method)
                             || "TRACE".equals(method))
-                            && (path.equals("/withdraws") || path.startsWith("/admin/")
+                            && (path.equals("/withdraws") || path.equals("/claims/game") || path.startsWith("/admin/")
                                 || path.equals("/auth/google/register"));
                 }))
                 .authorizeHttpRequests((authorize) -> authorize
