@@ -72,6 +72,16 @@ class AdminWithdrawalWebTest {
     }
 
     @Test
+    void homeRoutesRenderAadsAdvertisement() throws Exception {
+        for (String path : List.of("/", "/index")) {
+            String html = mvc.perform(get(path).servletPath(path.equals("/") ? "" : path))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            assertTrue(html.contains("data-aa=\"2462874\""));
+            assertTrue(html.contains("src=\"https://acceptable.a-ads.com/2462874/?size=Adaptive\""));
+        }
+    }
+
+    @Test
     void rendersAdminPageAndRequiresCsrfForApproval() throws Exception {
         User user = User.builder().email("user@example.com")
                 .userStats(UserStats.builder().annualPoints(100).build()).build();
