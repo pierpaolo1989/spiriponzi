@@ -211,4 +211,22 @@ class AdminWithdrawalWebTest {
         assertTrue(page.getResponse().getContentAsString().contains("href=\"/img/favicon.ico\""));
         org.junit.jupiter.api.Assertions.assertFalse(page.getResponse().getContentAsString().contains("Sign in with Google"));
     }
+
+    @Test
+    void gamesPageRendersAadsInsideClaimModalWithoutAffectingGameFrames() throws Exception {
+        User user = User.builder().email("test").userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+        MvcResult page = mvc.perform(get("/games").servletPath("/games").session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn();
+        String html = page.getResponse().getContentAsString();
+        int modal = html.indexOf("id=\"gameClaimModal\"");
+        int advertisement = html.indexOf("data-aa=\"2462874\"");
+        int claim = html.indexOf("id=\"gameClaimButton\"");
+        assertTrue(modal >= 0 && advertisement > modal && claim > advertisement);
+        assertTrue(html.contains("https://acceptable.a-ads.com/2462874/?size=Adaptive"));
+        assertTrue(html.contains(".game-embed iframe"));
+        assertTrue(html.contains("z-index: 1040;"));
+        assertTrue(html.split("class=\"game-embed\"", -1).length == 5);
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("adsbygoogle"));
+    }
 }
