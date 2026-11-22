@@ -4,6 +4,7 @@ import com.soa.spiriponzi.dto.ADDto;
 import com.soa.spiriponzi.service.WithdrawService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.dto.ResetPasswordFormDto;
@@ -25,6 +29,7 @@ import com.soa.spiriponzi.service.UserService;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 @RequiredArgsConstructor
 @Controller
@@ -41,6 +46,14 @@ public class AuthController {
 
 	@Value("${app.public-base-url:https://www.spiriponzi.cloud}")
 	private String publicBaseUrl = "";
+
+	@Value("${app.google.enabled:false}")
+	private boolean googleEnabled;
+
+	@ModelAttribute("googleEnabled")
+	public boolean googleEnabled() {
+		return googleEnabled;
+	}
 
 	@GetMapping({"/", "/index"})
 	public String home(){
@@ -139,12 +152,16 @@ public class AuthController {
 	public String updateUserStats(@Valid @ModelAttribute("updateUser") UpdateUserDto user,
 			BindingResult result,
 			Model model){
-		User existing = userService.findByEmail(user.getEmail());
+		String authenticatedEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		User existing = userService.findByEmail(authenticatedEmail);
 		if (existing == null) {
-			result.rejectValue("email", null, "No user was found registered with this email");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+		}
+		if (!authenticatedEmail.equals(user.getEmail())) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update another account");
 		}
 		if (result.hasErrors()) {
-			model.addAttribute("user", user);
+			addProfileDetails(model, existing);
 			return "profile";
 		}
 		userService.updateUser(user);
@@ -246,9 +263,28 @@ public class AuthController {
 				.email(user.getEmail())
 				.btcWallet(user.getBtcWallet())
 				.ethWallet(user.getEthWallet())
+				.paypalEmail(user.getPaypalEmail())
 				.build();
 		model.addAttribute("updateUser", updateUser);
-		model.addAttribute("referralCode", userService.getOrCreateReferralCode(user.getId()));
+		addProfileDetails(model, user);
 		return "profile";
+	}
+
+	private void addProfileDetails(Model model, User user) {
+		model.addAttribute("user", user);
+		String code = userService.getOrCreateReferralCode(user.getId());
+		String referralUrl = UriComponentsBuilder.fromUriString(publicBaseUrl.replaceAll("/+$", ""))
+				.path("/register").queryParam("ref", "{code}").encode().buildAndExpand(code).toUriString();
+		String message = "Join me on Spiriponzi: " + referralUrl;
+		model.addAttribute("referralCode", code);
+		model.addAttribute("referralUrl", referralUrl);
+		model.addAttribute("whatsappUrl", UriComponentsBuilder.fromUriString("https://wa.me/")
+				.queryParam("text", "{message}").encode().buildAndExpand(message).toUriString());
+		model.addAttribute("telegramUrl", UriComponentsBuilder.fromUriString("https://t.me/share/url")
+				.queryParam("url", "{url}").queryParam("text", "{text}").encode()
+				.buildAndExpand(referralUrl, "Join me on Spiriponzi!").toUriString());
+		model.addAttribute("emailShareUrl", "mailto:?subject="
+				+ UriUtils.encodeQueryParam("Join me on Spiriponzi", StandardCharsets.UTF_8)
+				+ "&body=" + UriUtils.encodeQueryParam(message, StandardCharsets.UTF_8));
 	}
 }

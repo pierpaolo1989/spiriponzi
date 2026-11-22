@@ -13,6 +13,8 @@ public interface UserService {
 
 	void saveUser(UserDto userDto);
 
+	User signInWithGoogle(String subject, String email, boolean registering, String referralCode);
+
 	boolean isValidReferralCode(String referralCode);
 
 	String getOrCreateReferralCode(Long userId);

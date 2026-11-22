@@ -12,6 +12,8 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
+    Optional<User> findByGoogleSubject(String googleSubject);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findWithLockById(Long id);
     List<User> findTop5ByOrderByIdDesc();

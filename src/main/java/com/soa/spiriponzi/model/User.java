@@ -42,6 +42,10 @@ public class User {
 	private String btcWallet;
     @Column
 	private String ethWallet;
+    @Column(length = 254)
+    private String paypalEmail;
+    @Column(name = "google_subject", unique = true, length = 255)
+    private String googleSubject;
     @Column
     private double balance;
     @Column(name = "referral_code", unique = true, length = 32)

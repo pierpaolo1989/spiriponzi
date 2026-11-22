@@ -35,6 +35,7 @@ class AuthControllerTest {
             .email(ControllerTestSupport.EMAIL)
             .btcWallet("btc-address")
             .ethWallet("eth-address")
+            .paypalEmail("pay@example.com")
             .build();
 
     @BeforeEach
@@ -194,17 +195,16 @@ class AuthControllerTest {
     }
 
     @Test
-    void updateUserReturnsProfileWhenUserDoesNotExist() {
+    void updateUserRejectsMissingAuthenticatedUser() {
         when(userService.findByEmail(ControllerTestSupport.EMAIL)).thenReturn(null);
         UpdateUserDto dto = UpdateUserDto.builder().email(ControllerTestSupport.EMAIL).build();
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(true);
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertEquals("profile", controller.updateUserStats(dto, result, model));
-
-        assertSame(dto, model.get("user"));
-        verify(result).rejectValue("email", null, "No user was found registered with this email");
+        org.junit.jupiter.api.Assertions.assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> controller.updateUserStats(dto, result, model));
+        verify(userService, never()).updateUser(dto);
     }
 
     @Test
@@ -245,6 +245,7 @@ class AuthControllerTest {
         assertEquals(ControllerTestSupport.EMAIL, profileDto.getEmail());
         assertEquals("btc-address", profileDto.getBtcWallet());
         assertEquals("eth-address", profileDto.getEthWallet());
+        assertEquals("pay@example.com", profileDto.getPaypalEmail());
         verify(userService).findAdsByUser(10L);
     }
 }

@@ -1,211 +1,160 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="">
-<meta name="author" content="">
-
-<title>Spiriponzi - Profile</title>
-
-<link th:href="@{vendor/fontawesome-free/css/all.min.css}"
-	rel="stylesheet" type="text/css">
-
-<!-- Custom fonts for this template-->
-<link
-	href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-	rel="stylesheet">
-
-<!-- Custom styles for this template-->
-<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet" />
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
-	crossorigin="anonymous"></script>
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spiriponzi - Profile</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
+        crossorigin="anonymous"></script>
 </head>
-
 <body id="page-top">
+<div id="wrapper">
+    <div th:replace="~{fragments/sidebar}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <div th:replace="~{fragments/navbar}"></div>
+            <div class="container-fluid">
+                <h1 class="h3 mb-4 text-gray-800">Profile</h1>
+                <div th:replace="~{fragments/summary}"></div>
+                <div class="row">
+                    <div class="col-xl-7 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h2 class="h6 m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-user-circle mr-2" aria-hidden="true"></i>Account &amp; payment details
+                                </h2>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">Manage the payment details you want to use for withdrawals.</p>
+                                <div th:if="${param.success}" class="alert alert-success" role="status">
+                                    Your details have been saved.
+                                </div>
+                                <form id="profile-form" method="post" th:action="@{/user-data}" th:object="${updateUser}">
+                                    <div class="form-group">
+                                        <label for="email">Account email</label>
+                                        <input class="form-control" id="email" th:field="*{email}" type="email" readonly>
+                                        <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="btcWallet">BTC wallet</label>
+                                        <input class="form-control" id="btcWallet" th:field="*{btcWallet}" type="text" autocomplete="off">
+                                        <div id="btc-error" class="text-danger small" role="alert"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ethWallet">ETH wallet</label>
+                                        <input class="form-control" id="ethWallet" th:field="*{ethWallet}" type="text" autocomplete="off">
+                                        <div id="eth-error" class="text-danger small" role="alert"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="paypalEmail">PayPal email</label>
+                                        <input class="form-control" id="paypalEmail" th:field="*{paypalEmail}"
+                                            type="email" maxlength="254" autocomplete="email"
+                                            aria-describedby="paypal-help">
+                                        <small id="paypal-help" class="form-text text-muted">
+                                            Optional. This address will be suggested when you choose PayPal for a withdrawal.
+                                        </small>
+                                        <div class="text-danger small" role="alert" th:if="${#fields.hasErrors('paypalEmail')}"
+                                            th:errors="*{paypalEmail}"></div>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-save mr-1" aria-hidden="true"></i> Save details
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h2 class="h6 m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-user-friends mr-2" aria-hidden="true"></i>Invite a friend
+                                </h2>
+                            </div>
+                            <div class="card-body">
+                                <p>Share your referral link. You and your friend each receive 1,000 coins when they register.</p>
+                                <label for="referralCode">Your referral code</label>
+                                <input class="form-control mb-3" id="referralCode" type="text"
+                                    th:value="${referralCode}" readonly>
+                                <label for="referralLink">Your referral link</label>
+                                <div class="input-group mb-3">
+                                    <input class="form-control" id="referralLink" type="text"
+                                        th:value="${referralUrl}" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="copy-referral" type="button">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap">
+                                    <a class="btn btn-success mr-2 mb-2" th:href="${whatsappUrl}" target="_blank" rel="noopener noreferrer">
+                                        <i class="fab fa-whatsapp mr-1" aria-hidden="true"></i> WhatsApp
+                                    </a>
+                                    <a class="btn btn-info mr-2 mb-2" th:href="${telegramUrl}" target="_blank" rel="noopener noreferrer">
+                                        <i class="fab fa-telegram-plane mr-1" aria-hidden="true"></i> Telegram
+                                    </a>
+                                    <a class="btn btn-secondary mr-2 mb-2" th:href="${emailShareUrl}">
+                                        <i class="fas fa-envelope mr-1" aria-hidden="true"></i> Email
+                                    </a>
+                                    <button class="btn btn-outline-primary mb-2" id="share-referral" type="button" hidden>
+                                        <i class="fas fa-share-alt mr-1" aria-hidden="true"></i> More options
+                                    </button>
+                                </div>
+                                <p class="small text-muted mb-1">For Instagram messages, use your device's share menu if available, or copy and paste the link.</p>
+                                <p id="share-status" class="small mb-0" role="status" aria-live="polite"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/footer}"></div>
+    </div>
+</div>
+<a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+<script>
+    const profileForm = document.getElementById('profile-form');
+    profileForm.addEventListener('submit', event => {
+        const btc = document.getElementById('btcWallet').value.trim();
+        const eth = document.getElementById('ethWallet').value.trim();
+        const btcValid = !btc || /^(1|3|bc1)[a-zA-HJ-NP-Z0-9]{25,39}$/.test(btc);
+        const ethValid = !eth || /^0x[a-fA-F0-9]{40}$/.test(eth);
+        document.getElementById('btc-error').textContent = btcValid ? '' : 'Invalid BTC Wallet Address';
+        document.getElementById('eth-error').textContent = ethValid ? '' : 'Invalid ETH Wallet Address';
+        if (!btcValid || !ethValid) event.preventDefault();
+    });
 
-	<!-- Page Wrapper -->
-	<div id="wrapper">
-
-		<!-- Sidebar -->
-		<div th:replace="~{fragments/sidebar}"></div>
-		<!-- End of Sidebar -->
-
-		<!-- Content Wrapper -->
-		<div id="content-wrapper" class="d-flex flex-column">
-
-			<!-- Main Content -->
-			<div id="content">
-
-				<!-- Topbar -->
-				<div th:replace="~{fragments/navbar}"></div>
-				<!-- End of Topbar -->
-
-				<!-- Begin Page Content -->
-				<div class="container-fluid">
-
-					<!-- Page Heading -->
-					<div
-						class="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 class="h3 mb-0 text-gray-800">Profile</h1>
-						<i class="fas fa-money fa-sm text-white-50"></i>
-					</div>
-
-					<!-- Content Row -->
-					<div th:replace="~{fragments/summary}"></div>
-
-					<hr class="divider">
-
-					<!-- Content Row -->
-
-					<div class="row" style="margin-top: 2%;">
-
-						<div class="col-lg-10 mb-4 offset-lg-1">
-							<div class="card shadow mb-12">
-								<div
-									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Personal
-										Data</h6>
-								</div>
-								<!-- Card Body -->
-								<div class="card-body" style="min-height: auto !important;">
-									<div class="row">
-										<div class="col-lg-5">
-											<img class="img-profile rounded-circle text-center"
-												width="50%" src="img/undraw_profile.svg"
-												style="margin-left: 25%; margin-top: 3%;">
-										</div>
-										<div class="col-lg-7">
-											<div th:if="${param.success}">
-												<div class="alert alert-info">You've successfully
-													update your data!</div>
-											</div>
-											<form method="POST" enctype="utf8" class="text-center"
-												th:action="@{/user-data}" th:object="${updateUser}">
-												<div class="form-group mb-6">
-													<label class="form-label">Email</label> <input
-														class="form-control" id="text" name="email"
-														th:field="*{email}" type="text" readonly />
-												</div>
-
-												<div class="form-group mb-6">
-
-													<label class="form-label">BTC Wallet</label> <input
-														class="form-control" id="btcWallet" name="btcWallet"
-														th:field="*{btcWallet}" type="text" />
-												</div>
-
-												<div class="form-group mb-6">
-
-													<label class="form-label">ETH Wallet</label> <input
-														class="form-control" id="ethWallet" name="ethWallet"
-														th:field="*{ethWallet}" type="text" />
-												</div>
-												<button class="btn btn-primary" id="claim_button">SAVE</button>
-											</form>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-					</div>
-
-						<div class="row">
-							<div class="col-lg-10 mb-4 offset-lg-1">
-								<div class="card shadow mb-4">
-									<div class="card-header py-3">
-										<h6 class="m-0 font-weight-bold text-primary">Invite a friend</h6>
-									</div>
-									<div class="card-body">
-										<p>Share your referral code. You and your friend each receive 1000 coins when they register.</p>
-										<div class="input-group">
-											<input class="form-control" id="referralCode" type="text"
-												th:value="${referralCode}" readonly aria-label="Your referral code" />
-											<div class="input-group-append">
-												<a class="btn btn-primary" th:href="@{/register(ref=${referralCode})}">
-													<i class="fas fa-user-plus"></i> Invite a friend
-												</a>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-					</div>
-
-				</div>
-				<!-- /.container-fluid -->
-
-			</div>
-			<!-- End of Main Content -->
-
-			<!-- Footer -->
-			<div th:replace="~{fragments/footer}"></div>
-			<!-- End of Footer -->
-
-		</div>
-		<!-- End of Content Wrapper -->
-
-	</div>
-	<!-- End of Page Wrapper -->
-
-	<!-- Scroll to Top Button-->
-	<a class="scroll-to-top rounded" href="#page-top"> <i
-		class="fas fa-angle-up"></i>
-	</a>
-
-	<!-- Bootstrap core JavaScript-->
-	<script th:src="@{vendor/jquery/jquery.min.js}"></script>
-	<script th:src="@{vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
-	<!-- Core plugin JavaScript-->
-	<script th:src="@{vendor/jquery-easing/jquery.easing.min.js}"></script>
-
-	<script type="text/javascript" th:src="@{/js/sb-admin-2.min.js}"></script>
-
-	<!-- Page level plugins -->
-	<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
-
-	<script>
-		$(document).ready(function () {
-    $("#claim_button").click(function (event) {
-        let btcWallet = $("#btcWallet").val().trim();
-        let ethWallet = $("#ethWallet").val().trim();
-        let isValid = true;
-
-        // Espressione regolare per BTC Address (inizia con 1, 3 o bc1 e segue un formato valido)
-        let btcRegex = /^(1|3|bc1)[a-zA-HJ-NP-Z0-9]{25,39}$/;
-
-        // Espressione regolare per ETH Address (inizia con 0x e ha 40 caratteri esadecimali)
-        let ethRegex = /^0x[a-fA-F0-9]{40}$/;
-
-        // Rimuove i vecchi messaggi di errore
-        $(".error-message").remove();
-
-        // Validazione BTC Wallet
-        if (btcWallet !== "" && !btcRegex.test(btcWallet)) {
-            $("#btcWallet").after('<p class="error-message text-danger">Invalid BTC Wallet Address</p>');
-            isValid = false;
-        }
-
-        // Validazione ETH Wallet
-        if (ethWallet !== "" && !ethRegex.test(ethWallet)) {
-            $("#ethWallet").after('<p class="error-message text-danger">Invalid ETH Wallet Address</p>');
-            isValid = false;
-        }
-
-        // Blocca l'invio del form se la validazione fallisce
-        if (!isValid) {
-            event.preventDefault();
+    const referralLink = document.getElementById('referralLink');
+    const shareStatus = document.getElementById('share-status');
+    document.getElementById('copy-referral').addEventListener('click', async () => {
+        try {
+            if (!navigator.clipboard) throw new Error('Clipboard unavailable');
+            await navigator.clipboard.writeText(referralLink.value);
+            shareStatus.textContent = 'Referral link copied.';
+        } catch (error) {
+            referralLink.focus();
+            referralLink.select();
+            shareStatus.textContent = 'Copy unavailable. The link is selected; copy it manually.';
         }
     });
-});
+    const shareButton = document.getElementById('share-referral');
+    if (navigator.share) {
+        shareButton.hidden = false;
+        shareButton.addEventListener('click', async () => {
+            try {
+                await navigator.share({ title: 'Spiriponzi', text: 'Join me on Spiriponzi!', url: referralLink.value });
+                shareStatus.textContent = '';
+            } catch (error) {
+                if (error.name !== 'AbortError') shareStatus.textContent = 'Unable to share. Copy the link instead.';
+            }
+        });
+    }
 </script>
 </body>
-
 </html>

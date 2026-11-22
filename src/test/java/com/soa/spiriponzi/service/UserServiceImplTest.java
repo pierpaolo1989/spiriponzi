@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.service;
 
 import com.soa.spiriponzi.dto.UserDto;
+import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.model.Ad;
 import com.soa.spiriponzi.model.PasswordResetToken;
@@ -68,6 +69,24 @@ class UserServiceImplTest {
                 userAdRepository
         );
         ReflectionTestUtils.setField(userService, "publicBaseUrl", "https://www.spiriponzi.cloud");
+    }
+
+    @Test
+    void updateUserSavesAndClearsPaypalEmail() {
+        User user = User.builder().email("person@example.com").build();
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(user);
+        UpdateUserDto details = UpdateUserDto.builder().email(user.getEmail())
+                .paypalEmail("pay@example.com").btcWallet("btc").ethWallet("eth").build();
+
+        userService.updateUser(details);
+        assertEquals("pay@example.com", user.getPaypalEmail());
+        assertEquals("btc", user.getBtcWallet());
+        assertEquals("eth", user.getEthWallet());
+
+        details.setPaypalEmail("");
+        userService.updateUser(details);
+        org.junit.jupiter.api.Assertions.assertNull(user.getPaypalEmail());
+        verify(userRepository, org.mockito.Mockito.times(2)).save(user);
     }
 
     @Test
@@ -170,6 +189,41 @@ class UserServiceImplTest {
         assertEquals(referrer, newUser.getReferredBy());
         assertNotNull(newUser.getReferralCode());
         assertTrue(newUser.getReferralCode().matches("[A-F0-9]{16}"));
+    }
+
+    @Test
+    void googleRegistrationRewardsReferrerAndStoresStableIdentity() {
+        User referrer = User.builder().id(10L).email("referrer@example.com").build();
+        UserStats stats = UserStats.builder().annualPoints(10).monthlyPoints(20).build();
+        when(userRepository.findByGoogleSubject("google-sub")).thenReturn(Optional.empty());
+        when(userRepository.findByReferralCode("REF123")).thenReturn(Optional.of(referrer));
+        when(userStatsRepository.findWithLockByUserEmail(referrer.getEmail())).thenReturn(Optional.of(stats));
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(new Role());
+        when(passwordEncoder.encode(any())).thenReturn("random-encoded-password");
+
+        User registered = userService.signInWithGoogle("google-sub", "new@gmail.com", true, "ref123");
+
+        assertEquals("google-sub", registered.getGoogleSubject());
+        assertEquals("new@gmail.com", registered.getEmail());
+        assertEquals("random-encoded-password", registered.getPassword());
+        assertEquals(1000, registered.getUserStats().getAnnualPoints());
+        assertEquals(1010, stats.getAnnualPoints());
+        assertEquals(1020, stats.getMonthlyPoints());
+        verify(userRepository).save(registered);
+    }
+
+    @Test
+    void googleSignInUsesSubjectAndNeverLinksExistingEmail() {
+        User existing = User.builder().email("original@gmail.com").googleSubject("google-sub").build();
+        when(userRepository.findByGoogleSubject("google-sub")).thenReturn(Optional.of(existing));
+        assertEquals(existing, userService.signInWithGoogle("google-sub", "changed@gmail.com", false, null));
+        when(userRepository.findByGoogleSubject("new-sub")).thenReturn(Optional.empty());
+        when(userRepository.existsByEmailIgnoreCase("original@gmail.com")).thenReturn(true);
+        assertThrows(ResponseStatusException.class,
+                () -> userService.signInWithGoogle("new-sub", "original@gmail.com", true, ""));
+        assertThrows(ResponseStatusException.class,
+                () -> userService.signInWithGoogle("new-sub", "other@gmail.com", false, null));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test

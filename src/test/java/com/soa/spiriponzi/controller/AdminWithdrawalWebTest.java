@@ -36,6 +36,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,8 +60,12 @@ class AdminWithdrawalWebTest {
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
 
     private MockHttpSession session(String role) {
+        return session(role, "test");
+    }
+
+    private MockHttpSession session(String role, String email) {
         MockHttpSession session = new MockHttpSession();
-        var auth = new UsernamePasswordAuthenticationToken("test", "unused",
+        var auth = new UsernamePasswordAuthenticationToken(email, "unused",
                 List.of(new SimpleGrantedAuthority(role)));
         session.setAttribute("SPRING_SECURITY_CONTEXT", new SecurityContextImpl(auth));
         return session;
@@ -78,6 +84,7 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn();
         String html = page.getResponse().getContentAsString();
         assertTrue(html.contains("pay@example.com"));
+        assertTrue(html.contains("href=\"/img/favicon.ico\""));
         Matcher token = Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"").matcher(html);
         assertTrue(token.find(), "The form must include a CSRF token");
 
@@ -121,7 +128,8 @@ class AdminWithdrawalWebTest {
 
     @Test
     void userPageRendersAndWithdrawalRequiresCsrfAndCaptcha() throws Exception {
-        User user = User.builder().email("test").userStats(UserStats.builder().annualPoints(3000).build()).build();
+        User user = User.builder().email("test").paypalEmail("pay@example.com")
+                .userStats(UserStats.builder().annualPoints(3000).build()).build();
         when(userService.findByEmail("test")).thenReturn(user);
         when(captchaSettings.getSite()).thenReturn("test-site-key");
         when(captchaService.getReCaptchaSite()).thenReturn("production-site-key");
@@ -131,6 +139,8 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn();
         String html = page.getResponse().getContentAsString();
         assertTrue(html.contains("PayPal"));
+        assertTrue(html.contains("href=\"/img/favicon.ico\""));
+        assertTrue(html.contains("data-paypal=\"pay@example.com\""));
         Matcher token = Pattern.compile("name=\"_csrf\" content=\"([^\"]+)\"").matcher(html);
         assertTrue(token.find(), "The page must expose a CSRF token for its request");
         String json = "{\"amount\":3000,\"currency\":\"PAYPAL\",\"destination\":\"pay@example.com\",\"captchaResponse\":\"captcha-token\"}";
@@ -142,5 +152,63 @@ class AdminWithdrawalWebTest {
                         .contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isOk());
         verify(captchaService).processResponse("captcha-token");
+    }
+
+    @Test
+    void profileRendersShareLinksAndValidatesPaypalForAuthenticatedUser() throws Exception {
+        String email = "user@example.com";
+        User user = User.builder().id(1L).email(email).paypalEmail("pay@example.com")
+                .userStats(UserStats.builder().annualPoints(3000).build()).build();
+        when(userService.findByEmail(email)).thenReturn(user);
+        when(userService.getOrCreateReferralCode(1L)).thenReturn("REF123");
+        MockHttpSession session = session("ROLE_USER", email);
+        MvcResult page = mvc.perform(get("/profile").servletPath("/profile").session(session))
+                .andExpect(status().isOk()).andReturn();
+        String html = page.getResponse().getContentAsString();
+        assertTrue(html.contains("pay@example.com"));
+        assertTrue(html.contains("href=\"/img/favicon.ico\""));
+        assertTrue(html.contains("https://www.spiriponzi.cloud/register?ref=REF123"));
+        assertTrue(html.contains("https://wa.me/"));
+        assertTrue(html.contains("https://t.me/share/url"));
+        assertTrue(html.contains("mailto:"));
+        assertTrue(html.contains("https%3A%2F%2Fwww.spiriponzi.cloud%2Fregister%3Fref%3DREF123"));
+        Matcher token = Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"").matcher(html);
+        assertTrue(token.find());
+
+        MvcResult invalid = mvc.perform(post("/user-data").servletPath("/user-data").session(session)
+                .param("_csrf", token.group(1)).param("email", email).param("paypalEmail", "not-an-email"))
+                .andExpect(status().isOk()).andReturn();
+        assertTrue(invalid.getResponse().getContentAsString().contains("Enter a valid PayPal email address"));
+        assertTrue(invalid.getResponse().getContentAsString().contains("REF123"));
+        mvc.perform(post("/user-data").servletPath("/user-data").session(session)
+                .param("_csrf", token.group(1)).param("email", email)
+                .param("paypalEmail", "a".repeat(245) + "@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("PayPal email must be at most 254 characters")));
+        verify(userService, never()).updateUser(any());
+
+        mvc.perform(post("/user-data").servletPath("/user-data").session(session)
+                .param("_csrf", token.group(1)).param("email", "other@example.com")
+                .param("paypalEmail", "pay@example.com")).andExpect(status().isForbidden());
+        verify(userService, never()).updateUser(any());
+
+        mvc.perform(post("/user-data").servletPath("/user-data").session(session)
+                .param("_csrf", token.group(1)).param("email", email).param("paypalEmail", "pay@example.com"))
+                .andExpect(status().is3xxRedirection());
+        org.mockito.ArgumentCaptor<com.soa.spiriponzi.dto.UpdateUserDto> captor =
+                org.mockito.ArgumentCaptor.forClass(com.soa.spiriponzi.dto.UpdateUserDto.class);
+        verify(userService).updateUser(captor.capture());
+        assertTrue("pay@example.com".equals(captor.getValue().getPaypalEmail()));
+    }
+
+    @Test
+    void faviconIsPubliclyAccessibleAndLoginPageReferencesIt() throws Exception {
+        mvc.perform(get("/img/favicon.ico").servletPath("/img/favicon.ico"))
+                .andExpect(status().isOk());
+        MvcResult page = mvc.perform(get("/login").servletPath("/login"))
+                .andExpect(status().isOk()).andReturn();
+        assertTrue(page.getResponse().getContentAsString().contains("href=\"/img/favicon.ico\""));
+        org.junit.jupiter.api.Assertions.assertFalse(page.getResponse().getContentAsString().contains("Sign in with Google"));
     }
 }

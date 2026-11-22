@@ -12,7 +12,7 @@
 <meta name="twitter:title" content="Join Spiriponzi">
 <meta name="twitter:description" content="Create your free Spiriponzi account and discover games, surveys and other activities to earn platform points.">
 <title>Spiriponzi - Registration</title>
-<link rel="icon" type="image/svg" href="img/favicon.ico">
+<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
 <link th:href="@{vendor/fontawesome-free/css/all.min.css}"
 	rel="stylesheet" type="text/css">
 <link
@@ -65,6 +65,12 @@
 						<div th:if="${param.success}">
 							<div class="alert alert-info">You've successfully registered to our app!</div>
 						</div>
+						<div th:if="${param.googleTerms}" class="alert alert-danger" role="alert">
+							Please accept the terms before registering with Google.
+						</div>
+						<div th:if="${param.googleReferral}" class="alert alert-danger" role="alert">
+							Referral code is not valid.
+						</div>
 						<div class="text-center">
 							<h1 class="h4 text-gray-900 font-weight-bold mb-2">Create your account</h1>
 							<p class="text-muted mb-4">It only takes a minute to get started.</p>
@@ -116,6 +122,13 @@
 
 							<div class="mb-3">
 								<button class="btn btn-primary btn-block btn-register" type="submit">Create account</button>
+							</div>
+							<div class="mb-3" th:if="${googleEnabled}">
+								<button class="btn btn-outline-primary btn-block" type="submit"
+									th:formaction="@{/auth/google/register}" formnovalidate>
+									<i class="fab fa-google mr-2" aria-hidden="true"></i>Continue with Google
+								</button>
+								<small class="form-text text-muted">Accept the terms above and optionally enter a referral code before continuing.</small>
 							</div>
 						</form>
 						<hr>

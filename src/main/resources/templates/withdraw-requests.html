@@ -6,6 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>Spiriponzi - Withdrawals</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
     <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
     <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
@@ -40,7 +41,10 @@
                             </select>
                             <label for="destination">Wallet address or PayPal email</label>
                             <input id="destination" class="form-control mb-2" maxlength="254" required autocomplete="off">
-                            <div id="wallet-data" th:data-btc="${user.btcWallet}" th:data-eth="${user.ethWallet}" hidden></div>
+                            <div id="wallet-data" th:data-btc="${user.btcWallet}" th:data-eth="${user.ethWallet}"
+                                 th:data-paypal="${user.paypalEmail}" hidden></div>
+                            <p class="small text-muted">Saved payment details from your <a th:href="@{/profile}">profile</a>
+                                are filled in when you choose a method. You can change the destination for this request.</p>
                             <p class="small">Check the destination and network carefully: blockchain transfers are irreversible.</p>
                             <p id="quote" aria-live="polite"></p>
                             <div class="g-recaptcha mb-2" th:attr="data-sitekey=${@captchaSettings.getSite()}"
@@ -112,7 +116,8 @@
     method.addEventListener('change', () => {
         const wallets = document.getElementById('wallet-data').dataset;
         destination.value = method.value === 'BTC' ? (wallets.btc || '') :
-            method.value === 'ETH' ? (wallets.eth || '') : '';
+            method.value === 'ETH' ? (wallets.eth || '') :
+            method.value === 'PAYPAL' ? (wallets.paypal || '') : '';
     });
     updateQuote();
     async function loadHistory() {

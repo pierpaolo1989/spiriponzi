@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -12,9 +13,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
+import org.springframework.web.filter.RequestContextFilter;
+
+import com.soa.spiriponzi.controller.GoogleAuthController;
+import com.soa.spiriponzi.security.GoogleOidcUserService;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SecurityConfig {
 
     @Autowired
@@ -26,13 +34,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ObjectProvider<GoogleOidcUserService> googleUsers) throws Exception {
         http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
                     String method = request.getMethod();
                     String path = request.getServletPath();
                     return !("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method)
                             || "TRACE".equals(method))
-                            && (path.equals("/withdraws") || path.startsWith("/admin/"));
+                            && (path.equals("/withdraws") || path.startsWith("/admin/")
+                                || path.equals("/auth/google/register"));
                 }))
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
@@ -40,6 +49,7 @@ public class SecurityConfig {
                                 "/callbacks/bitlabs",
                                 "/callbacks/cpx",
                                 "/callbacks/offerwall",
+                                "/auth/google/**", "/oauth2/**", "/login/oauth2/**",
                                 "/sitemap.xml",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
@@ -63,6 +73,25 @@ public class SecurityConfig {
                         .permitAll()
                 );
 
+        GoogleOidcUserService googleUserService = googleUsers.getIfAvailable();
+        if (googleUserService != null) {
+            http.addFilterBefore(new RequestContextFilter(), OAuth2LoginAuthenticationFilter.class);
+            http.oauth2Login(oauth -> oauth.loginPage("/login")
+                    .userInfoEndpoint(info -> info.oidcUserService(googleUserService))
+                    .successHandler((request, response, authentication) ->
+                            response.sendRedirect(request.getContextPath() + "/dashboard"))
+                    .failureHandler((request, response, exception) -> {
+                        if (exception instanceof org.springframework.security.oauth2.core.OAuth2AuthenticationException oauthException) {
+                            log.warn("Google sign-in failed: {}", oauthException.getError().getErrorCode());
+                        } else {
+                            log.warn("Google sign-in failed: {}", exception.getClass().getSimpleName());
+                        }
+                        if (request.getSession(false) != null) {
+                            request.getSession(false).removeAttribute(GoogleAuthController.REGISTRATION_REFERRAL);
+                        }
+                        response.sendRedirect(request.getContextPath() + "/login?googleError");
+                    }));
+        }
         return http.build();
     }
 

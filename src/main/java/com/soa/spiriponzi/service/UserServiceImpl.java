@@ -56,10 +56,32 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void saveUser(UserDto userDto) {
-        User referrer = findReferrer(userDto.getReferralCode());
+        createUser(userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), null, userDto.getReferralCode());
+    }
+
+    @Override
+    @Transactional
+    public User signInWithGoogle(String subject, String email, boolean registering, String referralCode) {
+        return userRepository.findByGoogleSubject(subject).orElseGet(() -> {
+            if (!registering) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Please register with Google first");
+            }
+            if (userRepository.existsByEmailIgnoreCase(email)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with this email already exists");
+            }
+            byte[] randomPassword = new byte[32];
+            SECURE_RANDOM.nextBytes(randomPassword);
+            return createUser(email, passwordEncoder.encode(Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(randomPassword)), subject, referralCode);
+        });
+    }
+
+    private User createUser(String email, String encodedPassword, String googleSubject, String referralCode) {
+        User referrer = findReferrer(referralCode);
         User user = new User();
-        user.setEmail(userDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+        user.setGoogleSubject(googleSubject);
         user.setReferralCode(generateReferralCode());
         user.setReferredBy(referrer);
         Role role = roleRepository.findByName("ROLE_USER");
@@ -85,6 +107,7 @@ public class UserServiceImpl implements UserService {
             referrerStats.setMonthlyPoints(referrerStats.getMonthlyPoints() + REFERRAL_REWARD);
             userStatsRepository.save(referrerStats);
         }
+        return user;
     }
 
     @Override
@@ -134,6 +157,8 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.findByEmail(userDto.getEmail());
         user.setBtcWallet(userDto.getBtcWallet());
         user.setEthWallet(userDto.getEthWallet());
+        user.setPaypalEmail(userDto.getPaypalEmail() == null || userDto.getPaypalEmail().isBlank()
+                ? null : userDto.getPaypalEmail().trim());
         userRepository.save(user);
     }
 
