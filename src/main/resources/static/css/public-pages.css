@@ -154,7 +154,7 @@ body {
 	align-items: center;
 	box-sizing: border-box;
 	display: flex;
-	max-width: 1100px;
+	max-width: 1200px;
 	min-height: calc(100vh - 64px);
 	padding-top: 116px;
 }
@@ -163,6 +163,7 @@ body {
 	justify-content: center;
 	margin-left: 0;
 	margin-right: 0;
+	width: 100%;
 }
 
 .recover-password-page {
@@ -181,6 +182,7 @@ body {
 .login-card {
 	border-radius: 14px;
 	overflow: hidden;
+	width: 100%;
 }
 
 .login-aside {
@@ -265,14 +267,23 @@ body {
 
 .login-form-panel {
 	margin: 0 auto;
-	max-width: 460px;
-	padding: 2.25rem;
+	max-width: 540px;
+	padding: 2.5rem;
 	width: 100%;
 }
 
 .login-form-panel .form-control {
 	border-radius: 0.5rem;
-	min-height: 44px;
+	font-size: 1rem;
+	min-height: 52px;
+	padding: 0.75rem 1rem;
+	width: 100%;
+}
+
+.login-form-panel .control-label {
+	color: #4b4d59;
+	font-size: 0.95rem;
+	font-weight: 700;
 }
 
 .login-form-panel .form-control:focus {
@@ -282,7 +293,9 @@ body {
 
 .login-submit {
 	border-radius: 0.5rem;
+	font-size: 1rem;
 	font-weight: 700;
+	min-height: 50px;
 	padding: 0.75rem 1rem;
 }
 
@@ -656,6 +669,71 @@ body {
 	margin: 0;
 }
 
+.landing-rewards {
+	align-items: flex-start;
+	background: linear-gradient(120deg, #fff, #f3f6ff);
+	border: 1px solid rgba(255, 255, 255, 0.75);
+	border-radius: 12px;
+	box-shadow: 0 0.25rem 1rem rgba(58, 59, 69, 0.08);
+	display: flex;
+	gap: 1.25rem;
+	margin: 1.5rem 0;
+	padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.landing-rewards-icon {
+	align-items: center;
+	background: #eef1ff;
+	border-radius: 12px;
+	color: #4e73df;
+	display: inline-flex;
+	flex: 0 0 48px;
+	font-size: 1.25rem;
+	height: 48px;
+	justify-content: center;
+}
+
+.landing-rewards-content h2 {
+	color: #3a3b45;
+	font-size: 1.25rem;
+	font-weight: 800;
+	margin: 0 0 0.5rem;
+}
+
+.landing-rewards-content > p {
+	color: #6e707e;
+	line-height: 1.6;
+	margin-bottom: 0.75rem;
+}
+
+.landing-reward-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0.75rem 0;
+}
+
+.landing-reward-options span {
+	background: #fff;
+	border: 1px solid #dfe5fa;
+	border-radius: 999px;
+	color: #314f9a;
+	font-size: 0.875rem;
+	font-weight: 700;
+	padding: 0.4rem 0.8rem;
+}
+
+.landing-rewards-content .landing-rewards-note {
+	font-size: 0.82rem;
+	margin-bottom: 0.65rem;
+}
+
+.landing-rewards-content > a {
+	color: #3156aa;
+	font-size: 0.875rem;
+	font-weight: 700;
+}
+
 .landing-cta {
 	align-items: center;
 	background: #fff;
@@ -746,7 +824,7 @@ body {
 	}
 
 	.login-form-panel {
-		padding: 1.25rem;
+		padding: 1.5rem;
 	}
 
 	.login-form-panel .text-center > p {
@@ -816,6 +894,10 @@ body {
 
 	.landing-cta {
 		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.landing-rewards {
 		flex-direction: column;
 	}
 }

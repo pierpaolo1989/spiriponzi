@@ -83,7 +83,25 @@ class AdminWithdrawalWebTest {
                     .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
             assertTrue(html.contains("data-aa=\"2462874\""));
             assertTrue(html.contains("src=\"https://acceptable.a-ads.com/2462874/?size=Adaptive\""));
+            assertTrue(html.contains("Bitcoin (BTC), Ethereum (ETH), or PayPal (EUR)"));
         }
+    }
+
+    @Test
+    void faqAndOfferwallRenderLazyAadsAdvertisements() throws Exception {
+        String faq = mvc.perform(get("/faq").servletPath("/faq"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertTrue(faq.contains("data-aa=\"2462874\""));
+        assertTrue(faq.contains("loading=\"lazy\" width=\"720\" height=\"150\""));
+        assertTrue(faq.contains("Bitcoin (BTC), Ethereum (ETH), or PayPal (EUR)"));
+
+        User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+        String offerwall = mvc.perform(get("/offerwall").servletPath("/offerwall")
+                        .session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertTrue(offerwall.contains("data-aa=\"2462874\""));
+        assertTrue(offerwall.contains("loading=\"lazy\" width=\"720\" height=\"150\""));
     }
 
     @Test
@@ -168,6 +186,10 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("Gestisci prelievi"));
         assertTrue(html.contains("Servizi Render"));
         assertTrue(html.contains("/admin/render/services"));
+        assertTrue(html.contains("id=\"sidebarToggle\""));
+        assertTrue(html.contains("id=\"sidebarToggleTop\""));
+        assertTrue(html.contains("th:action=\"/logout\"") || html.contains("action=\"/logout\""));
+        assertTrue(html.indexOf("render-heading") > html.indexOf("Prelievi da approvare"));
     }
 
     @Test
@@ -305,10 +327,10 @@ class AdminWithdrawalWebTest {
         int claim = html.indexOf("id=\"gameClaimButton\"");
         assertTrue(modal >= 0 && advertisement > modal && claim > advertisement);
         assertTrue(html.contains("https://acceptable.a-ads.com/2462874/?size=Adaptive"));
-        int firstGame = html.indexOf("game=BubbleBubble");
-        int firstRowEnd = html.indexOf("game=SoldierAttack3");
+        int firstGame = html.indexOf("BubbleBubble/index.html");
+        int firstRowEnd = html.indexOf("SoldierAttack3/index.html");
         int betweenRows = html.indexOf("id=\"frame\"");
-        int secondRowStart = html.indexOf("game=NeonMath");
+        int secondRowStart = html.indexOf("NeonMath/index.html");
         assertTrue(firstGame >= 0 && firstGame < firstRowEnd && firstRowEnd < betweenRows
                 && betweenRows < secondRowStart);
         assertTrue(html.contains(".game-embed iframe"));
