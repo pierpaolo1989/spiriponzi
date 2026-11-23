@@ -125,6 +125,22 @@ class AuthControllerTest {
     }
 
     @Test
+    void activationRedirectsAccordingToTokenResult() {
+        when(userService.activateAccount("valid-token")).thenReturn(true);
+        when(userService.activateAccount("invalid-token")).thenReturn(false);
+
+        assertEquals("redirect:/login?activated", controller.activateAccount("valid-token"));
+        assertEquals("redirect:/login?activationError", controller.activateAccount("invalid-token"));
+    }
+
+    @Test
+    void resendingActivationRedirectsWithGenericConfirmation() {
+        assertEquals("redirect:/login?activationSent", controller.resendActivationEmail("person@example.com"));
+
+        verify(userService).resendActivationEmail("person@example.com");
+    }
+
+    @Test
     void recoverPasswordRequestsRecoveryAndRedirects() {
         RecoverPasswordDto dto = RecoverPasswordDto.builder()
                 .email(ControllerTestSupport.EMAIL)

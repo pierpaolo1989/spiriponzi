@@ -18,6 +18,7 @@ import com.soa.spiriponzi.service.WithdrawServiceImpl;
 import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.CaptchaService;
+import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -45,7 +47,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({AdminController.class, AuthController.class, WihdrawController.class})
+@WebMvcTest({AdminController.class, AuthController.class, AdController.class, WihdrawController.class})
 @Import(SecurityConfig.class)
 class AdminWithdrawalWebTest {
     @Autowired private MockMvc mvc;
@@ -59,6 +61,7 @@ class AdminWithdrawalWebTest {
     @MockBean private OfferwallService offerwallService;
     @MockBean private CaptchaService captchaService;
     @MockBean private RenderService renderService;
+    @MockBean private ADService adService;
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
 
     private MockHttpSession session(String role) {
@@ -81,6 +84,39 @@ class AdminWithdrawalWebTest {
             assertTrue(html.contains("data-aa=\"2462874\""));
             assertTrue(html.contains("src=\"https://acceptable.a-ads.com/2462874/?size=Adaptive\""));
         }
+    }
+
+    @Test
+    void surfAndCreateAdsPagesRenderAadsAdvertisement() throws Exception {
+        User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+        when(userService.findAdsByUser(1L)).thenReturn(List.of());
+        when(adService.getProposedAds(1L)).thenReturn(List.of());
+
+        for (String path : List.of("/surf-ads", "/create-ads")) {
+            String html = mvc.perform(get(path).servletPath(path).session(session("ROLE_USER")))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            assertTrue(html.contains("data-aa=\"2462874\""));
+        }
+    }
+
+    @Test
+    void dashboardAdBlockNoticeIsNotDismissible() throws Exception {
+        User user = User.builder().email("test").userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+
+        String html = mvc.perform(get("/dashboard").servletPath("/dashboard").session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        int modalStart = html.lastIndexOf("<div class=\"modal fade adblock-notice\"");
+        int modalEnd = html.indexOf("<!-- Bootstrap core JavaScript-->", modalStart);
+        assertTrue(modalStart >= 0);
+        assertTrue(modalEnd > modalStart);
+        String modal = html.substring(modalStart, modalEnd);
+        assertTrue(modal.contains("data-backdrop=\"static\""));
+        assertTrue(modal.contains("data-keyboard=\"false\""));
+        assertTrue(modal.contains("Allow ads to continue"));
+        assertTrue(modal.contains("Check again"));
+        assertFalse(modal.contains("data-dismiss=\"modal\""));
     }
 
     @Test
@@ -202,6 +238,8 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("https://t.me/share/url"));
         assertTrue(html.contains("mailto:"));
         assertTrue(html.contains("https%3A%2F%2Fwww.spiriponzi.cloud%2Fregister%3Fref%3DREF123"));
+        assertTrue(html.contains("id=\"frame\""));
+        assertTrue(html.contains("data-aa=\"2462874\""));
         Matcher token = Pattern.compile("name=\"_csrf\" value=\"([^\"]+)\"").matcher(html);
         assertTrue(token.find());
 
@@ -233,6 +271,19 @@ class AdminWithdrawalWebTest {
     }
 
     @Test
+    void reportPageRendersAadsBeforeTheReportContent() throws Exception {
+        String email = "user@example.com";
+        when(userService.findByEmail(email)).thenReturn(User.builder().email(email)
+                .userStats(UserStats.builder().annualPoints(3000).build()).build());
+        MvcResult page = mvc.perform(get("/report").servletPath("/report").session(session("ROLE_USER", email)))
+                .andExpect(status().isOk()).andReturn();
+        String html = page.getResponse().getContentAsString();
+
+        assertTrue(html.indexOf("id=\"frame\"") < html.indexOf("h1 class=\"h3 mb-0 text-gray-800\">Reports"));
+        assertTrue(html.contains("data-aa=\"2462874\""));
+    }
+
+    @Test
     void faviconIsPubliclyAccessibleAndLoginPageReferencesIt() throws Exception {
         mvc.perform(get("/img/favicon.ico").servletPath("/img/favicon.ico"))
                 .andExpect(status().isOk());
@@ -250,10 +301,16 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn();
         String html = page.getResponse().getContentAsString();
         int modal = html.indexOf("id=\"gameClaimModal\"");
-        int advertisement = html.indexOf("data-aa=\"2462874\"");
+        int advertisement = html.indexOf("data-aa=\"2462874\"", modal);
         int claim = html.indexOf("id=\"gameClaimButton\"");
         assertTrue(modal >= 0 && advertisement > modal && claim > advertisement);
         assertTrue(html.contains("https://acceptable.a-ads.com/2462874/?size=Adaptive"));
+        int firstGame = html.indexOf("game=BubbleBubble");
+        int firstRowEnd = html.indexOf("game=SoldierAttack3");
+        int betweenRows = html.indexOf("id=\"frame\"");
+        int secondRowStart = html.indexOf("game=NeonMath");
+        assertTrue(firstGame >= 0 && firstGame < firstRowEnd && firstRowEnd < betweenRows
+                && betweenRows < secondRowStart);
         assertTrue(html.contains(".game-embed iframe"));
         assertTrue(html.contains("every hour you can claim 50 coins"));
         assertTrue(html.contains("Claim 50 coins"));

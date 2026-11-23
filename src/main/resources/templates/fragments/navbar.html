@@ -59,7 +59,11 @@
 			aria-expanded="false"> <span
 				class="mr-2 d-none d-lg-inline text-gray-600 small"> <span
 					sec:authentication="username"></span>
-			</span> <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+			</span>
+			<img th:if="${googleProfilePicture != null}" class="img-profile rounded-circle"
+				th:src="${googleProfilePicture}" alt="Google profile picture" referrerpolicy="no-referrer">
+			<img th:unless="${googleProfilePicture != null}" class="img-profile rounded-circle"
+				src="img/undraw_profile.svg" alt="">
 		</a> <!-- Dropdown - User Information -->
 			<div
 				class="dropdown-menu dropdown-menu-right shadow animated--grow-in"

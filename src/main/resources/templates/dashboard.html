@@ -435,6 +435,91 @@
 			animation: none;
 		}
 	}
+
+	.adblock-notice .modal-content {
+		border: 0;
+		border-radius: 1rem;
+		box-shadow: 0 1.5rem 4rem rgba(20, 31, 65, .25);
+		overflow: hidden;
+	}
+
+	.adblock-notice .modal-header {
+		border: 0;
+		display: block;
+		padding: 2rem 2rem 0;
+	}
+
+	.adblock-notice-icon {
+		align-items: center;
+		background: linear-gradient(135deg, #e8efff, #f3edff);
+		border-radius: 1.1rem;
+		color: #4e73df;
+		display: flex;
+		font-size: 1.5rem;
+		height: 3.5rem;
+		justify-content: center;
+		margin-bottom: 1rem;
+		width: 3.5rem;
+	}
+
+	.adblock-notice-kicker {
+		color: #4e73df;
+		font-size: .72rem;
+		font-weight: 800;
+		letter-spacing: .09em;
+		margin-bottom: .35rem;
+		text-transform: uppercase;
+	}
+
+	.adblock-notice .modal-title {
+		color: #2f3445;
+		font-size: 1.45rem;
+		font-weight: 800;
+		line-height: 1.25;
+	}
+
+	.adblock-notice .modal-body {
+		color: #6c7280;
+		line-height: 1.65;
+		padding: 1rem 2rem;
+	}
+
+	.adblock-notice .modal-footer {
+		border: 0;
+		display: block;
+		padding: 0 2rem 2rem;
+	}
+
+	.adblock-notice #adblockNoticeRetry {
+		border-radius: .65rem;
+		font-weight: 700;
+		padding: .75rem 1rem;
+		width: 100%;
+	}
+
+	.adblock-notice #adblockNoticeStatus {
+		color: #b02a37;
+		font-size: .875rem;
+		margin-top: .75rem;
+	}
+
+	@media (max-width: 576px) {
+		.adblock-notice .modal-dialog {
+			margin: 1rem;
+		}
+
+		.adblock-notice .modal-header {
+			padding: 1.5rem 1.5rem 0;
+		}
+
+		.adblock-notice .modal-body {
+			padding: 1rem 1.5rem;
+		}
+
+		.adblock-notice .modal-footer {
+			padding: 0 1.5rem 1.5rem;
+		}
+	}
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 	crossorigin="anonymous"></script>
@@ -699,23 +784,30 @@
 		class="fas fa-angle-up"></i>
 	</a>
 
-	<div class="modal fade" id="adblockNoticeModal" tabindex="-1" role="dialog"
-		aria-labelledby="adblockNoticeModalLabel" aria-hidden="true">
+	<div class="modal fade adblock-notice" id="adblockNoticeModal" tabindex="-1" role="dialog"
+		aria-labelledby="adblockNoticeModalLabel" aria-describedby="adblockNoticeDescription"
+		aria-hidden="true" data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog modal-dialog-centered" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="adblockNoticeModalLabel">Help support Spiriponzi</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
+					<div class="adblock-notice-icon" aria-hidden="true">
+						<i class="fas fa-shield-alt"></i>
+					</div>
+					<p class="adblock-notice-kicker">One quick step</p>
+					<h2 class="modal-title" id="adblockNoticeModalLabel">Allow ads to continue</h2>
 				</div>
 				<div class="modal-body">
-					<p>It looks like you may be using an ad blocker or a browser with built-in ad blocking, such as Brave.</p>
-					<p>Advertising helps support the service. If you like, disable the ad blocker for this site or use a browser that allows its ads.</p>
-					<p class="mb-0">You can continue using Spiriponzi either way.</p>
+					<p id="adblockNoticeDescription">
+						Spiriponzi is supported by advertising. To use your account, turn off your ad blocker
+						for this site or disable Brave Shields for Spiriponzi.
+					</p>
+					<p class="mb-0">Once ads are allowed, select the button below to check again.</p>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" data-dismiss="modal">Continue anyway</button>
+					<button type="button" class="btn btn-primary" id="adblockNoticeRetry">
+						<i class="fas fa-redo-alt mr-2" aria-hidden="true"></i>Check again
+					</button>
+					<p id="adblockNoticeStatus" class="mb-0" role="status" aria-live="polite"></p>
 				</div>
 			</div>
 		</div>

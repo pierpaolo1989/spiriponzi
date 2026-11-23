@@ -103,6 +103,19 @@ public class AuthController {
 		userService.saveUser(user);
 		return "redirect:/register?success";
 	}
+
+	@GetMapping("/activate")
+	public String activateAccount(@RequestParam("token") String token) {
+		return userService.activateAccount(token)
+				? "redirect:/login?activated"
+				: "redirect:/login?activationError";
+	}
+
+	@PostMapping("/resend-activation")
+	public String resendActivationEmail(@RequestParam("email") String email) {
+		userService.resendActivationEmail(email);
+		return "redirect:/login?activationSent";
+	}
 	
 	@PostMapping("/recover-password/save")
 	public String recoverPassword(@Valid @ModelAttribute("password") RecoverPasswordDto password,

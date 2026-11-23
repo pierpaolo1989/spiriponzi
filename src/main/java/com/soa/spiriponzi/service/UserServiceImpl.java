@@ -39,10 +39,13 @@ public class UserServiceImpl implements UserService {
 
     private static final int REFERRAL_REWARD = 1000;
     private static final Duration PASSWORD_RESET_TOKEN_TTL = Duration.ofMinutes(30);
+    private static final Duration EMAIL_VERIFICATION_TOKEN_TTL = Duration.ofHours(24);
+    private static final Duration ACTIVATION_EMAIL_COOLDOWN = Duration.ofMinutes(1);
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final UserStatsRepository userStatsRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -61,6 +64,53 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public boolean activateAccount(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+
+        EmailVerificationToken verificationToken = emailVerificationTokenRepository
+                .findWithLockByTokenHash(hashToken(token)).orElse(null);
+        if (verificationToken == null) {
+            return false;
+        }
+        if (!verificationToken.getExpiresAt().isAfter(LocalDateTime.now())) {
+            emailVerificationTokenRepository.delete(verificationToken);
+            return false;
+        }
+
+        User user = verificationToken.getUser();
+        if (!user.isEnabled()) {
+            user.setEnabled(true);
+            userRepository.save(user);
+            rewardReferral(user);
+        }
+        emailVerificationTokenRepository.delete(verificationToken);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public void resendActivationEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        User user = userRepository.findByEmail(email.trim());
+        if (user == null || user.isEnabled()) {
+            return;
+        }
+        EmailVerificationToken existingToken = emailVerificationTokenRepository.findByUserId(user.getId())
+                .orElse(null);
+        if (existingToken != null
+                && existingToken.getCreatedAt().isAfter(LocalDateTime.now().minus(ACTIVATION_EMAIL_COOLDOWN))
+                && existingToken.getExpiresAt().isAfter(LocalDateTime.now())) {
+            return;
+        }
+        sendActivationEmail(user);
+    }
+
+    @Override
+    @Transactional
     public User signInWithGoogle(String subject, String email, boolean registering, String referralCode) {
         return userRepository.findByGoogleSubject(subject).orElseGet(() -> {
             if (!registering) {
@@ -71,7 +121,7 @@ public class UserServiceImpl implements UserService {
             }
             byte[] randomPassword = new byte[32];
             SECURE_RANDOM.nextBytes(randomPassword);
-            return createUser(email, passwordEncoder.encode(Base64.getUrlEncoder().withoutPadding()
+                return createUser(email, passwordEncoder.encode(Base64.getUrlEncoder().withoutPadding()
                     .encodeToString(randomPassword)), subject, referralCode);
         });
     }
@@ -82,6 +132,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(email);
         user.setPassword(encodedPassword);
         user.setGoogleSubject(googleSubject);
+        user.setEnabled(false);
         user.setReferralCode(generateReferralCode());
         user.setReferredBy(referrer);
         Role role = roleRepository.findByName("ROLE_USER");
@@ -92,22 +143,59 @@ public class UserServiceImpl implements UserService {
         //User stats
         var userStats = new UserStats();
         userStats.setNumberOfClaims(0);
-        userStats.setMonthlyPoints(referrer == null ? 0 : REFERRAL_REWARD);
-        userStats.setAnnualPoints(referrer == null ? 0 : REFERRAL_REWARD);
+        userStats.setMonthlyPoints(0);
+        userStats.setAnnualPoints(0);
         userStatsRepository.save(userStats);
         user.setUserStats(userStats);
         userRepository.save(user);
 
-        if (referrer != null) {
-            UserStats referrerStats = userStatsRepository.findWithLockByUserEmail(referrer.getEmail())
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, "Referrer has no coin balance"
-                    ));
-            referrerStats.setAnnualPoints(referrerStats.getAnnualPoints() + REFERRAL_REWARD);
-            referrerStats.setMonthlyPoints(referrerStats.getMonthlyPoints() + REFERRAL_REWARD);
-            userStatsRepository.save(referrerStats);
-        }
+        sendActivationEmail(user);
         return user;
+    }
+
+    private void rewardReferral(User user) {
+        if (user.getReferredBy() == null) {
+            return;
+        }
+        UserStats userStats = userStatsRepository.findWithLockByUserEmail(user.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "User has no coin balance"
+                ));
+        UserStats referrerStats = userStatsRepository.findWithLockByUserEmail(user.getReferredBy().getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Referrer has no coin balance"
+                ));
+        userStats.setAnnualPoints(userStats.getAnnualPoints() + REFERRAL_REWARD);
+        userStats.setMonthlyPoints(userStats.getMonthlyPoints() + REFERRAL_REWARD);
+        referrerStats.setAnnualPoints(referrerStats.getAnnualPoints() + REFERRAL_REWARD);
+        referrerStats.setMonthlyPoints(referrerStats.getMonthlyPoints() + REFERRAL_REWARD);
+        userStatsRepository.save(userStats);
+        userStatsRepository.save(referrerStats);
+    }
+
+    private void sendActivationEmail(User user) {
+        byte[] randomBytes = new byte[32];
+        SECURE_RANDOM.nextBytes(randomBytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        EmailVerificationToken verificationToken = new EmailVerificationToken();
+        verificationToken.setTokenHash(hashToken(token));
+        verificationToken.setUser(user);
+        verificationToken.setCreatedAt(LocalDateTime.now());
+        verificationToken.setExpiresAt(LocalDateTime.now().plus(EMAIL_VERIFICATION_TOKEN_TTL));
+        emailVerificationTokenRepository.deleteAllByUserId(user.getId());
+        emailVerificationTokenRepository.save(verificationToken);
+
+        String activationUrl = UriComponentsBuilder.fromUriString(publicBaseUrl.replaceAll("/+$", ""))
+                .path("/activate")
+                .queryParam("token", token)
+                .build()
+                .toUriString();
+        try {
+            emailService.sendActivationEmail(user.getEmail(), activationUrl);
+        } catch (jakarta.mail.MessagingException | java.io.IOException | freemarker.template.TemplateException e) {
+            throw new IllegalStateException("Unable to send account activation email", e);
+        }
     }
 
     @Override
@@ -204,7 +292,7 @@ public class UserServiceImpl implements UserService {
 		String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
 
 		PasswordResetToken resetToken = new PasswordResetToken();
-		resetToken.setTokenHash(hashPasswordResetToken(token));
+		resetToken.setTokenHash(hashToken(token));
 		resetToken.setUser(user);
 		resetToken.setExpiresAt(LocalDateTime.now().plus(PASSWORD_RESET_TOKEN_TTL));
 
@@ -229,7 +317,7 @@ public class UserServiceImpl implements UserService {
 		if (token == null || token.isBlank()) {
 			return false;
 		}
-		return passwordResetTokenRepository.findByTokenHash(hashPasswordResetToken(token))
+		return passwordResetTokenRepository.findByTokenHash(hashToken(token))
 				.filter(resetToken -> resetToken.getExpiresAt().isAfter(LocalDateTime.now()))
 				.isPresent();
 	}
@@ -242,7 +330,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		PasswordResetToken resetToken = passwordResetTokenRepository
-				.findWithLockByTokenHash(hashPasswordResetToken(token))
+				.findWithLockByTokenHash(hashToken(token))
 				.orElse(null);
 		if (resetToken == null) {
 			return false;
@@ -259,7 +347,7 @@ public class UserServiceImpl implements UserService {
 		return true;
 	}
 
-	private String hashPasswordResetToken(String token) {
+	private String hashToken(String token) {
 		try {
 			byte[] digest = MessageDigest.getInstance("SHA-256")
 					.digest(token.getBytes(StandardCharsets.UTF_8));

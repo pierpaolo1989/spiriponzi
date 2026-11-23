@@ -90,4 +90,16 @@ class GoogleOidcUserServiceTest {
         assertEquals("google@gmail.com", service.loadUser(oidcRequest).getName());
         verify(users).signInWithGoogle("google-sub", "google@gmail.com", false, null);
     }
+
+    @Test
+    void requiresEmailActivationBeforeGoogleSignIn() {
+        when(delegate.loadUser(oidcRequest)).thenReturn(googleUser(true));
+        User pending = User.builder().email("google@gmail.com").enabled(false).build();
+        when(users.signInWithGoogle("google-sub", "google@gmail.com", false, null)).thenReturn(pending);
+
+        OAuth2AuthenticationException exception = assertThrows(
+                OAuth2AuthenticationException.class, () -> service.loadUser(oidcRequest));
+
+        assertEquals("account_not_activated", exception.getError().getErrorCode());
+    }
 }

@@ -10,4 +10,7 @@ public interface EmailService {
 	void sendPasswordResetEmail(String email, String resetUrl)
 			throws MessagingException, IOException, TemplateException;
 
+	void sendActivationEmail(String email, String activationUrl)
+			throws MessagingException, IOException, TemplateException;
+
 }

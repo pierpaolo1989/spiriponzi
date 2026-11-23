@@ -13,6 +13,10 @@ public interface UserService {
 
 	void saveUser(UserDto userDto);
 
+	boolean activateAccount(String token);
+
+	void resendActivationEmail(String email);
+
 	User signInWithGoogle(String subject, String email, boolean registering, String referralCode);
 
 	boolean isValidReferralCode(String referralCode);

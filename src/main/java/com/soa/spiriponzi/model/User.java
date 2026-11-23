@@ -48,6 +48,9 @@ public class User {
     private String googleSubject;
     @Column
     private double balance;
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean enabled = true;
     @Column(name = "referral_code", unique = true, length = 32)
     private String referralCode;
     @ManyToOne

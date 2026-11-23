@@ -61,6 +61,10 @@ public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest,
         } catch (ResponseStatusException ex) {
             throw new OAuth2AuthenticationException(new OAuth2Error("google_account_error"), ex.getReason(), ex);
         }
+        if (!user.isEnabled()) {
+            throw new OAuth2AuthenticationException(
+                    new OAuth2Error("account_not_activated"), "Activate your account using the link sent by email");
+        }
         List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName())).toList();
         return new LocalOidcUser(authorities, googleUser, user.getEmail());

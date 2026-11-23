@@ -26,6 +26,11 @@ links can be shared via WhatsApp, Telegram, email, the device share menu, or cop
 The application uses `APP_PUBLIC_BASE_URL` when building referral links. Hibernate
 schema updates add the nullable `users.paypal_email` column; installations that
 manage their schema separately must add a nullable `varchar(254)` column.
+New accounts, including those registered with Google, must be activated through
+the link sent to their email before they can sign in. Activation links expire
+after 24 hours; users can request a replacement from the login page. Referral
+rewards are credited to both users only after activation. Existing accounts
+remain active.
 3,000 points equal EUR 0.50, rounded down to the cent, with a fixed EUR 0.10 fee.
 Requests reserve points; rejected unpaid requests return them. BTC and ETH are
 converted manually at the rate available when paying.
@@ -51,6 +56,8 @@ The first countdown starts when the account first requests its game claim status
 or attempts a game claim. The server stores and enforces the cooldown per account,
 including across sessions and concurrent requests; it does not verify active play.
 Existing accounts keep their last game claim timestamp when the interval changes.
+Adaptive A-ADS unit 2462874 appears at the bottom of the profile, at the top of
+the reports page, and between the two rows of games.
 
 ### Render overview in the admin dashboard
 
@@ -101,7 +108,8 @@ verified account email. Google sign-in never grants the configured admin role.
    register `http://localhost:8080/login/oauth2/code/google` with the local
    OAuth client. Use separate Google projects for development and production.
 
-The implementation requests only OpenID Connect identity and email scopes, not
-access to Gmail messages. The callback uses the configured public URL rather
-than trusting proxy headers. Real Google authentication requires valid Google
-credentials and a publicly accessible HTTPS deployment.
+The implementation requests OpenID Connect identity, email, and basic profile
+scopes so the app can display the Google profile photo when one is available.
+It does not request access to Gmail messages. The callback uses the configured
+public URL rather than trusting proxy headers. Real Google authentication
+requires valid Google credentials and a publicly accessible HTTPS deployment.

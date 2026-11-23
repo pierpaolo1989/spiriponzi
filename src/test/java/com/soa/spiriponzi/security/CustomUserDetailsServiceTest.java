@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -73,5 +74,19 @@ class CustomUserDetailsServiceTest {
                 new CustomUserDetailsService(userRepository, passwordEncoder, "admin", "");
 
         assertEquals("user@example.com", service.loadUserByUsername(user.getEmail()).getUsername());
+    }
+
+    @Test
+    void doesNotEnableUsersWhoHaveNotVerifiedTheirEmail() {
+        User user = new User();
+        user.setEmail("pending@example.com");
+        user.setPassword("encoded-password");
+        user.setEnabled(false);
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(user);
+
+        CustomUserDetailsService service =
+                new CustomUserDetailsService(userRepository, passwordEncoder, "admin", "");
+
+        assertFalse(service.loadUserByUsername(user.getEmail()).isEnabled());
     }
 }

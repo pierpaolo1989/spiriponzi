@@ -48,11 +48,11 @@
 
 <main class="public-page login-page">
 	<div class="row justify-content-center">
-		<div class="col-xl-10 col-lg-12">
+		<div class="col-xl-9 col-lg-12">
 			<div class="card o-hidden border-0 shadow-lg login-card">
 				<div class="card-body p-0">
 					<div class="row">
-						<div class="col-lg-5 d-none d-lg-block">
+						<div class="col-lg-6 d-none d-lg-block">
 							<aside class="login-aside">
 								<img th:src="@{/img/spiriponzi-mark.svg}" alt="" aria-hidden="true">
 								<span class="login-aside-eyebrow">Welcome back</span>
@@ -65,10 +65,23 @@
 								</ul>
 							</aside>
 						</div>
-						<div class="col-lg-7">
+						<div class="col-lg-6">
 							<div class="login-form-panel">
 								<div th:if="${param.error}">
 									<div class="alert alert-danger text-center">No user found with such credentials</div>
+								</div>
+								<div th:if="${param.unverified}" class="alert alert-warning" role="alert">
+									Activate your account using the link sent to your email before signing in.
+									You can request another activation email below.
+								</div>
+								<div th:if="${param.activated}" class="alert alert-success" role="status">
+									Your account is active. You can now sign in.
+								</div>
+								<div th:if="${param.activationSent}" class="alert alert-info" role="status">
+									If your account is awaiting activation, a new link will be sent when available. Check your inbox.
+								</div>
+								<div th:if="${param.activationError}" class="alert alert-danger" role="alert">
+									This activation link is invalid or expired. Request a new one below.
 								</div>
 								<div th:if="${param.googleError}" class="alert alert-danger" role="alert">
 									Google sign-in failed. New users should register with Google first. Existing password accounts
@@ -94,6 +107,17 @@
 
 									<div class="mb-3">
 										<button type="submit" class="btn btn-primary btn-block login-submit">Sign in</button>
+									</div>
+								</form>
+								<form th:if="${param.unverified != null or param.activationError != null}" method="post"
+									th:action="@{/resend-activation}" class="mb-3">
+									<label for="activationEmail" class="control-label">Email for activation link</label>
+									<div class="input-group">
+										<input type="email" id="activationEmail" name="email" class="form-control"
+											placeholder="Email address" required />
+										<div class="input-group-append">
+											<button type="submit" class="btn btn-outline-primary">Resend link</button>
+										</div>
 									</div>
 								</form>
 								<a th:if="${googleEnabled}" th:href="@{/auth/google/login}" class="btn btn-outline-primary btn-block mb-3">

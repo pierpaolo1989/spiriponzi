@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,7 +46,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
-                        .requestMatchers("/", "/register/**", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
+                        .requestMatchers("/", "/register/**", "/activate", "/resend-activation", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
                                 "/callbacks/bitlabs",
                                 "/callbacks/cpx",
                                 "/callbacks/offerwall",
@@ -60,6 +61,10 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
+                        .failureHandler((request, response, exception) -> {
+                            String status = exception instanceof DisabledException ? "unverified" : "error";
+                            response.sendRedirect(request.getContextPath() + "/login?" + status);
+                        })
                         .successHandler((request, response, authentication) -> {
                             boolean isAdmin = authentication.getAuthorities()
                                     .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
@@ -89,7 +94,10 @@ public class SecurityConfig {
                         if (request.getSession(false) != null) {
                             request.getSession(false).removeAttribute(GoogleAuthController.REGISTRATION_REFERRAL);
                         }
-                        response.sendRedirect(request.getContextPath() + "/login?googleError");
+                        boolean needsActivation = exception instanceof org.springframework.security.oauth2.core.OAuth2AuthenticationException oauthException
+                                && "account_not_activated".equals(oauthException.getError().getErrorCode());
+                        response.sendRedirect(request.getContextPath()
+                                + (needsActivation ? "/login?unverified" : "/login?googleError"));
                     }));
         }
         return http.build();

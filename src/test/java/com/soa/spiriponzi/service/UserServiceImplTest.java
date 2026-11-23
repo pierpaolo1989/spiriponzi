@@ -4,11 +4,13 @@ import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.RecoverPasswordDto;
 import com.soa.spiriponzi.model.Ad;
+import com.soa.spiriponzi.model.EmailVerificationToken;
 import com.soa.spiriponzi.model.PasswordResetToken;
 import com.soa.spiriponzi.model.Role;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.repository.AdRepository;
+import com.soa.spiriponzi.repository.EmailVerificationTokenRepository;
 import com.soa.spiriponzi.repository.PasswordResetTokenRepository;
 import com.soa.spiriponzi.repository.RoleRepository;
 import com.soa.spiriponzi.repository.UserAdRepository;
@@ -41,6 +43,7 @@ class UserServiceImplTest {
     private UserRepository userRepository;
     private UserStatsRepository userStatsRepository;
     private PasswordResetTokenRepository passwordResetTokenRepository;
+    private EmailVerificationTokenRepository emailVerificationTokenRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AdRepository adRepository;
@@ -53,6 +56,7 @@ class UserServiceImplTest {
         userRepository = mock(UserRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
         passwordResetTokenRepository = mock(PasswordResetTokenRepository.class);
+        emailVerificationTokenRepository = mock(EmailVerificationTokenRepository.class);
         roleRepository = mock(RoleRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         adRepository = mock(AdRepository.class);
@@ -61,6 +65,7 @@ class UserServiceImplTest {
         userService = new UserServiceImpl(
                 userRepository,
                 passwordResetTokenRepository,
+                emailVerificationTokenRepository,
                 userStatsRepository,
                 roleRepository,
                 passwordEncoder,
@@ -156,14 +161,13 @@ class UserServiceImplTest {
     }
 
     @Test
-    void registeringWithReferralCodeRewardsBothUsers() {
+    void registeringWithReferralCodeDefersRewardsUntilActivation() throws Exception {
         User referrer = User.builder().id(10L).email("referrer@example.com").build();
         UserStats referrerStats = UserStats.builder().annualPoints(250).monthlyPoints(100).build();
         when(userRepository.findByReferralCode("REFERRAL123")).thenReturn(Optional.of(referrer));
         when(userRepository.existsByReferralCode(any())).thenReturn(false);
         when(roleRepository.findByName("ROLE_USER")).thenReturn(new Role());
         when(passwordEncoder.encode("password")).thenReturn("encoded-password");
-        when(userStatsRepository.findWithLockByUserEmail(referrer.getEmail())).thenReturn(Optional.of(referrerStats));
 
         UserDto registration = new UserDto();
         registration.setEmail("new-user@example.com");
@@ -172,32 +176,88 @@ class UserServiceImplTest {
 
         userService.saveUser(registration);
 
-        assertEquals(1250, referrerStats.getAnnualPoints());
-        assertEquals(1100, referrerStats.getMonthlyPoints());
-        verify(userStatsRepository).save(referrerStats);
+        assertEquals(250, referrerStats.getAnnualPoints());
+        assertEquals(100, referrerStats.getMonthlyPoints());
+        verify(userStatsRepository, never()).save(referrerStats);
         org.mockito.ArgumentCaptor<UserStats> newStatsCaptor =
                 org.mockito.ArgumentCaptor.forClass(UserStats.class);
-        verify(userStatsRepository, org.mockito.Mockito.times(2)).save(newStatsCaptor.capture());
-        UserStats newUserStats = newStatsCaptor.getAllValues().get(0);
-        assertEquals(1000, newUserStats.getAnnualPoints());
-        assertEquals(1000, newUserStats.getMonthlyPoints());
+        verify(userStatsRepository).save(newStatsCaptor.capture());
+        UserStats newUserStats = newStatsCaptor.getValue();
+        assertEquals(0, newUserStats.getAnnualPoints());
+        assertEquals(0, newUserStats.getMonthlyPoints());
         assertEquals(0, newUserStats.getNumberOfClaims());
 
         org.mockito.ArgumentCaptor<User> userCaptor = org.mockito.ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User newUser = userCaptor.getValue();
         assertEquals(referrer, newUser.getReferredBy());
+        assertFalse(newUser.isEnabled());
         assertNotNull(newUser.getReferralCode());
         assertTrue(newUser.getReferralCode().matches("[A-F0-9]{16}"));
+        verify(emailService).sendActivationEmail(org.mockito.ArgumentMatchers.eq(newUser.getEmail()),
+                org.mockito.ArgumentMatchers.contains("/activate?token="));
+        verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
     }
 
     @Test
-    void googleRegistrationRewardsReferrerAndStoresStableIdentity() {
+    void activationEnablesAccountAndRewardsBothUsersOnlyOnce() throws Exception {
+        String rawToken = "single-use-activation-token";
+        String tokenHash = HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-256").digest(rawToken.getBytes(StandardCharsets.UTF_8)));
+        User referrer = User.builder().id(10L).email("referrer@example.com").build();
+        User newUser = User.builder().id(11L).email("new-user@example.com").enabled(false)
+                .referredBy(referrer).build();
+        UserStats newUserStats = UserStats.builder().annualPoints(0).monthlyPoints(0).build();
+        UserStats referrerStats = UserStats.builder().annualPoints(250).monthlyPoints(100).build();
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setTokenHash(tokenHash);
+        token.setUser(newUser);
+        token.setExpiresAt(java.time.LocalDateTime.now().plusHours(1));
+        when(emailVerificationTokenRepository.findWithLockByTokenHash(tokenHash)).thenReturn(Optional.of(token));
+        when(userStatsRepository.findWithLockByUserEmail(newUser.getEmail())).thenReturn(Optional.of(newUserStats));
+        when(userStatsRepository.findWithLockByUserEmail(referrer.getEmail())).thenReturn(Optional.of(referrerStats));
+
+        assertTrue(userService.activateAccount(rawToken));
+
+        assertTrue(newUser.isEnabled());
+        assertEquals(1000, newUserStats.getAnnualPoints());
+        assertEquals(1000, newUserStats.getMonthlyPoints());
+        assertEquals(1250, referrerStats.getAnnualPoints());
+        assertEquals(1100, referrerStats.getMonthlyPoints());
+        verify(userRepository).save(newUser);
+        verify(emailVerificationTokenRepository).delete(token);
+        verify(userStatsRepository).save(newUserStats);
+        verify(userStatsRepository).save(referrerStats);
+    }
+
+    @Test
+    void activationRejectsExpiredTokenWithoutEnablingOrRewarding() throws Exception {
+        String rawToken = "expired-activation-token";
+        String tokenHash = HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-256").digest(rawToken.getBytes(StandardCharsets.UTF_8)));
+        User user = User.builder().id(11L).email("new-user@example.com").enabled(false).build();
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setUser(user);
+        token.setExpiresAt(java.time.LocalDateTime.now().minusMinutes(1));
+        when(emailVerificationTokenRepository.findWithLockByTokenHash(tokenHash)).thenReturn(Optional.of(token));
+
+        assertFalse(userService.activateAccount(rawToken));
+
+        assertFalse(user.isEnabled());
+        verify(emailVerificationTokenRepository).delete(token);
+        verify(userRepository, never()).save(any(User.class));
+        verify(userStatsRepository, never()).save(any(UserStats.class));
+    }
+
+    @Test
+    void googleRegistrationDefersRewardsUntilEmailActivation() throws Exception {
         User referrer = User.builder().id(10L).email("referrer@example.com").build();
         UserStats stats = UserStats.builder().annualPoints(10).monthlyPoints(20).build();
+        UserStats registeredStats = UserStats.builder().annualPoints(0).monthlyPoints(0).build();
         when(userRepository.findByGoogleSubject("google-sub")).thenReturn(Optional.empty());
         when(userRepository.findByReferralCode("REF123")).thenReturn(Optional.of(referrer));
         when(userStatsRepository.findWithLockByUserEmail(referrer.getEmail())).thenReturn(Optional.of(stats));
+        when(userStatsRepository.findWithLockByUserEmail("new@gmail.com")).thenReturn(Optional.of(registeredStats));
         when(roleRepository.findByName("ROLE_USER")).thenReturn(new Role());
         when(passwordEncoder.encode(any())).thenReturn("random-encoded-password");
 
@@ -206,10 +266,13 @@ class UserServiceImplTest {
         assertEquals("google-sub", registered.getGoogleSubject());
         assertEquals("new@gmail.com", registered.getEmail());
         assertEquals("random-encoded-password", registered.getPassword());
-        assertEquals(1000, registered.getUserStats().getAnnualPoints());
-        assertEquals(1010, stats.getAnnualPoints());
-        assertEquals(1020, stats.getMonthlyPoints());
+        assertFalse(registered.isEnabled());
+        assertEquals(0, registeredStats.getAnnualPoints());
+        assertEquals(10, stats.getAnnualPoints());
+        assertEquals(20, stats.getMonthlyPoints());
         verify(userRepository).save(registered);
+        verify(emailService).sendActivationEmail(org.mockito.ArgumentMatchers.eq(registered.getEmail()),
+                org.mockito.ArgumentMatchers.contains("/activate?token="));
     }
 
     @Test

@@ -26,7 +26,7 @@ public class GoogleOAuthConfig {
                 .clientId(clientId)
                 .clientSecret(clientSecret)
                 .redirectUri(publicBaseUrl.replaceAll("/+$", "") + "/login/oauth2/code/google")
-                .scope("openid", "email")
+                .scope("openid", "email", "profile")
                 .build();
         return new InMemoryClientRegistrationRepository(google);
     }

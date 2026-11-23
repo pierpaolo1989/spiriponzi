@@ -19,6 +19,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.soa.spiriponzi.config.SecurityConfig;
 import com.soa.spiriponzi.model.Role;
 import com.soa.spiriponzi.model.User;
+import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.security.GoogleOidcUserService;
 import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.UserService;
@@ -74,7 +75,8 @@ class GoogleOAuthFlowTest {
                     "{\"access_token\":\"access\",\"token_type\":\"Bearer\",\"expires_in\":300,\"id_token\":\""
                             + ID_TOKEN.get() + "\"}"));
             PROVIDER.createContext("/userinfo", exchange -> respond(exchange,
-                    "{\"sub\":\"google-sub\",\"email\":\"new@gmail.com\",\"email_verified\":true}"));
+                    "{\"sub\":\"google-sub\",\"email\":\"new@gmail.com\",\"email_verified\":true,"
+                            + "\"picture\":\"https://lh3.googleusercontent.com/test-photo\"}"));
             PROVIDER.start();
         } catch (Exception ex) {
             throw new ExceptionInInitializerError(ex);
@@ -99,7 +101,7 @@ class GoogleOAuthFlowTest {
                     .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                     .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .redirectUri("http://localhost/login/oauth2/code/google")
-                    .scope("openid", "email")
+                    .scope("openid", "email", "profile")
                     .authorizationUri(ISSUER + "/authorize").tokenUri(ISSUER + "/token")
                     .jwkSetUri(ISSUER + "/keys").issuerUri(ISSUER)
                     .userInfoUri(ISSUER + "/userinfo").userNameAttributeName("sub")
@@ -144,8 +146,11 @@ class GoogleOAuthFlowTest {
         when(users.isValidReferralCode("REF123")).thenReturn(true);
         Role role = new Role();
         role.setName("ROLE_USER");
-        when(users.signInWithGoogle("google-sub", "new@gmail.com", true, "REF123"))
-                .thenReturn(User.builder().email("new@gmail.com").roles(List.of(role)).build());
+        User signedIn = User.builder().id(1L).email("new@gmail.com").roles(List.of(role))
+                .userStats(UserStats.builder().build()).build();
+        when(users.signInWithGoogle("google-sub", "new@gmail.com", true, "REF123")).thenReturn(signedIn);
+        when(users.findByEmail("new@gmail.com")).thenReturn(signedIn);
+        when(users.getOrCreateReferralCode(1L)).thenReturn("REF123");
         mvc.perform(post("/auth/google/register").servletPath("/auth/google/register").session(session)
                 .with(csrf()).param("terms", "true").param("referralCode", "REF123"))
                 .andExpect(redirectedUrl("/oauth2/authorization/google"));
@@ -154,8 +159,15 @@ class GoogleOAuthFlowTest {
         assertEquals("/dashboard", result.getResponse().getRedirectedUrl());
         SecurityContext context = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
         assertEquals("new@gmail.com", context.getAuthentication().getName());
+        assertEquals("https://lh3.googleusercontent.com/test-photo",
+                ((org.springframework.security.oauth2.core.oidc.user.OidcUser)
+                        context.getAuthentication().getPrincipal()).getAttribute("picture"));
         assertTrue(context.getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+        String profileHtml = mvc.perform(get("/profile").servletPath("/profile").session(session))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertTrue(profileHtml.contains("src=\"https://lh3.googleusercontent.com/test-photo\""));
+        assertTrue(profileHtml.contains("alt=\"Google profile picture\""));
         verify(users).signInWithGoogle("google-sub", "new@gmail.com", true, "REF123");
     }
 

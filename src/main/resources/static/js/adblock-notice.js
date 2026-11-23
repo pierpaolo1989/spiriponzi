@@ -1,22 +1,6 @@
 (function () {
-    const noticeKey = "spiriponzi-adblock-notice-dismissed";
     const modal = $("#adblockNoticeModal");
-
-    function wasNoticeDismissed() {
-        try {
-            return window.sessionStorage.getItem(noticeKey) === "true";
-        } catch (error) {
-            return false;
-        }
-    }
-
-    function rememberDismissal() {
-        try {
-            window.sessionStorage.setItem(noticeKey, "true");
-        } catch (error) {
-            // The notice remains dismissible even when browser storage is unavailable.
-        }
-    }
+    let blockingNotice = false;
 
     function hasAdBlocker() {
         const bait = document.createElement("div");
@@ -36,13 +20,35 @@
     }
 
     function showNoticeIfNeeded(adBlockDetected) {
-        if (adBlockDetected && !wasNoticeDismissed()) {
+        if (adBlockDetected) {
+            blockingNotice = true;
             modal.modal("show");
         }
     }
 
+    function retryAfterDisablingBlocker() {
+        const status = $("#adblockNoticeStatus");
+        if (hasAdBlocker()) {
+            status.text("An ad blocker is still active. Disable it for this site, then try again.");
+            return;
+        }
+
+        blockingNotice = false;
+        modal.modal("hide");
+    }
+
     $(function () {
-        modal.on("hidden.bs.modal", rememberDismissal);
+        modal.modal({
+            backdrop: "static",
+            keyboard: false,
+            show: false
+        });
+        modal.on("hide.bs.modal", function (event) {
+            if (blockingNotice) {
+                event.preventDefault();
+            }
+        });
+        $("#adblockNoticeRetry").on("click", retryAfterDisablingBlocker);
 
         const adBlockDetected = hasAdBlocker();
         if (navigator.brave && typeof navigator.brave.isBrave === "function") {
