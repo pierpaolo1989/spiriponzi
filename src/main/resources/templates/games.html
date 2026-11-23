@@ -29,7 +29,8 @@
 
 <style>
 .game-embed iframe {
-	width: -webkit-fill-available !important;
+	width: 100% !important;
+	height: 600px !important;
 	min-height: 600px !important;
 }
 
@@ -116,8 +117,9 @@
 								<div class="card-body" style="min-height: 600px;">
 
 									<div class="game-embed">
-										<script
-											src="https://cdn.htmlgames.com/embed.js?game=BubbleBubble&amp;bgcolor=white"></script>
+										<iframe title="Bubble Bubble"
+											src="https://cdn.htmlgames.com/BubbleBubble/index.html?bgcolor=white"
+											width="800" height="600" loading="lazy" allowfullscreen></iframe>
 									</div>
 								</div>
 							</div>
@@ -134,8 +136,9 @@
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
 									<div class="game-embed">
-										<script
-											src="https://cdn.htmlgames.com/embed.js?game=SoldierAttack3&amp;bgcolor=white"></script>
+										<iframe title="Soldier Attack 3"
+											src="https://cdn.htmlgames.com/SoldierAttack3/index.html?bgcolor=white"
+											width="800" height="600" loading="lazy" allowfullscreen></iframe>
 									</div>
 								</div>
 							</div>
@@ -143,7 +146,8 @@
 					</div>
 
 					<div id="frame" style="width: 100%; margin: auto; position: relative; z-index: 99998;">
-						<iframe data-aa="2462874" src="//acceptable-a-ads.com/2462874/?size=Adaptive"
+						<iframe title="Advertisement" data-aa="2462874" loading="lazy"
+							src="https://acceptable.a-ads.com/2462874/?size=Adaptive"
 							style="border: 0; padding: 0; width: 70%; height: auto; overflow: hidden; display: block; margin: auto"></iframe>
 					</div>
 
@@ -157,8 +161,9 @@
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
 									<div class="game-embed">
-										<script
-											src="https://cdn.htmlgames.com/embed.js?game=NeonMath&amp;bgcolor=white"></script>
+										<iframe title="Neon Math"
+											src="https://cdn.htmlgames.com/NeonMath/index.html?bgcolor=white"
+											width="800" height="600" loading="lazy" allowfullscreen></iframe>
 									</div>
 								</div>
 							</div>
@@ -175,8 +180,9 @@
 								<!-- Card Body -->
 								<div class="card-body" style="min-height: 600px;">
 									<div class="game-embed">
-										<script
-											src="https://cdn.htmlgames.com/embed.js?game=GalaxyShooter&amp;bgcolor=white"></script>
+										<iframe title="Galaxy Shooter"
+											src="https://cdn.htmlgames.com/GalaxyShooter/index.html?bgcolor=white"
+											width="800" height="600" loading="lazy" allowfullscreen></iframe>
 									</div>
 								</div>
 							</div>
@@ -219,7 +225,7 @@
 					<p>Your game reward is ready. Claim 50 coins.</p>
 					<div class="my-4" style="width: 100%; margin-left: auto; margin-right: auto; position: relative;">
 						<span class="small text-muted d-block mb-2">Advertisement</span>
-						<iframe title="Advertisement" data-aa="2462874"
+						<iframe title="Advertisement" data-aa="2462874" loading="lazy"
 							src="https://acceptable.a-ads.com/2462874/?size=Adaptive"
 							style="border: 0; padding: 0; width: 70%; height: auto; overflow: hidden; display: block; margin: auto"></iframe>
 					</div>
@@ -247,8 +253,6 @@
 	<script th:src="@{vendor/chart.js/Chart.min.js}"></script>
 
 	<!-- Page level custom scripts -->
-	<script src='https://www.google.com/recaptcha/api.js'></script>
-
 	<script>
 		let gameClaimSecondsRemaining = null;
 		let gameClaimTimer = null;
