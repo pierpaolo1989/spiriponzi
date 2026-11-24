@@ -102,6 +102,24 @@
 			overflow-wrap: anywhere;
 		}
 
+		.analytics-countries {
+			display: grid;
+			gap: .75rem;
+			grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+			list-style: none;
+			padding: 0;
+		}
+
+		.analytics-country {
+			align-items: center;
+			background: #f8f9fc;
+			border: 1px solid #eaecf4;
+			border-radius: .5rem;
+			display: flex;
+			justify-content: space-between;
+			padding: .85rem 1rem;
+		}
+
 		.admin-topbar-title {
 			align-items: center;
 			display: flex;
@@ -322,6 +340,36 @@
 						</div>
 					</div>
 				</section>
+
+				<section class="card shadow mb-4 admin-table-card admin-render-card" aria-labelledby="cloudflare-heading">
+					<div class="card-header">
+						<div>
+							<h2 id="cloudflare-heading" class="h6 m-0 font-weight-bold text-primary">Cloudflare Web Analytics</h2>
+							<p class="small text-muted mb-0 mt-1">Visualizzazioni pagina degli ultimi 30 giorni per paese.</p>
+						</div>
+						<button class="btn btn-sm btn-outline-primary" type="button" id="cloudflare-refresh">
+							<i class="fas fa-sync-alt mr-1" aria-hidden="true"></i>Aggiorna
+						</button>
+					</div>
+					<div class="card-body">
+						<div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
+							<p id="cloudflare-status" class="small text-muted admin-render-intro mb-2" role="status" aria-live="polite"
+								th:data-url="@{/admin/cloudflare/analytics}">Caricamento analytics Cloudflare...</p>
+							<a class="small" href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">
+								Apri Cloudflare <i class="fas fa-external-link-alt ml-1" aria-hidden="true"></i>
+							</a>
+						</div>
+						<div class="h5 mb-3">
+							<span id="cloudflare-page-loads">—</span>
+							<span class="small text-muted font-weight-normal">visualizzazioni pagina</span>
+						</div>
+						<ul id="cloudflare-countries" class="analytics-countries mb-3"></ul>
+						<div class="alert alert-light border small mb-0" role="note">
+							<i class="fas fa-info-circle text-primary mr-1" aria-hidden="true"></i>
+							Dati aggregati recuperati direttamente da Cloudflare; non vengono salvati nel database dell’applicazione.
+						</div>
+					</div>
+				</section>
 			</div>
 		</div>
 	</div>
@@ -381,6 +429,57 @@
 		}
 		button.addEventListener('click', loadRenderServices);
 		loadRenderServices();
+	})();
+	(() => {
+		const status = document.getElementById('cloudflare-status');
+		const total = document.getElementById('cloudflare-page-loads');
+		const list = document.getElementById('cloudflare-countries');
+		const button = document.getElementById('cloudflare-refresh');
+		async function loadCloudflareAnalytics() {
+			button.disabled = true;
+			list.replaceChildren();
+			total.textContent = '—';
+			status.textContent = 'Caricamento analytics Cloudflare...';
+			try {
+				const response = await fetch(status.dataset.url, { cache: 'no-store' });
+				if (response.status === 503) {
+					status.textContent = 'Analytics non configurate: imposta CLOUDFLARE_ANALYTICS_API_TOKEN, CLOUDFLARE_ACCOUNT_ID e CLOUDFLARE_WEB_ANALYTICS_TOKEN su Render.';
+					return;
+				}
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}`);
+				}
+				const analytics = await response.json();
+				if (!Number.isSafeInteger(analytics.pageLoads) || !Array.isArray(analytics.countries)) {
+					throw new Error('Risposta non valida');
+				}
+				const numberFormat = new Intl.NumberFormat('it-IT');
+				total.textContent = numberFormat.format(analytics.pageLoads);
+				for (const country of analytics.countries) {
+					if (typeof country.country !== 'string' || !Number.isSafeInteger(country.pageLoads)) {
+						throw new Error('Dati paese non validi');
+					}
+					const item = document.createElement('li');
+					item.className = 'analytics-country';
+					const name = document.createElement('span');
+					name.className = 'font-weight-bold';
+					name.textContent = country.country;
+					const count = document.createElement('span');
+					count.className = 'badge badge-primary';
+					count.textContent = numberFormat.format(country.pageLoads);
+					item.append(name, count);
+					list.appendChild(item);
+				}
+				status.textContent = `Ultimi 30 giorni · aggiornato alle ${new Date().toLocaleTimeString('it-IT')}.`;
+			} catch (error) {
+				console.error('Impossibile caricare Cloudflare Web Analytics:', error);
+				status.textContent = 'Impossibile caricare i dati. Verifica token API, account ID, site token e permessi Cloudflare.';
+			} finally {
+				button.disabled = false;
+			}
+		}
+		button.addEventListener('click', loadCloudflareAnalytics);
+		loadCloudflareAnalytics();
 	})();
 </script>
 <th:block th:replace="~{fragments/cloudflare-analytics}"></th:block>

@@ -84,6 +84,17 @@ requirements for your deployment. If Cloudflare is already injecting Web
 Analytics automatically through its proxy, disable one of the manual beacons
 to avoid counting visits twice.
 
+To display aggregated page views by country in the admin dashboard, create a
+Cloudflare API token with the **Account Analytics: Read** permission and set
+`CLOUDFLARE_ANALYTICS_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and
+`CLOUDFLARE_WEB_ANALYTICS_TOKEN` in the Render service's Environment settings.
+Use the Web Analytics site token already provided for the beacon as the value
+of `CLOUDFLARE_WEB_ANALYTICS_TOKEN`; it is used as the site tag. Keep the API
+token server-side and never commit or expose it. The dashboard requests the
+last 30 days directly from Cloudflare; it does not persist the results in the
+application database. If the panel reports an API error, check the token's
+account permission and that the site token is correct.
+
 ### Sign in with Google
 
 Google sign-in is optional and disabled by default. It creates accounts only

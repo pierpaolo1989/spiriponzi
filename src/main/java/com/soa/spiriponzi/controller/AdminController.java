@@ -7,6 +7,7 @@ import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.WithdrawRepository;
 import com.soa.spiriponzi.service.WithdrawServiceImpl;
 import com.soa.spiriponzi.service.RenderService;
+import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +36,14 @@ public class AdminController {
     private final WithdrawRepository withdrawRepository;
     private final WithdrawServiceImpl withdrawService;
     private final RenderService renderService;
+    private final CloudflareAnalyticsService cloudflareAnalyticsService;
+
+    @GetMapping("/cloudflare/analytics")
+    @ResponseBody
+    public ResponseEntity<CloudflareAnalyticsService.AnalyticsSnapshot> cloudflareAnalytics() {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(cloudflareAnalyticsService.getPageLoads());
+    }
 
     @GetMapping("/render/services")
     @ResponseBody

@@ -6,6 +6,7 @@ import com.soa.spiriponzi.repository.AdRepository;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.WithdrawRepository;
+import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,8 @@ class AdminControllerTest {
     private WithdrawRepository withdrawRepository;
     @Mock
     private RenderService renderService;
+    @Mock
+    private CloudflareAnalyticsService cloudflareAnalyticsService;
     @InjectMocks
     private AdminController adminController;
 

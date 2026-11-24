@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Spiriponzi - Errore</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+	<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+	<style>
+		.error-card {
+			border: 0;
+			border-radius: .75rem;
+			max-width: 34rem;
+		}
+
+		.error-code {
+			color: #4e73df;
+			font-size: clamp(4rem, 18vw, 7rem);
+			font-weight: 800;
+			line-height: 1;
+		}
+	</style>
+</head>
+<body class="bg-gradient-primary">
+<main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+	<section class="card shadow error-card w-100" aria-labelledby="error-title">
+		<div class="card-body text-center p-4 p-md-5">
+			<a th:href="@{/}" class="d-inline-flex align-items-center mb-4">
+				<img th:src="@{/img/spiriponzi-mark.svg}" alt="Spiriponzi" width="48" height="48">
+			</a>
+			<div class="error-code" th:text="${status}">500</div>
+			<h1 id="error-title" class="h3 font-weight-bold text-gray-800 mt-3"
+				th:text="${status == 404 ? 'Pagina non trovata' : (status == 403 ? 'Accesso negato' : 'Si è verificato un errore')}">
+				Si è verificato un errore
+			</h1>
+			<p class="text-gray-600 mb-4" th:if="${status == 404}">
+				La pagina richiesta non esiste o potrebbe essere stata spostata.
+			</p>
+			<p class="text-gray-600 mb-4" th:if="${status == 403}">
+				Non hai i permessi necessari per visualizzare questa pagina.
+			</p>
+			<p class="text-gray-600 mb-4" th:if="${status != 403 and status != 404}">
+				Non è stato possibile completare la richiesta. Riprova più tardi.
+			</p>
+			<a th:href="@{/}" class="btn btn-primary">
+				<i class="fas fa-home mr-1" aria-hidden="true"></i>Torna alla home
+			</a>
+		</div>
+	</section>
+</main>
+<th:block th:replace="~{fragments/cloudflare-analytics}"></th:block>
+</body>
+</html>
