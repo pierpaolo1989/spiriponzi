@@ -1,0 +1,4 @@
+<th:block th:if="${cloudflareAnalyticsToken != null}">
+	<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+		th:attr='data-cf-beacon=|{"token":"${cloudflareAnalyticsToken}"}|'></script>
+</th:block>

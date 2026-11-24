@@ -28,22 +28,6 @@
 			opacity: .75;
 		}
 
-		.admin-logout-btn {
-			border: 1px solid #4e73df;
-			border-radius: 999px;
-			color: #4e73df;
-			font-weight: 700;
-			padding: .45rem 1.15rem;
-			transition: background-color .15s ease, color .15s ease, transform .15s ease;
-		}
-
-		.admin-logout-btn:hover,
-		.admin-logout-btn:focus {
-			background: #4e73df;
-			color: #fff;
-			transform: translateY(-1px);
-		}
-
 		.admin-table-card {
 			border: 0;
 			border-radius: .65rem;
@@ -166,11 +150,24 @@
 					</button>
 					<span class="h5 mb-0 text-gray-800">Dashboard amministratore</span>
 				</div>
-				<form th:action="@{/logout}" method="post" class="ml-auto">
-					<button class="btn btn-sm admin-logout-btn" type="submit">
-						<i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Esci
-					</button>
-				</form>
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item dropdown no-arrow">
+						<a class="nav-link dropdown-toggle" href="#" id="adminUserDropdown"
+							role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+							aria-label="Menu amministratore">
+							<i class="fas fa-user-circle fa-sm fa-fw text-gray-400" aria-hidden="true"></i>
+						</a>
+						<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+							aria-labelledby="adminUserDropdown">
+							<form th:action="@{/logout}" method="post">
+								<button class="dropdown-item" type="submit">
+									<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400" aria-hidden="true"></i>
+									Esci
+								</button>
+							</form>
+						</div>
+					</li>
+				</ul>
 			</nav>
 			<div class="container-fluid">
 				<div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -386,5 +383,6 @@
 		loadRenderServices();
 	})();
 </script>
+<th:block th:replace="~{fragments/cloudflare-analytics}"></th:block>
 </body>
 </html>

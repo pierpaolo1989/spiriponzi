@@ -72,6 +72,18 @@ restart. Never commit or share the key. If unset, the rest of the admin dashboar
 still works and the panel reports that it is not configured. Refresh the panel
 with its button; it does not refresh automatically.
 
+### Cloudflare Web Analytics
+
+The Cloudflare beacon reports aggregated site traffic, including geographic
+summaries, directly in Cloudflare Web Analytics. It does not write analytics
+data to the application database. The homepage contains the provided site
+token. To enable the beacon on the other pages, set the same token as
+`CLOUDFLARE_WEB_ANALYTICS_TOKEN` in the Render service's Environment settings
+and redeploy or restart. Review the applicable privacy notice and consent
+requirements for your deployment. If Cloudflare is already injecting Web
+Analytics automatically through its proxy, disable one of the manual beacons
+to avoid counting visits twice.
+
 ### Sign in with Google
 
 Google sign-in is optional and disabled by default. It creates accounts only
