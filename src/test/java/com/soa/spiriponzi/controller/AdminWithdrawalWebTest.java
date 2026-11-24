@@ -117,7 +117,11 @@ class AdminWithdrawalWebTest {
             String html = mvc.perform(get(path).servletPath(path).session(session("ROLE_USER")))
                     .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
             assertTrue(html.contains("data-aa=\"2462874\""));
-            if (path.equals("/create-ads")) {
+            if (path.equals("/surf-ads")) {
+                int priorityNote = html.indexOf("Ads with higher remaining budgets appear first.");
+                int adList = html.indexOf("class=\"card-body ad-container\"");
+                assertTrue(priorityNote > 0 && priorityNote < adList);
+            } else {
                 assertTrue(html.contains("id=\"budget\""));
                 assertTrue(html.contains("id=\"fundedViewsEstimate\""));
             }
@@ -134,6 +138,10 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertTrue(html.contains("class=\"nav-item d-none d-lg-block px-3 py-2 sidebar-ad\""));
         assertTrue(html.contains("data-ad-slot=\"2465731755\""));
+        assertTrue(html.indexOf("Offerwall") < html.indexOf("data-ad-slot=\"2465731755\""));
+        assertTrue(html.contains("id=\"themeToggle\""));
+        assertTrue(html.contains("/css/user-dark-mode.css"));
+        assertTrue(html.contains("spiriponzi.theme"));
         int modalStart = html.lastIndexOf("<div class=\"modal fade adblock-notice\"");
         int modalEnd = html.indexOf("<!-- Bootstrap core JavaScript-->", modalStart);
         assertTrue(modalStart >= 0);

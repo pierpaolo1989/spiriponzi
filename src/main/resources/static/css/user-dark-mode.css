@@ -1,0 +1,153 @@
+html[data-theme="dark"] {
+	color-scheme: dark;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] #content-wrapper,
+html[data-theme="dark"] #content {
+	background-color: #111827 !important;
+	color: #e5e7eb;
+}
+
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-light,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .dropdown-menu,
+html[data-theme="dark"] .collapse-inner,
+html[data-theme="dark"] .list-group-item,
+html[data-theme="dark"] .input-group-text {
+	background-color: #1f2937 !important;
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .card-footer,
+html[data-theme="dark"] .modal-header,
+html[data-theme="dark"] .modal-footer,
+html[data-theme="dark"] .list-group-item,
+html[data-theme="dark"] .dropdown-divider,
+html[data-theme="dark"] .table,
+html[data-theme="dark"] .table td,
+html[data-theme="dark"] .table th {
+	border-color: #374151 !important;
+}
+
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .card-footer {
+	background-color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .navbar-light.bg-white,
+html[data-theme="dark"] .topbar {
+	background-color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .sidebar.bg-gradient-primary {
+	background: linear-gradient(180deg, #1f2937 10%, #111827 100%) !important;
+}
+
+html[data-theme="dark"] .nav-link,
+html[data-theme="dark"] .navbar-light .navbar-nav .nav-link,
+html[data-theme="dark"] .dropdown-item,
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] label,
+html[data-theme="dark"] .text-dark,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-900 {
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-500 {
+	color: #aab4c3 !important;
+}
+
+html[data-theme="dark"] .dropdown-item:hover,
+html[data-theme="dark"] .dropdown-item:focus,
+html[data-theme="dark"] .list-group-item-action:hover,
+html[data-theme="dark"] .list-group-item-action:focus {
+	background-color: #374151 !important;
+	color: #fff !important;
+}
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .custom-select,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+	background-color: #111827 !important;
+	border-color: #4b5563 !important;
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .form-control::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+	color: #9ca3af !important;
+}
+
+html[data-theme="dark"] .table,
+html[data-theme="dark"] .table td,
+html[data-theme="dark"] .table th {
+	color: #e5e7eb;
+}
+
+html[data-theme="dark"] .table thead th,
+html[data-theme="dark"] .table-light,
+html[data-theme="dark"] .table-light th,
+html[data-theme="dark"] .table-light td {
+	background-color: #1f2937 !important;
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] hr,
+html[data-theme="dark"] .sidebar-divider {
+	border-color: #374151 !important;
+}
+
+html[data-theme="dark"] .sidebar .sidebar-divider {
+	background-color: #374151;
+}
+
+html[data-theme="dark"] .sidebar #sidebarToggle,
+html[data-theme="dark"] #themeToggle {
+	color: #fbbf24 !important;
+}
+
+html[data-theme="dark"] .quiz-shell,
+html[data-theme="dark"] .quiz-option,
+html[data-theme="dark"] .ad-card {
+	background: #1f2937 !important;
+	border-color: #374151 !important;
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .quiz-question,
+html[data-theme="dark"] .claim-reward-copy strong,
+html[data-theme="dark"] .ad-card p {
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .claim-reward-copy {
+	color: #b4c0cf;
+}
+
+html[data-theme="dark"] .claim-reward {
+	background: linear-gradient(120deg, #1f2937, #12352c) !important;
+	border-color: #285c49 !important;
+}
+
+html[data-theme="dark"] .claim-reward-icon,
+html[data-theme="dark"] .claim-reward-amount {
+	background-color: #174632 !important;
+	color: #9af0c6 !important;
+}
+
+html[data-theme="dark"] .chart-area > .text-center {
+	color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .modal-content .close {
+	color: #e5e7eb;
+}

@@ -53,20 +53,6 @@
 	<li class="nav-item"><a class="nav-link" th:href="@{/academy}"> <i
 			class="fas fa-fw fa-graduation-cap"></i> <span>Academy</span></a></li>
 
-	<li class="nav-item d-none d-lg-block px-3 py-2 sidebar-ad" th:if="${showSidebarAd}">
-		<ins class="adsbygoogle"
-			style="display:block"
-			data-ad-client="ca-pub-3177939731250769"
-			data-ad-slot="2465731755"
-			data-ad-format="auto"
-			data-full-width-responsive="true"></ins>
-		<script>
-			if (window.matchMedia('(min-width: 992px)').matches) {
-				(adsbygoogle = window.adsbygoogle || []).push({});
-			}
-		</script>
-	</li>
-
 	<hr class="sidebar-divider">
 
 	<!-- Heading -->
@@ -88,6 +74,19 @@
 			</div>
 		</div></li>
 
+	<li class="nav-item d-none d-lg-block px-3 py-2 sidebar-ad" th:if="${showSidebarAd}">
+		<ins class="adsbygoogle"
+			style="display:block"
+			data-ad-client="ca-pub-3177939731250769"
+			data-ad-slot="2465731755"
+			data-ad-format="auto"
+			data-full-width-responsive="true"></ins>
+		<script>
+			if (window.matchMedia('(min-width: 992px)').matches) {
+				(adsbygoogle = window.adsbygoogle || []).push({});
+			}
+		</script>
+	</li>
 
 	<!-- Divider -->
 	<hr class="sidebar-divider d-none d-md-block">
