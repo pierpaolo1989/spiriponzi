@@ -19,6 +19,7 @@ import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ADService;
+import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,7 @@ class AdminWithdrawalWebTest {
     @MockBean private UserService userService;
     @MockBean private OfferwallService offerwallService;
     @MockBean private CaptchaService captchaService;
+    @MockBean private CloudflareAnalyticsService cloudflareAnalyticsService;
     @MockBean private RenderService renderService;
     @MockBean private ADService adService;
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
@@ -115,6 +117,11 @@ class AdminWithdrawalWebTest {
             String html = mvc.perform(get(path).servletPath(path).session(session("ROLE_USER")))
                     .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
             assertTrue(html.contains("data-aa=\"2462874\""));
+            if (path.equals("/create-ads")) {
+                assertTrue(html.contains("id=\"budget\""));
+                assertTrue(html.contains("id=\"fundedViewsEstimate\""));
+            }
+            assertFalse(html.contains("data-ad-slot=\"2465731755\""));
         }
     }
 
@@ -125,6 +132,8 @@ class AdminWithdrawalWebTest {
 
         String html = mvc.perform(get("/dashboard").servletPath("/dashboard").session(session("ROLE_USER")))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertTrue(html.contains("class=\"nav-item d-none d-lg-block px-3 py-2 sidebar-ad\""));
+        assertTrue(html.contains("data-ad-slot=\"2465731755\""));
         int modalStart = html.lastIndexOf("<div class=\"modal fade adblock-notice\"");
         int modalEnd = html.indexOf("<!-- Bootstrap core JavaScript-->", modalStart);
         assertTrue(modalStart >= 0);

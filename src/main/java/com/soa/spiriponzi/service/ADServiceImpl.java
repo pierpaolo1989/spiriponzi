@@ -6,6 +6,7 @@ import com.soa.spiriponzi.exception.GenericSpriponziException;
 import com.soa.spiriponzi.exception.ResourceNotFoundException;
 import com.soa.spiriponzi.model.Ad;
 import com.soa.spiriponzi.model.User;
+import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.repository.AdRepository;
 import com.soa.spiriponzi.repository.UserAdRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -42,16 +44,70 @@ public class ADServiceImpl implements ADService {
 	}
 
 	@Override
+	@Transactional
 	public void create(User user, ADDto ad) {
+		if (ad == null || ad.getTitle() == null || ad.getTitle().isBlank()
+				|| ad.getTitle().trim().length() > 150 || ad.getTimer() <= 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad title and visit duration are invalid");
+		}
+		String title = ad.getTitle().trim();
+		String url = validateAdUrl(ad.getUrl());
+
+		UserStats userStats = userStatsRepository.findWithLockByUserEmail(user.getEmail())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has no coin balance"));
+		int budgetAmount = validateInitialBudget(ad.getReward(), ad.getBudget(), userStats.getAnnualPoints());
+
 		Ad model = new Ad();
-		model.setUrl(ad.getUrl());
-		model.setTitle(ad.getTitle());
+		model.setUrl(url);
+		model.setTitle(title);
 		model.setReward(ad.getReward());
+		model.setBudget(budgetAmount);
 		model.setTimer(ad.getTimer());
 		model.setProposer(user);
 		model.setActive(false);
 		model.setCreatedAt(LocalDate.now());
+		userStats.setAnnualPoints(userStats.getAnnualPoints() - budgetAmount);
 		adRepository.save(model);
+		userStatsRepository.save(userStats);
+	}
+
+	private String validateAdUrl(String value) {
+		if (value == null || value.isBlank()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad URL must be an HTTP or HTTPS address");
+		}
+		String url = value.trim();
+		try {
+			URI destination = URI.create(url);
+			String scheme = destination.getScheme();
+			if (destination.getHost() == null
+					|| !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad URL must be an HTTP or HTTPS address");
+			}
+		} catch (IllegalArgumentException ex) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ad URL must be an HTTP or HTTPS address", ex);
+		}
+		return url;
+	}
+
+	private int validateInitialBudget(double reward, double budget, int availablePoints) {
+		if (!Double.isFinite(reward) || reward <= 0 || reward > Integer.MAX_VALUE
+				|| BigDecimal.valueOf(reward).stripTrailingZeros().scale() > 0
+				|| !Double.isFinite(budget)) {
+			throw new ResponseStatusException(
+					HttpStatus.BAD_REQUEST,
+					"Budget must be a positive whole-number multiple of the reward and within your available balance");
+		}
+		BigDecimal rewardAmount = BigDecimal.valueOf(reward);
+		BigDecimal budgetAmount = BigDecimal.valueOf(budget);
+		if (budgetAmount.compareTo(rewardAmount) < 0
+				|| budgetAmount.remainder(rewardAmount).compareTo(BigDecimal.ZERO) != 0
+				|| budgetAmount.stripTrailingZeros().scale() > 0
+				|| budgetAmount.compareTo(BigDecimal.valueOf(availablePoints)) > 0) {
+			throw new ResponseStatusException(
+					HttpStatus.BAD_REQUEST,
+					"Budget must be a positive whole-number multiple of the reward and within your available balance");
+		}
+		return budgetAmount.intValueExact();
 	}
 
 	@Override

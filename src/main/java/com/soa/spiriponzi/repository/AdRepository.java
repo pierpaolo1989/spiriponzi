@@ -35,6 +35,7 @@ public interface AdRepository extends JpaRepository<Ad, Long> {
            AND a.deleted = false
            AND a.reward > 0
            AND a.budget >= a.reward)
+    ORDER BY a.budget DESC, a.id ASC
     """)
 	List<Object[]> findAdsWithCompletionStatus(@Param("userId") Long userId);
 	List<Ad> findByActiveTrue();

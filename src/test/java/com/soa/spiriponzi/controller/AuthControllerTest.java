@@ -231,6 +231,7 @@ class AuthControllerTest {
 
         assertEquals("dashboard", controller.dashboard(model));
         assertEquals(user, model.get("user"));
+        assertEquals(true, model.get("showSidebarAd"));
         assertEquals("surf-ads", controller.surfAds(model));
         assertEquals(ads, model.get("ads"));
         assertEquals("survey", controller.survey(model));

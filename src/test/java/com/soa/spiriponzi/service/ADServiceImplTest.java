@@ -3,6 +3,7 @@ package com.soa.spiriponzi.service;
 import com.soa.spiriponzi.model.Ad;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
+import com.soa.spiriponzi.dto.ADDto;
 import com.soa.spiriponzi.repository.AdRepository;
 import com.soa.spiriponzi.repository.UserAdRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
@@ -32,6 +33,53 @@ class ADServiceImplTest {
         adRepository = mock(AdRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
         adService = new ADServiceImpl(mock(UserAdRepository.class), adRepository, userStatsRepository);
+    }
+
+    @Test
+    void createFundsCampaignAndDeductsBudgetFromAvailablePoints() {
+        User owner = userWithCoins(1L, 0, 100);
+        when(userStatsRepository.findWithLockByUserEmail(owner.getEmail()))
+                .thenReturn(Optional.of(owner.getUserStats()));
+        ADDto ad = ADDto.builder()
+                .title("Campaign")
+                .url("https://example.com")
+                .timer(30)
+                .reward(10)
+                .budget(50)
+                .build();
+
+        adService.create(owner, ad);
+
+        assertEquals(50, owner.getUserStats().getAnnualPoints());
+        verify(adRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
+                saved.getTitle().equals("Campaign")
+                        && saved.getBudget() == 50
+                        && saved.getReward() == 10
+                        && !saved.isActive()));
+        verify(userStatsRepository).save(owner.getUserStats());
+    }
+
+    @Test
+    void createRejectsBudgetAboveBalanceWithoutSavingCampaign() {
+        User owner = userWithCoins(1L, 0, 100);
+        when(userStatsRepository.findWithLockByUserEmail(owner.getEmail()))
+                .thenReturn(Optional.of(owner.getUserStats()));
+        ADDto ad = ADDto.builder()
+                .title("Campaign")
+                .url("https://example.com")
+                .timer(30)
+                .reward(10)
+                .budget(110)
+                .build();
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> adService.create(owner, ad));
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertEquals(100, owner.getUserStats().getAnnualPoints());
+        verify(adRepository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(userStatsRepository, never()).save(owner.getUserStats());
     }
 
     @Test

@@ -186,6 +186,7 @@ public class AuthController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
+		model.addAttribute("showSidebarAd", true);
 		return "dashboard";
 	}
 	

@@ -203,12 +203,19 @@
 										</div>
 										<div class="form-group">
 											<label for="duration">Minimum Visit Duration (seconds)</label>
-											<input type="number" id="duration" class="form-control" required>
+											<input type="number" id="duration" class="form-control" min="1" step="1" required>
 										</div>
 										<div class="form-group">
 											<label for="points">Points per View</label>
-											<input type="number" id="points" class="form-control" required>
+											<input type="number" id="points" class="form-control" min="1" step="1" required>
 										</div>
+										<div class="form-group">
+											<label for="budget">Campaign Budget (coins)</label>
+											<input type="number" id="budget" class="form-control" min="1" step="1" required>
+											<small class="form-text text-muted">The budget is reserved from your points balance and spent as users complete views. New ads start paused; activate them from your ad list.</small>
+											<p id="fundedViewsEstimate" class="small text-primary mt-2 mb-0" aria-live="polite">Estimated funded views: enter a reward and budget.</p>
+										</div>
+										<div id="adFormError" class="alert alert-danger" role="alert" hidden></div>
 										<button type="submit" class="btn btn-success">Submit</button>
 										<button type="button" class="btn btn-secondary" onclick="toggleAdForm()">Cancel</button>
 									</form>
@@ -402,9 +409,38 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById("adForm");
+			const rewardInput = document.getElementById("points");
+			const budgetInput = document.getElementById("budget");
+			const estimate = document.getElementById("fundedViewsEstimate");
+			const formError = document.getElementById("adFormError");
+
+			function updateFundedViewsEstimate() {
+				const reward = Number(rewardInput.value);
+				const budget = Number(budgetInput.value);
+				if (Number.isInteger(reward) && reward > 0) {
+					budgetInput.min = String(reward);
+					budgetInput.step = String(reward);
+				} else {
+					budgetInput.min = "1";
+					budgetInput.step = "1";
+				}
+				if (Number.isInteger(reward) && reward > 0
+						&& Number.isInteger(budget) && budget >= reward && budget % reward === 0) {
+					estimate.textContent = `Estimated funded views: ${budget / reward}. Ads with higher remaining budgets appear earlier in the surf ads list.`;
+				} else if (Number.isInteger(reward) && reward > 0) {
+					estimate.textContent = `Enter a budget of at least ${reward} coins, in multiples of the reward.`;
+				} else {
+					estimate.textContent = "Estimated funded views: enter a reward and budget.";
+				}
+			}
+
+			rewardInput.addEventListener("input", updateFundedViewsEstimate);
+			budgetInput.addEventListener("input", updateFundedViewsEstimate);
+			updateFundedViewsEstimate();
 
             form.addEventListener("submit", async function (e) {
                 e.preventDefault();
+				formError.hidden = true;
 
                 let isValid = true;
                 const inputs = form.querySelectorAll("input");
@@ -421,8 +457,9 @@
                     const data = {
                         title: document.getElementById("title").value,
                         url: document.getElementById("url").value,
-                        timer: document.getElementById("duration").value,
-                        reward: document.getElementById("points").value
+						timer: Number(document.getElementById("duration").value),
+						reward: Number(rewardInput.value),
+						budget: Number(budgetInput.value)
                     };
 
                     try {
@@ -434,11 +471,15 @@
                             body: JSON.stringify(data)
                         });
                         if (!response.ok) {
-                            alert("Something went wrong while submitting the ad.");
+							formError.textContent = response.status === 400
+								? "Check the URL, visit duration, reward, budget multiple, and available balance."
+								: "The ad could not be created. Please try again.";
+							formError.hidden = false;
                             return;
                         }
 
                         form.reset();
+						updateFundedViewsEstimate();
                         toggleAdForm();
 
                         let message = "Ad created successfully!";
@@ -448,12 +489,27 @@
                             console.error("Ad created, but the list could not be refreshed:", error);
                             message = "Ad created successfully, but the list could not be refreshed. Reload the page to see it.";
                         }
+						try {
+							const balanceResponse = await fetch('/user-ads/balance', { cache: 'no-store' });
+							if (!balanceResponse.ok) {
+								throw new Error(`Could not refresh balance: ${balanceResponse.status}`);
+							}
+							const availableCoins = Number(await balanceResponse.json());
+							if (!Number.isFinite(availableCoins) || availableCoins < 0) {
+								throw new Error('The server returned an invalid coin balance.');
+							}
+							document.getElementById("annualPoints").textContent = String(availableCoins);
+						} catch (balanceError) {
+							console.error("Ad created, but the balance could not be refreshed:", balanceError);
+							message += " Your balance could not be refreshed; reload the page to see it.";
+						}
 
                         document.getElementById("createdAdMessage").textContent = message;
                         $('#createdAdModal').modal('show');
                     } catch (error) {
                         console.error("Error creating ad:", error);
-                        alert("Server error. Please try again later.");
+						formError.textContent = "Server error. Please try again later.";
+						formError.hidden = false;
                     }
                 }
             });

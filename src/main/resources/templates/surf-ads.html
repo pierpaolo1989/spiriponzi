@@ -204,6 +204,7 @@
 							</div>
 							<!-- Card Body -->
 							<div class="card-body ad-container" style="min-height: 600px;">
+								<p class="small text-muted">Ads with higher remaining budgets appear first.</p>
 
 								<div class="ad-card" th:each="ad, iter : ${ads}"
 									 th:id="'ad-' + ${ad.id}"
