@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.controller;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Duration;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.service.AffiliateService;
@@ -56,12 +58,15 @@ public class AffiliateController {
                 + "<img src=\"" + bannerUrl
                 + "\" alt=\"Join Spiriponzi\" width=\"468\" height=\"60\""
                 + " style=\"max-width:100%;height:auto;border:0\"></a>";
+        String facebookShareUrl = "https://www.facebook.com/sharer/sharer.php?u="
+                + UriUtils.encodeQueryParam(clickUrl, StandardCharsets.UTF_8);
         AffiliateService.AffiliateStats stats = affiliateService.getStats(user.getId());
 
         model.addAttribute("referralCode", referralCode);
         model.addAttribute("affiliateClickUrl", clickUrl);
         model.addAttribute("affiliateBannerUrl", bannerUrl);
         model.addAttribute("affiliateEmbedCode", embedCode);
+        model.addAttribute("facebookShareUrl", facebookShareUrl);
         model.addAttribute("qualifiedClicks", stats.qualifiedClicks());
         model.addAttribute("affiliateCoinsEarned", stats.coinsEarned());
         model.addAttribute("clicksUntilReward", stats.clicksUntilReward());

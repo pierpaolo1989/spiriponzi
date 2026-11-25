@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" role="img" aria-labelledby="title description">
+  <title id="title">Join Spiriponzi</title>
+  <desc id="description">Learn about Bitcoin, play games, and earn coins with Spiriponzi</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset=".55" stop-color="#203866"/>
+      <stop offset="1" stop-color="#536fca"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe4a0"/>
+      <stop offset="1" stop-color="#f2be55"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#background)"/>
+  <circle cx="860" cy="320" r="290" fill="#ffffff" opacity=".035"/>
+  <circle cx="120" cy="1500" r="360" fill="#ffffff" opacity=".035"/>
+  <path d="M0 1280c230-110 420-100 620 0s320 120 460 40v600H0Z" fill="#111827" opacity=".32"/>
+  <circle cx="540" cy="440" r="178" fill="url(#coin)" stroke="#fff1c8" stroke-width="12"/>
+  <circle cx="540" cy="440" r="151" fill="none" stroke="#203866" stroke-width="5" opacity=".45"/>
+  <text x="540" y="506" fill="#172b4d" font-family="Arial,sans-serif" font-size="190" font-weight="700" text-anchor="middle">S</text>
+  <text x="540" y="785" fill="#ffffff" font-family="Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="3" text-anchor="middle">SPIRIPONZI</text>
+  <text x="540" y="950" fill="#ffe4a0" font-family="Arial,sans-serif" font-size="54" font-weight="700" text-anchor="middle">LEARN. PLAY. EARN.</text>
+  <text x="540" y="1080" fill="#e0e7ff" font-family="Arial,sans-serif" font-size="38" text-anchor="middle">Explore Bitcoin, play games,</text>
+  <text x="540" y="1138" fill="#e0e7ff" font-family="Arial,sans-serif" font-size="38" text-anchor="middle">and earn coins along the way.</text>
+  <rect x="260" y="1330" width="560" height="118" rx="59" fill="#f2be55"/>
+  <text x="540" y="1407" fill="#172b4d" font-family="Arial,sans-serif" font-size="40" font-weight="700" text-anchor="middle">JOIN SPIRIPONZI</text>
+  <text x="540" y="1570" fill="#ffffff" font-family="Arial,sans-serif" font-size="28" opacity=".8" text-anchor="middle">Tap the link sticker to get started</text>
+</svg>

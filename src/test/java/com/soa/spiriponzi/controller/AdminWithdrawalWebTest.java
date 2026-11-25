@@ -248,6 +248,10 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("affiliate-banner.svg"));
         assertTrue(html.contains("/affiliate/click/AFFILIATE10"));
         assertTrue(html.contains("id=\"affiliateEmbedCode\""));
+        assertTrue(html.contains("affiliate-instagram-story.svg"));
+        assertTrue(html.contains("affiliate-facebook-banner.svg"));
+        assertTrue(html.contains("facebook.com/sharer/sharer.php"));
+        assertTrue(html.indexOf("id=\"socialBannerStatus\"") < html.indexOf("data-aa=\"2462874\""));
         assertTrue(html.contains("12"));
         assertTrue(html.contains("88"));
     }

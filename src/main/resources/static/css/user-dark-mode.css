@@ -2,6 +2,16 @@ html[data-theme="dark"] {
 	color-scheme: dark;
 }
 
+.sidebar-ad {
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.sidebar-ad .adsbygoogle {
+	max-width: 100%;
+}
+
 html[data-theme="dark"] body,
 html[data-theme="dark"] #content-wrapper,
 html[data-theme="dark"] #content {
