@@ -94,7 +94,12 @@ class AdminLoginWebTest {
     void adminAnalyticsEndpointReturnsNoStoreAggregates() throws Exception {
         when(cloudflareAnalyticsService.getPageLoads()).thenReturn(
                 new CloudflareAnalyticsService.AnalyticsSnapshot(15,
-                        List.of(new CloudflareAnalyticsService.CountryPageLoads("IT", 15))));
+                        List.of(new CloudflareAnalyticsService.AnalyticsDimension("IT", 15)),
+                        List.of(new CloudflareAnalyticsService.DailyPageLoads("2026-11-25", 15)),
+                        List.of(new CloudflareAnalyticsService.AnalyticsDimension("/", 15)),
+                        List.of(new CloudflareAnalyticsService.AnalyticsDimension("Chrome", 15)),
+                        List.of(new CloudflareAnalyticsService.AnalyticsDimension("desktop", 15)),
+                        List.of(new CloudflareAnalyticsService.AnalyticsDimension("Direct", 15))));
         var login = mvc.perform(post("/login").servletPath("/login")
                         .param("username", "test-admin").param("password", "local-test-password"))
                 .andExpect(status().is3xxRedirection())
@@ -105,7 +110,15 @@ class AdminLoginWebTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", containsString("no-store")))
                 .andExpect(content().json("""
-                        {"pageLoads":15,"countries":[{"country":"IT","pageLoads":15}]}
+                        {
+                          "pageLoads":15,
+                          "countries":[{"value":"IT","pageLoads":15}],
+                          "daily":[{"date":"2026-11-25","pageLoads":15}],
+                          "topPages":[{"value":"/","pageLoads":15}],
+                          "browsers":[{"value":"Chrome","pageLoads":15}],
+                          "devices":[{"value":"desktop","pageLoads":15}],
+                          "referrers":[{"value":"Direct","pageLoads":15}]
+                        }
                         """));
     }
 

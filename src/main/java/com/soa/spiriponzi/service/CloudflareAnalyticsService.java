@@ -3,7 +3,7 @@ package com.soa.spiriponzi.service;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,17 +34,39 @@ public class CloudflareAnalyticsService {
     private static final Logger log = LoggerFactory.getLogger(CloudflareAnalyticsService.class);
     private static final String GRAPHQL_URL = "https://api.cloudflare.com/client/v4/graphql";
     private static final String QUERY = """
-            query WebAnalytics($accountTag: string!, $siteTag: string!, $start: string!, $end: string!) {
+            query WebAnalytics($accountTag: string!, $siteTag: string!, $start: Date!, $end: Date!) {
               viewer {
                 accounts(filter: { accountTag: $accountTag }) {
-                  rumPageloadEventsAdaptiveGroups(
+                  daily: rumPageloadEventsAdaptiveGroups(
+                    limit: 30
+                    filter: { date_geq: $start, date_leq: $end, siteTag: $siteTag }
+                    orderBy: [date_ASC]
+                  ) { count dimensions { date } }
+                  countries: rumPageloadEventsAdaptiveGroups(
                     limit: 500
-                    filter: { datetime_geq: $start, datetime_lt: $end, siteTag: $siteTag }
+                    filter: { date_geq: $start, date_leq: $end, siteTag: $siteTag }
                     orderBy: [count_DESC]
-                  ) {
-                    count
-                    dimensions { countryName }
-                  }
+                  ) { count dimensions { countryName } }
+                  topPages: rumPageloadEventsAdaptiveGroups(
+                    limit: 10
+                    filter: { date_geq: $start, date_leq: $end, siteTag: $siteTag }
+                    orderBy: [count_DESC]
+                  ) { count dimensions { requestPath } }
+                  browsers: rumPageloadEventsAdaptiveGroups(
+                    limit: 10
+                    filter: { date_geq: $start, date_leq: $end, siteTag: $siteTag }
+                    orderBy: [count_DESC]
+                  ) { count dimensions { userAgentBrowser } }
+                  devices: rumPageloadEventsAdaptiveGroups(
+                    limit: 10
+                    filter: { date_geq: $start, date_leq: $end, siteTag: $siteTag }
+                    orderBy: [count_DESC]
+                  ) { count dimensions { deviceType } }
+                  referrers: rumPageloadEventsAdaptiveGroups(
+                    limit: 10
+                    filter: { date_geq: $start, date_leq: $end, siteTag: $siteTag }
+                    orderBy: [count_DESC]
+                  ) { count dimensions { refererHost } }
                 }
               }
             }
@@ -78,11 +100,11 @@ public class CloudflareAnalyticsService {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Cloudflare Analytics non configurata");
         }
 
-        OffsetDateTime end = OffsetDateTime.now(ZoneOffset.UTC).withNano(0);
+        LocalDate end = LocalDate.now(ZoneOffset.UTC);
         Map<String, Object> variables = Map.of(
                 "accountTag", accountId,
                 "siteTag", siteTag,
-                "start", end.minusDays(30).toString(),
+                "start", end.minusDays(29).toString(),
                 "end", end.toString());
 
         JsonNode response = request(variables);
@@ -95,33 +117,72 @@ public class CloudflareAnalyticsService {
         if (!accounts.isArray() || accounts.isEmpty()) {
             throw invalidResponse();
         }
-        JsonNode groups = accounts.get(0).path("rumPageloadEventsAdaptiveGroups");
+        JsonNode account = accounts.get(0);
+        List<DailyPageLoads> daily = dailyPageLoads(account.path("daily"));
+        long pageLoads = 0;
+        for (DailyPageLoads day : daily) {
+            if (Long.MAX_VALUE - pageLoads < day.pageLoads()) {
+                throw invalidResponse();
+            }
+            pageLoads += day.pageLoads();
+        }
+
+        return new AnalyticsSnapshot(
+                pageLoads,
+                dimensionPageLoads(account.path("countries"), "countryName", "Unknown"),
+                daily,
+                dimensionPageLoads(account.path("topPages"), "requestPath", "/"),
+                dimensionPageLoads(account.path("browsers"), "userAgentBrowser", "Unknown"),
+                dimensionPageLoads(account.path("devices"), "deviceType", "Unknown"),
+                dimensionPageLoads(account.path("referrers"), "refererHost", "Direct"));
+    }
+
+    private List<DailyPageLoads> dailyPageLoads(JsonNode groups) {
         if (!groups.isArray()) {
             throw invalidResponse();
         }
-
-        Map<String, Long> countryTotals = new LinkedHashMap<>();
-        long pageLoads = 0;
+        List<DailyPageLoads> days = new ArrayList<>();
         for (JsonNode group : groups) {
-            JsonNode count = group.path("count");
-            if (!count.isIntegralNumber() || !count.canConvertToLong() || count.longValue() < 0) {
+            long count = pageLoadCount(group);
+            String date = group.path("dimensions").path("date").asText("");
+            if (date.isBlank()) {
                 throw invalidResponse();
             }
-            String country = countryFrom(group.path("dimensions"));
-            long countryPageLoads = count.longValue();
-            long countryTotal = countryTotals.getOrDefault(country, 0L);
-            if (Long.MAX_VALUE - countryTotal < countryPageLoads
-                    || Long.MAX_VALUE - pageLoads < countryPageLoads) {
-                throw invalidResponse();
-            }
-            countryTotals.put(country, countryTotal + countryPageLoads);
-            pageLoads += countryPageLoads;
+            days.add(new DailyPageLoads(date, count));
         }
+        days.sort(Comparator.comparing(DailyPageLoads::date));
+        return List.copyOf(days);
+    }
 
-        List<CountryPageLoads> countries = new ArrayList<>();
-        countryTotals.forEach((country, count) -> countries.add(new CountryPageLoads(country, count)));
-        countries.sort(Comparator.comparingLong(CountryPageLoads::pageLoads).reversed());
-        return new AnalyticsSnapshot(pageLoads, List.copyOf(countries));
+    private List<AnalyticsDimension> dimensionPageLoads(JsonNode groups, String dimension, String fallback) {
+        if (!groups.isArray()) {
+            throw invalidResponse();
+        }
+        Map<String, Long> totals = new LinkedHashMap<>();
+        for (JsonNode group : groups) {
+            long count = pageLoadCount(group);
+            String value = group.path("dimensions").path(dimension).asText("").trim();
+            if (value.isEmpty()) {
+                value = fallback;
+            }
+            long currentTotal = totals.getOrDefault(value, 0L);
+            if (Long.MAX_VALUE - currentTotal < count) {
+                throw invalidResponse();
+            }
+            totals.put(value, currentTotal + count);
+        }
+        List<AnalyticsDimension> dimensions = new ArrayList<>();
+        totals.forEach((value, count) -> dimensions.add(new AnalyticsDimension(value, count)));
+        dimensions.sort(Comparator.comparingLong(AnalyticsDimension::pageLoads).reversed());
+        return List.copyOf(dimensions);
+    }
+
+    private long pageLoadCount(JsonNode group) {
+        JsonNode count = group.path("count");
+        if (!count.isIntegralNumber() || !count.canConvertToLong() || count.longValue() < 0) {
+            throw invalidResponse();
+        }
+        return count.longValue();
     }
 
     private JsonNode request(Map<String, Object> variables) {
@@ -167,18 +228,22 @@ public class CloudflareAnalyticsService {
         return messages.size() > displayedCount ? summary + " | additional errors omitted" : summary;
     }
 
-    private String countryFrom(JsonNode dimensions) {
-        JsonNode country = dimensions.path("countryName");
-        return country.isTextual() ? country.asText() : "XX";
-    }
-
     private ResponseStatusException invalidResponse() {
         return new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Risposta Cloudflare Analytics non valida");
     }
 
-    public record AnalyticsSnapshot(long pageLoads, List<CountryPageLoads> countries) {}
+    public record AnalyticsSnapshot(
+            long pageLoads,
+            List<AnalyticsDimension> countries,
+            List<DailyPageLoads> daily,
+            List<AnalyticsDimension> topPages,
+            List<AnalyticsDimension> browsers,
+            List<AnalyticsDimension> devices,
+            List<AnalyticsDimension> referrers) {}
 
-    public record CountryPageLoads(String country, long pageLoads) {}
+    public record AnalyticsDimension(String value, long pageLoads) {}
+
+    public record DailyPageLoads(String date, long pageLoads) {}
 
     private static class NoRedirectRequestFactory extends SimpleClientHttpRequestFactory {
         @Override

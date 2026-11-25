@@ -22,6 +22,7 @@ import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
+import com.soa.spiriponzi.service.CherriesCallbackService;
 import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,7 @@ class AdminWithdrawalWebTest {
     @MockBean private RenderService renderService;
     @MockBean private ADService adService;
     @MockBean private AffiliateService affiliateService;
+    @MockBean private CherriesCallbackService cherriesCallbackService;
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
 
     private MockHttpSession session(String role) {
@@ -317,6 +319,11 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("PayPal"));
         assertTrue(html.contains("href=\"/img/favicon.ico\""));
         assertTrue(html.contains("data-paypal=\"pay@example.com\""));
+        int adPosition = html.indexOf("data-ad-slot=\"6698101758\"");
+        int formPosition = html.indexOf("id=\"withdraw-form\"");
+        int footerPosition = html.indexOf("<footer class=\"sticky-footer");
+        assertTrue(adPosition >= 0 && adPosition < formPosition && formPosition < footerPosition,
+                "The ad should stay above the withdrawal form and footer");
         Matcher token = Pattern.compile("name=\"_csrf\" content=\"([^\"]+)\"").matcher(html);
         assertTrue(token.find(), "The page must expose a CSRF token for its request");
         String json = "{\"amount\":3000,\"currency\":\"PAYPAL\",\"destination\":\"pay@example.com\",\"captchaResponse\":\"captcha-token\"}";

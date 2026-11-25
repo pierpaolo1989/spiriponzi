@@ -102,22 +102,67 @@
 			overflow-wrap: anywhere;
 		}
 
-		.analytics-countries {
+		.analytics-breakdowns {
 			display: grid;
-			gap: .75rem;
-			grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+			gap: 1rem;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		}
+
+		.analytics-panel {
+			background: #fff;
+			border: 1px solid #eaecf4;
+			border-radius: .5rem;
+			min-width: 0;
+			padding: .85rem;
+		}
+
+		.analytics-list {
+			display: grid;
+			gap: .5rem;
 			list-style: none;
+			margin: 0;
 			padding: 0;
 		}
 
-		.analytics-country {
+		.analytics-item {
 			align-items: center;
 			background: #f8f9fc;
 			border: 1px solid #eaecf4;
 			border-radius: .5rem;
 			display: flex;
 			justify-content: space-between;
-			padding: .85rem 1rem;
+			gap: .75rem;
+			padding: .6rem .75rem;
+		}
+
+		.analytics-item-label {
+			min-width: 0;
+			overflow-wrap: anywhere;
+		}
+
+		.analytics-daily-chart {
+			align-items: stretch;
+			display: flex;
+			gap: 4px;
+			height: 110px;
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		.analytics-daily-item {
+			align-items: flex-end;
+			display: flex;
+			flex: 1 1 0;
+			height: 100%;
+			min-width: 0;
+		}
+
+		.analytics-daily-bar {
+			background: linear-gradient(180deg, #7894ed, #4e73df);
+			border-radius: 3px 3px 0 0;
+			min-height: 2px;
+			width: 100%;
 		}
 
 		.admin-topbar-title {
@@ -342,7 +387,7 @@
 					<div class="card-header">
 						<div>
 							<h2 id="cloudflare-heading" class="h6 m-0 font-weight-bold text-primary">Cloudflare Web Analytics</h2>
-							<p class="small text-muted mb-0 mt-1">Visualizzazioni pagina degli ultimi 30 giorni per paese.</p>
+							<p class="small text-muted mb-0 mt-1">Pagine, pubblico e provenienza degli ultimi 30 giorni.</p>
 						</div>
 						<button class="btn btn-sm btn-outline-primary" type="button" id="cloudflare-refresh">
 							<i class="fas fa-sync-alt mr-1" aria-hidden="true"></i>Aggiorna
@@ -360,7 +405,33 @@
 							<span id="cloudflare-page-loads">—</span>
 							<span class="small text-muted font-weight-normal">visualizzazioni pagina</span>
 						</div>
-						<ul id="cloudflare-countries" class="analytics-countries mb-3"></ul>
+						<section class="analytics-panel mb-4" aria-labelledby="cloudflare-daily-heading">
+							<h3 id="cloudflare-daily-heading" class="h6 font-weight-bold text-gray-800">Andamento giornaliero</h3>
+							<p class="small text-muted">Ogni barra rappresenta un giorno; il dettaglio è disponibile al passaggio del mouse.</p>
+							<ul id="cloudflare-daily" class="analytics-daily-chart" aria-label="Visualizzazioni pagina giornaliere"></ul>
+						</section>
+						<div class="analytics-breakdowns mb-4">
+							<section class="analytics-panel" aria-labelledby="cloudflare-countries-heading">
+								<h3 id="cloudflare-countries-heading" class="h6 font-weight-bold text-gray-800">Paesi principali</h3>
+								<ul id="cloudflare-countries" class="analytics-list"></ul>
+							</section>
+							<section class="analytics-panel" aria-labelledby="cloudflare-pages-heading">
+								<h3 id="cloudflare-pages-heading" class="h6 font-weight-bold text-gray-800">Pagine più viste</h3>
+								<ul id="cloudflare-pages" class="analytics-list"></ul>
+							</section>
+							<section class="analytics-panel" aria-labelledby="cloudflare-browsers-heading">
+								<h3 id="cloudflare-browsers-heading" class="h6 font-weight-bold text-gray-800">Browser</h3>
+								<ul id="cloudflare-browsers" class="analytics-list"></ul>
+							</section>
+							<section class="analytics-panel" aria-labelledby="cloudflare-devices-heading">
+								<h3 id="cloudflare-devices-heading" class="h6 font-weight-bold text-gray-800">Dispositivi</h3>
+								<ul id="cloudflare-devices" class="analytics-list"></ul>
+							</section>
+							<section class="analytics-panel" aria-labelledby="cloudflare-referrers-heading">
+								<h3 id="cloudflare-referrers-heading" class="h6 font-weight-bold text-gray-800">Siti di provenienza</h3>
+								<ul id="cloudflare-referrers" class="analytics-list"></ul>
+							</section>
+						</div>
 						<div class="alert alert-light border small mb-0" role="note">
 							<i class="fas fa-info-circle text-primary mr-1" aria-hidden="true"></i>
 							Dati aggregati recuperati direttamente da Cloudflare; non vengono salvati nel database dell’applicazione.
@@ -430,11 +501,42 @@
 	(() => {
 		const status = document.getElementById('cloudflare-status');
 		const total = document.getElementById('cloudflare-page-loads');
-		const list = document.getElementById('cloudflare-countries');
+		const dailyChart = document.getElementById('cloudflare-daily');
 		const button = document.getElementById('cloudflare-refresh');
+		const dimensions = [
+			['cloudflare-countries', 'countries'],
+			['cloudflare-pages', 'topPages'],
+			['cloudflare-browsers', 'browsers'],
+			['cloudflare-devices', 'devices'],
+			['cloudflare-referrers', 'referrers']
+		].map(([elementId, property]) => ({
+			list: document.getElementById(elementId),
+			property
+		}));
+		function renderDimensionList(list, entries, numberFormat) {
+			if (!Array.isArray(entries)) {
+				throw new Error('Dati analytics non validi');
+			}
+			for (const entry of entries) {
+				if (typeof entry.value !== 'string' || !Number.isSafeInteger(entry.pageLoads) || entry.pageLoads < 0) {
+					throw new Error('Dimensione analytics non valida');
+				}
+				const item = document.createElement('li');
+				item.className = 'analytics-item';
+				const name = document.createElement('span');
+				name.className = 'analytics-item-label';
+				name.textContent = entry.value;
+				const count = document.createElement('span');
+				count.className = 'badge badge-primary';
+				count.textContent = numberFormat.format(entry.pageLoads);
+				item.append(name, count);
+				list.appendChild(item);
+			}
+		}
 		async function loadCloudflareAnalytics() {
 			button.disabled = true;
-			list.replaceChildren();
+			dailyChart.replaceChildren();
+			dimensions.forEach(({ list }) => list.replaceChildren());
 			total.textContent = '—';
 			status.textContent = 'Caricamento analytics Cloudflare...';
 			try {
@@ -447,25 +549,30 @@
 					throw new Error(`HTTP ${response.status}`);
 				}
 				const analytics = await response.json();
-				if (!Number.isSafeInteger(analytics.pageLoads) || !Array.isArray(analytics.countries)) {
+				if (!Number.isSafeInteger(analytics.pageLoads) || !Array.isArray(analytics.daily)) {
 					throw new Error('Risposta non valida');
 				}
 				const numberFormat = new Intl.NumberFormat('it-IT');
 				total.textContent = numberFormat.format(analytics.pageLoads);
-				for (const country of analytics.countries) {
-					if (typeof country.country !== 'string' || !Number.isSafeInteger(country.pageLoads)) {
-						throw new Error('Dati paese non validi');
+				const maxDailyPageLoads = Math.max(0, ...analytics.daily.map(day => day.pageLoads));
+				for (const day of analytics.daily) {
+					if (typeof day.date !== 'string' || !Number.isSafeInteger(day.pageLoads) || day.pageLoads < 0) {
+						throw new Error('Dati giornalieri non validi');
 					}
 					const item = document.createElement('li');
-					item.className = 'analytics-country';
-					const name = document.createElement('span');
-					name.className = 'font-weight-bold';
-					name.textContent = country.country;
-					const count = document.createElement('span');
-					count.className = 'badge badge-primary';
-					count.textContent = numberFormat.format(country.pageLoads);
-					item.append(name, count);
-					list.appendChild(item);
+					item.className = 'analytics-daily-item';
+					item.title = `${day.date}: ${numberFormat.format(day.pageLoads)} visualizzazioni`;
+					const bar = document.createElement('span');
+					bar.className = 'analytics-daily-bar';
+					bar.style.height = `${maxDailyPageLoads === 0 ? 2 : Math.max(2, Math.round(day.pageLoads / maxDailyPageLoads * 100))}%`;
+					const accessibleLabel = document.createElement('span');
+					accessibleLabel.className = 'sr-only';
+					accessibleLabel.textContent = `${day.date}: ${numberFormat.format(day.pageLoads)} visualizzazioni`;
+					item.append(bar, accessibleLabel);
+					dailyChart.appendChild(item);
+				}
+				for (const { list, property } of dimensions) {
+					renderDimensionList(list, analytics[property], numberFormat);
 				}
 				status.textContent = `Ultimi 30 giorni · aggiornato alle ${new Date().toLocaleTimeString('it-IT')}.`;
 			} catch (error) {

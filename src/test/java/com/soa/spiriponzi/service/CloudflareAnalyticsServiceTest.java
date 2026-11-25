@@ -29,15 +29,31 @@ class CloudflareAnalyticsServiceTest {
     }
 
     @Test
-    void aggregatesPageLoadsByCountryWithoutExposingTheApiToken() {
+    void aggregatesPageLoadsAcrossAnalyticsDimensionsWithoutExposingTheApiToken() {
         server.expect(requestTo("https://api.cloudflare.com/client/v4/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", "Bearer test-api-token"))
+                .andExpect(content().string(containsString("dimensions { countryName }")))
+                .andExpect(content().string(containsString("dimensions { requestPath }")))
+                .andExpect(content().string(containsString("dimensions { userAgentBrowser }")))
+                .andExpect(content().string(containsString("dimensions { deviceType }")))
+                .andExpect(content().string(containsString("dimensions { refererHost }")))
                 .andRespond(withSuccess("""
-                        {"data":{"viewer":{"accounts":[{"rumPageloadEventsAdaptiveGroups":[
-                          {"count":8,"dimensions":{"countryName":"IT"}},
-                          {"count":3,"dimensions":{"countryName":"FR"}},
-                          {"count":4,"dimensions":{"countryName":"IT"}}
+                        {"data":{"viewer":{"accounts":[{"daily":[
+                          {"count":8,"dimensions":{"date":"2026-11-24"}},
+                          {"count":7,"dimensions":{"date":"2026-11-25"}}
+                        ],"countries":[
+                          {"count":12,"dimensions":{"countryName":"IT"}},
+                          {"count":3,"dimensions":{"countryName":"FR"}}
+                        ],"topPages":[
+                          {"count":9,"dimensions":{"requestPath":"/"}},
+                          {"count":6,"dimensions":{"requestPath":"/survey"}}
+                        ],"browsers":[
+                          {"count":10,"dimensions":{"userAgentBrowser":"Chrome"}}
+                        ],"devices":[
+                          {"count":15,"dimensions":{"deviceType":"desktop"}}
+                        ],"referrers":[
+                          {"count":5,"dimensions":{"refererHost":"example.com"}}
                         ]}]}},"errors":null}
                         """, MediaType.APPLICATION_JSON));
 
@@ -46,8 +62,20 @@ class CloudflareAnalyticsServiceTest {
 
         assertEquals(15, result.pageLoads());
         assertEquals(java.util.List.of(
-                new CloudflareAnalyticsService.CountryPageLoads("IT", 12),
-                new CloudflareAnalyticsService.CountryPageLoads("FR", 3)), result.countries());
+                new CloudflareAnalyticsService.AnalyticsDimension("IT", 12),
+                new CloudflareAnalyticsService.AnalyticsDimension("FR", 3)), result.countries());
+        assertEquals(java.util.List.of(
+                new CloudflareAnalyticsService.DailyPageLoads("2026-11-24", 8),
+                new CloudflareAnalyticsService.DailyPageLoads("2026-11-25", 7)), result.daily());
+        assertEquals(java.util.List.of(
+                new CloudflareAnalyticsService.AnalyticsDimension("/", 9),
+                new CloudflareAnalyticsService.AnalyticsDimension("/survey", 6)), result.topPages());
+        assertEquals(java.util.List.of(
+                new CloudflareAnalyticsService.AnalyticsDimension("Chrome", 10)), result.browsers());
+        assertEquals(java.util.List.of(
+                new CloudflareAnalyticsService.AnalyticsDimension("desktop", 15)), result.devices());
+        assertEquals(java.util.List.of(
+                new CloudflareAnalyticsService.AnalyticsDimension("example.com", 5)), result.referrers());
         server.verify();
     }
 
@@ -71,24 +99,6 @@ class CloudflareAnalyticsServiceTest {
 
         assertEquals(HttpStatus.BAD_GATEWAY,
                 assertThrows(ResponseStatusException.class, service::getPageLoads).getStatusCode());
-        server.verify();
-    }
-
-    @Test
-    void queriesTheSupportedCountryNameDimension() {
-        server.expect(requestTo("https://api.cloudflare.com/client/v4/graphql"))
-                .andExpect(content().string(containsString("dimensions { countryName }")))
-                .andRespond(withSuccess("""
-                        {"data":{"viewer":{"accounts":[{"rumPageloadEventsAdaptiveGroups":[
-                          {"count":6,"dimensions":{"countryName":"IT"}}
-                        ]}]}},"errors":null}
-                        """, MediaType.APPLICATION_JSON));
-
-        var result = new CloudflareAnalyticsService(client, "test-api-token", "account-id", "site-tag")
-                .getPageLoads();
-
-        assertEquals(6, result.pageLoads());
-        assertEquals(java.util.List.of(new CloudflareAnalyticsService.CountryPageLoads("IT", 6)), result.countries());
         server.verify();
     }
 }
