@@ -29,17 +29,30 @@
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 			crossorigin="anonymous"></script>
 	<style>
+        .aads-ad-slot {
+            max-width: 100%;
+            min-width: 0;
+        }
+        .aads-ad-slot iframe {
+            max-width: 100%;
+        }
 		.ad-container {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-		    gap: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             padding: 20px;
         }
         #adFormContainer {
-            grid-column: 1 / -1;
             width: 100%;
             min-width: 0;
             box-sizing: border-box;
+            margin-top: 20px;
+        }
+        #adList {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 0;
         }
         .ad-card {
             border: 1px solid #ddd;
@@ -51,8 +64,9 @@
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease;
         }
-        #adList {
-            display: contents;
+        .ad-card.row {
+            margin-left: 0;
+            margin-right: 0;
         }
         .ad-card {
             padding-top: 36px;
@@ -73,7 +87,7 @@
             max-width: 40px;
         }
         .ad-empty-state {
-            grid-column: 1 / -1;
+            width: 100%;
         }
         .countdown {
             font-size: 16px;
@@ -117,22 +131,6 @@
         .reward-button:hover:not(:disabled) {
             background: #218838;
         }
-        @media (max-width: 1200px) {
-            .ad-container {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
-        @media (max-width: 992px) {
-            .ad-container {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        @media (max-width: 576px) {
-            .ad-container {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-
 		input:invalid {
     border-color: red;
 }
@@ -189,9 +187,13 @@
 				<!-- Content Row -->
 				<div th:replace="~{fragments/summary}"></div>
 
-				<div id="frame" style="width: 100%; margin: auto; position: relative; z-index: 99998;">
-					<iframe data-aa="2462874" src="//acceptable.a-ads.com/2462874/?size=Adaptive"
-							style="border: 0; padding: 0; width: 70%; height: auto; overflow: hidden; display: block; margin: auto"></iframe>
+				<div class="row">
+					<div class="col-12 mb-4">
+						<div class="aads-ad-slot">
+							<iframe title="Advertisement" data-aa="2462874" src="https://acceptable.a-ads.com/2462874/?size=Adaptive"
+									style="border: 0; padding: 0; width: 70%; max-width: 100%; height: auto; overflow: hidden; display: block; margin: auto"></iframe>
+						</div>
+					</div>
 				</div>
 
 				<!-- Content Row -->
@@ -235,13 +237,23 @@
 										<div class="form-group">
 											<label for="budget">Campaign Budget (coins)</label>
 											<input type="number" id="budget" class="form-control" min="1" step="1" required>
-											<small class="form-text text-muted">The budget is reserved from your points balance and spent as users complete views. New ads start paused; activate them from your ad list.</small>
+											<small class="form-text text-muted">Ads with higher remaining budgets appear first on the Surf Ads page, so increasing your remaining budget can improve visibility. The budget is reserved from your points balance and spent as users complete views. New ads start paused; activate them from your ad list.</small>
 											<p id="fundedViewsEstimate" class="small text-primary mt-2 mb-0" aria-live="polite">Estimated funded views: enter a reward and budget.</p>
 										</div>
 										<div id="adFormError" class="alert alert-danger" role="alert" hidden></div>
-										<button type="submit" class="btn btn-success">Submit</button>
+										<button type="submit" class="btn btn-primary">Submit</button>
 										<button type="button" class="btn btn-secondary" onclick="toggleAdForm()">Cancel</button>
 									</form>
+								</div>
+
+								<div class="row">
+									<div class="col-12 mb-4">
+										<div class="aads-ad-slot">
+											<iframe title="Advertisement" data-aa="2462874" loading="lazy"
+													src="https://acceptable.a-ads.com/2462874/?size=Adaptive"
+													style="border: 0; padding: 0; width: 70%; max-width: 100%; height: auto; overflow: hidden; display: block; margin: auto"></iframe>
+										</div>
+									</div>
 								</div>
 
 							</div>

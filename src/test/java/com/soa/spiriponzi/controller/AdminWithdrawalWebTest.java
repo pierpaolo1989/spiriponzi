@@ -121,9 +121,13 @@ class AdminWithdrawalWebTest {
             String html = mvc.perform(get(path).servletPath(path).session(session("ROLE_USER")))
                     .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
             assertTrue(html.contains("data-aa=\"2462874\""));
+            int firstAd = html.indexOf("data-aa=\"2462874\"");
+            int lastAd = html.indexOf("data-aa=\"2462874\"", firstAd + 1);
+            int adList = html.indexOf("class=\"card-body ad-container\"");
+            assertTrue(firstAd < adList && adList < lastAd);
+            assertTrue(html.contains("Ads with higher remaining budgets appear first"));
             if (path.equals("/surf-ads")) {
-                int priorityNote = html.indexOf("Ads with higher remaining budgets appear first.");
-                int adList = html.indexOf("class=\"card-body ad-container\"");
+                int priorityNote = html.indexOf("Ads with higher remaining budgets appear first");
                 assertTrue(priorityNote > 0 && priorityNote < adList);
             } else {
                 assertTrue(html.contains("id=\"budget\""));
@@ -228,6 +232,8 @@ class AdminWithdrawalWebTest {
 
         assertTrue(html.contains("<h1 class=\"h3 mb-0 text-gray-800\">Report</h1>"));
         assertFalse(html.contains(">Reports</h1>"));
+        assertTrue(html.contains("href=\"/css/sb-admin-2.css\""));
+        assertFalse(html.contains("/css/sb-admin-2.min.css"));
         assertTrue(html.contains("src=\"/img/spiriponzi-mark.svg\""));
         assertTrue(html.contains("class=\"nav-item d-none d-lg-block px-3 py-2 sidebar-ad\""));
         assertTrue(html.contains("data-ad-slot=\"2465731755\""));
