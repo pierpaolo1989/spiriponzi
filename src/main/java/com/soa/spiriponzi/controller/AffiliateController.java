@@ -44,7 +44,6 @@ public class AffiliateController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         model.addAttribute("user", user);
-        model.addAttribute("showSidebarAd", true);
 
         String referralCode = userService.getOrCreateReferralCode(user.getId());
         String baseUrl = publicBaseUrl.replaceAll("/+$", "");

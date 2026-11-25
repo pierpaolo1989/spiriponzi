@@ -129,7 +129,7 @@ class AdminWithdrawalWebTest {
                 assertTrue(html.contains("id=\"budget\""));
                 assertTrue(html.contains("id=\"fundedViewsEstimate\""));
             }
-            assertFalse(html.contains("data-ad-slot=\"2465731755\""));
+            assertTrue(html.contains("data-ad-slot=\"2465731755\""));
         }
     }
 
@@ -215,6 +215,22 @@ class AdminWithdrawalWebTest {
         assertFalse(html.contains("adminUserDropdown"));
         assertFalse(html.contains("fas fa-user-circle"));
         assertTrue(html.indexOf("render-heading") > html.indexOf("Prelievi da approvare"));
+    }
+
+    @Test
+    void reportUsesSingularTitleAndRendersSidebarLogoAndAd() throws Exception {
+        User user = User.builder().id(10L).email("test")
+                .userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+
+        String html = mvc.perform(get("/report").servletPath("/report").session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        assertTrue(html.contains("<h1 class=\"h3 mb-0 text-gray-800\">Report</h1>"));
+        assertFalse(html.contains(">Reports</h1>"));
+        assertTrue(html.contains("src=\"/img/spiriponzi-mark.svg\""));
+        assertTrue(html.contains("class=\"nav-item d-none d-lg-block px-3 py-2 sidebar-ad\""));
+        assertTrue(html.contains("data-ad-slot=\"2465731755\""));
     }
 
     @Test
@@ -361,7 +377,7 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn();
         String html = page.getResponse().getContentAsString();
 
-        assertTrue(html.indexOf("id=\"frame\"") < html.indexOf("h1 class=\"h3 mb-0 text-gray-800\">Reports"));
+        assertTrue(html.indexOf("id=\"frame\"") < html.indexOf("h1 class=\"h3 mb-0 text-gray-800\">Report"));
         assertTrue(html.contains("data-aa=\"2462874\""));
     }
 
@@ -400,6 +416,7 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("name=\"_csrf_header\""));
         assertTrue(html.contains("z-index: 1040;"));
         assertTrue(html.split("class=\"game-embed\"", -1).length == 5);
-        org.junit.jupiter.api.Assertions.assertFalse(html.contains("adsbygoogle"));
+        assertTrue(html.contains("data-ad-slot=\"2465731755\""));
+        assertTrue(html.contains("adsbygoogle.js?client=ca-pub-3177939731250769"));
     }
 }
