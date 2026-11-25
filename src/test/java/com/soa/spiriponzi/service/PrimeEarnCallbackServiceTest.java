@@ -7,9 +7,9 @@ import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.Optional;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,15 +23,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class BitLabsCallbackServiceTest {
+class PrimeEarnCallbackServiceTest {
 
-    private static final String CALLBACK_URL = "https://example.test/callbacks/bitlabs";
-    private static final String SECRET = "test-secret";
+    private static final String CALLBACK_URL = "https://example.test/callbacks/primeearn";
+    private static final String SALT = "test-salt";
 
     private ClaimRepository claimRepository;
     private UserRepository userRepository;
     private UserStatsRepository userStatsRepository;
-    private BitLabsCallbackService service;
+    private PrimeEarnCallbackService service;
     private User user;
     private UserStats stats;
 
@@ -40,8 +40,8 @@ class BitLabsCallbackServiceTest {
         claimRepository = mock(ClaimRepository.class);
         userRepository = mock(UserRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
-        service = new BitLabsCallbackService(claimRepository, userRepository, userStatsRepository);
-        ReflectionTestUtils.setField(service, "secret", SECRET);
+        service = new PrimeEarnCallbackService(claimRepository, userRepository, userStatsRepository);
+        ReflectionTestUtils.setField(service, "postbackSalt", SALT);
         ReflectionTestUtils.setField(service, "callbackUrl", CALLBACK_URL);
 
         user = User.builder().id(10L).email("user@example.test").build();
@@ -52,12 +52,12 @@ class BitLabsCallbackServiceTest {
                 .build();
         when(userRepository.findWithLockById(10L)).thenReturn(Optional.of(user));
         when(userStatsRepository.findWithLockByUserEmail(user.getEmail())).thenReturn(Optional.of(stats));
-        when(claimRepository.findByExternalTransactionId("tx-1")).thenReturn(Optional.empty());
+        when(claimRepository.findByExternalTransactionId("primeearn:tx-1")).thenReturn(Optional.empty());
     }
 
     @Test
-    void validCompletionCreditsWholeCoinsAndRecordsTransactionId() throws Exception {
-        service.process(callbackQuery("uid=10&tx=tx-1&val=15&raw=survey&activity_type=COMPLETE"));
+    void validCompletionCreditsRewardAndRecordsTransactionId() throws Exception {
+        service.process(signedQuery("user=10&tx_id=tx-1&reward=15&type=1&payout=0.15"));
 
         assertEquals(65, stats.getAnnualPoints());
         assertEquals(35, stats.getMonthlyPoints());
@@ -68,10 +68,10 @@ class BitLabsCallbackServiceTest {
 
     @Test
     void repeatedTransactionDoesNotCreditTwice() throws Exception {
-        when(claimRepository.findByExternalTransactionId("tx-1"))
+        when(claimRepository.findByExternalTransactionId("primeearn:tx-1"))
                 .thenReturn(Optional.of(Claim.builder().user(user).amount(15).build()));
 
-        service.process(callbackQuery("uid=10&tx=tx-1&val=15&raw=survey&activity_type=COMPLETE"));
+        service.process(signedQuery("user=10&tx_id=tx-1&reward=15&type=1"));
 
         assertEquals(50, stats.getAnnualPoints());
         assertEquals(20, stats.getMonthlyPoints());
@@ -81,15 +81,22 @@ class BitLabsCallbackServiceTest {
     }
 
     @Test
-    void reconciliationRecordsNegativeAdjustmentWithoutIncrementingClaimCount() throws Exception {
-        Claim original = Claim.builder().user(user).amount(15).build();
-        when(claimRepository.findByExternalTransactionId("original-tx")).thenReturn(Optional.of(original));
+    void reconciliationReversesOnlyTheOriginalUsersReward() throws Exception {
+        Claim original = Claim.builder()
+                .user(user)
+                .amount(15)
+                .externalTransactionId("primeearn:original-tx")
+                .build();
+        when(claimRepository.findByExternalTransactionId("primeearn:original-tx"))
+                .thenReturn(Optional.of(original));
+        when(claimRepository.findByExternalTransactionId("primeearn:reverse-tx"))
+                .thenReturn(Optional.empty());
 
-        service.process(callbackQuery(
-                "uid=10&tx=tx-2&val=-5&raw=survey&activity_type=RECONCILIATION&ref=original-tx"));
+        service.process(signedQuery(
+                "user=10&tx_id=reverse-tx&reward=-15&type=4&reconciled_tx_id=original-tx"));
 
-        assertEquals(45, stats.getAnnualPoints());
-        assertEquals(15, stats.getMonthlyPoints());
+        assertEquals(35, stats.getAnnualPoints());
+        assertEquals(5, stats.getMonthlyPoints());
         assertEquals(3, stats.getNumberOfClaims());
         verify(claimRepository).save(any(Claim.class));
         verify(userStatsRepository).save(stats);
@@ -97,36 +104,29 @@ class BitLabsCallbackServiceTest {
 
     @Test
     void invalidHashIsRejectedBeforeLookingUpUser() throws Exception {
-        String validQuery = callbackQuery("uid=10&tx=tx-1&val=15&raw=survey&activity_type=COMPLETE");
-        String query = validQuery.substring(0, validQuery.length() - 1)
-                + (validQuery.endsWith("0") ? "1" : "0");
+        String query = signedQuery("user=10&tx_id=tx-1&reward=15&type=1");
+        String invalidQuery = query.substring(0, query.length() - 1)
+                + (query.endsWith("0") ? "1" : "0");
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> service.process(query));
+                ResponseStatusException.class, () -> service.process(invalidQuery));
 
         assertEquals(401, exception.getStatusCode().value());
         verify(userRepository, never()).findWithLockById(10L);
     }
 
     @Test
-    void fractionalRewardsAreRejectedInsteadOfSilentlyRounded() throws Exception {
-        String query = callbackQuery("uid=10&tx=tx-1&val=1.5&raw=survey&activity_type=COMPLETE");
+    void screenoutWithoutRewardDoesNotCreateClaim() throws Exception {
+        service.process(signedQuery("user=10&tx_id=screenout-tx&reward=0&type=2"));
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> service.process(query));
-
-        assertEquals(400, exception.getStatusCode().value());
+        verify(userRepository, never()).findWithLockById(10L);
         verify(claimRepository, never()).save(any(Claim.class));
     }
 
-    private String callbackQuery(String unsignedQuery) throws Exception {
-        Mac mac = Mac.getInstance("HmacSHA1");
-        mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
-        byte[] digest = mac.doFinal((CALLBACK_URL + "?" + unsignedQuery).getBytes(StandardCharsets.UTF_8));
-        StringBuilder hash = new StringBuilder(digest.length * 2);
-        for (byte value : digest) {
-            hash.append(String.format("%02x", value & 0xff));
-        }
+    private String signedQuery(String unsignedQuery) throws Exception {
+        String value = CALLBACK_URL + "?" + unsignedQuery + SALT;
+        String hash = HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-1").digest(value.getBytes(StandardCharsets.UTF_8)));
         return unsignedQuery + "&hash=" + hash;
     }
 }

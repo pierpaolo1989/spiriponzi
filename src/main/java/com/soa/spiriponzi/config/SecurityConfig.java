@@ -47,15 +47,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
                         .requestMatchers("/", "/register/**", "/activate", "/resend-activation", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
-                                "/callbacks/bitlabs",
+                                "/callbacks/primeearn",
                                 "/callbacks/cpx",
                                 "/callbacks/offerwall",
+                                "/affiliate/click/**",
                                 "/auth/google/**", "/oauth2/**", "/login/oauth2/**",
                                 "/sitemap.xml",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
 
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/affiliate").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/**").hasRole("USER")
                 )
                 .formLogin(form -> form

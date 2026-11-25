@@ -115,6 +115,11 @@ html[data-theme="dark"] #themeToggle {
 	color: #fbbf24 !important;
 }
 
+#themeToggle:focus:not(:focus-visible) {
+	outline: none;
+	box-shadow: none;
+}
+
 html[data-theme="dark"] .quiz-shell,
 html[data-theme="dark"] .quiz-option,
 html[data-theme="dark"] .ad-card {

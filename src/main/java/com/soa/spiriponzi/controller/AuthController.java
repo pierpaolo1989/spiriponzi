@@ -41,8 +41,8 @@ public class AuthController {
 	private final WithdrawService withdrawService;
 	private final OfferwallService offerwallService;
 
-	@Value("${bitlabs.token:}")
-	private String bitlabsToken = "";
+	@Value("${primeearn.app-id:}")
+	private String primeEarnAppId = "";
 
 	@Value("${app.public-base-url:https://www.spiriponzi.cloud}")
 	private String publicBaseUrl = "";
@@ -205,8 +205,8 @@ public class AuthController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
-		model.addAttribute("bitlabsUid", user.getId().toString());
-		model.addAttribute("bitlabsToken", bitlabsToken);
+		model.addAttribute("primeEarnAppId", primeEarnAppId);
+		model.addAttribute("primeEarnUid", user.getId().toString());
 		model.addAttribute("cpxAppId", CPX_APP_ID);
 		model.addAttribute("cpxExtUserId", user.getId().toString());
 		model.addAttribute("cpxEmail", user.getEmail());

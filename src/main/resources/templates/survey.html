@@ -28,8 +28,9 @@
 
 	<style>
 iframe {
-	width: -webkit-fill-available !important;
-	min-height: 600px !important;
+		width: 100%;
+		min-height: 700px;
+		border: 0;
 }
 
 .survey-provider-card {
@@ -92,18 +93,19 @@ iframe {
 							<div class="card shadow mb-4 survey-provider-card">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Bitlabs</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Prime Earn</h6>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body">
 									<iframe
-										title="BitLabs surveys"
+										title="Prime Earn surveys"
 										loading="lazy"
-										th:if="${!#strings.isEmpty(bitlabsToken)}"
-										th:src="@{https://web.bitlabs.ai/(uid=${bitlabsUid},token=${bitlabsToken})}">
+										allow="clipboard-write"
+										th:if="${!#strings.isEmpty(primeEarnAppId)}"
+										th:src="@{https://monetize.primeearn.com/(app=${primeEarnAppId},uuid=${primeEarnUid},locale='en')}">
 									</iframe>
-									<p th:if="${#strings.isEmpty(bitlabsToken)}">
-										BitLabs is not configured.
+									<p th:if="${#strings.isEmpty(primeEarnAppId)}">
+										Prime Earn is not configured.
 									</p>
 								</div>
 							</div>

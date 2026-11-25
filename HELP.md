@@ -59,6 +59,26 @@ Existing accounts keep their last game claim timestamp when the interval changes
 Adaptive A-ADS unit 2462874 appears at the bottom of the profile, at the top of
 the reports page, and between the two rows of games.
 
+### Prime Earn surveys
+
+The Surveys page embeds Prime Earn's survey iframe and identifies each user by
+their stable Spiriponzi user ID. In Render, set `PRIME_EARN_APP_ID` to the
+Publisher App ID and `PRIME_EARN_POSTBACK_SALT` to the secret salt from the
+Prime Earn dashboard. Keep the salt server-side. The optional
+`PRIME_EARN_CALLBACK_URL` is the public callback base URL; its default is
+`https://www.spiriponzi.cloud/callbacks/primeearn`. If the app uses another
+hostname, set this to that exact HTTPS endpoint.
+
+In the Prime Earn dashboard, configure the postback URL as
+`https://www.spiriponzi.cloud/callbacks/primeearn?user={user}&tx_id={tx_id}&reward={reward}&type={type}&reconciled_tx_id={reconciled_tx_id}`
+and do not add `hash` manually; Prime Earn appends it. The URL must use the
+same hostname and path as `PRIME_EARN_CALLBACK_URL`. The callback verifies the
+SHA-1 URL signature, processes each transaction once, credits completion,
+screenout and bonus rewards, and applies reconciliation events. Test with
+Prime Earn's Test Mode and Test Postback before going live. Prime Earn also
+documents IP allowlisting for its postbacks; configure it at the network layer
+if available, alongside signature verification.
+
 ### Render overview in the admin dashboard
 
 The optional Render panel lists the first 100 services accessible to a workspace

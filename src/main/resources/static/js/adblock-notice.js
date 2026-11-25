@@ -50,21 +50,6 @@
         });
         $("#adblockNoticeRetry").on("click", retryAfterDisablingBlocker);
 
-        const adBlockDetected = hasAdBlocker();
-        if (navigator.brave && typeof navigator.brave.isBrave === "function") {
-            Promise.resolve()
-                .then(function () {
-                    return navigator.brave.isBrave();
-                })
-                .then(function (isBrave) {
-                    showNoticeIfNeeded(adBlockDetected || isBrave);
-                })
-                .catch(function () {
-                    showNoticeIfNeeded(adBlockDetected);
-                });
-            return;
-        }
-
-        showNoticeIfNeeded(adBlockDetected);
+        showNoticeIfNeeded(hasAdBlocker());
     });
 })();

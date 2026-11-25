@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spiriponzi - Affiliate</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+    <link th:href="@{/css/user-dark-mode.css}" rel="stylesheet">
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <div th:replace="~{fragments/sidebar}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <div th:replace="~{fragments/navbar}"></div>
+            <div class="container-fluid">
+                <div th:replace="~{fragments/summary}"></div>
+                <h1 class="h3 mb-4 text-gray-800">Affiliate</h1>
+
+                <div class="row">
+                    <div class="col-xl-8 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h2 class="h6 m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-bullhorn mr-2" aria-hidden="true"></i>Share a Spiriponzi banner
+                                </h2>
+                            </div>
+                            <div class="card-body">
+                                <p>Embed this banner on your website. Visitors who click it will be taken to Spiriponzi registration.</p>
+                                <div class="text-center rounded bg-light p-3 mb-3">
+                                    <a th:href="${affiliateClickUrl}" target="_blank" rel="noopener noreferrer">
+                                        <img th:src="${affiliateBannerUrl}" alt="Join Spiriponzi"
+                                            width="468" height="60" style="max-width:100%;height:auto">
+                                    </a>
+                                </div>
+                                <label for="affiliateEmbedCode">Banner embed code</label>
+                                <textarea id="affiliateEmbedCode" class="form-control mb-3" rows="4"
+                                    readonly aria-label="HTML code to embed the Spiriponzi affiliate banner"
+                                    th:text="${affiliateEmbedCode}"></textarea>
+                                <button id="copyAffiliateCode" class="btn btn-primary" type="button">
+                                    <i class="fas fa-copy mr-1" aria-hidden="true"></i>Copy embed code
+                                </button>
+                                <p id="affiliateCopyStatus" class="small mt-2 mb-0" role="status" aria-live="polite"></p>
+                                <p class="small text-muted mt-3 mb-0">
+                                    One click per browser per affiliate is counted every 24 hours. Your own clicks do not count.
+                                    Every 100 valid clicks earns you 10 coins. A first-party cookie is used to
+                                    distinguish browsers for the 24-hour limit and is stored for up to one year.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h2 class="h6 m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-chart-line mr-2" aria-hidden="true"></i>Your results
+                                </h2>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-1">Qualified clicks</p>
+                                <p class="h4 font-weight-bold text-gray-800" th:text="${qualifiedClicks}">0</p>
+                                <p class="mb-1">Affiliate coins earned</p>
+                                <p class="h4 font-weight-bold text-primary" th:text="${affiliateCoinsEarned}">0</p>
+                                <p class="small text-muted mb-0">
+                                    <span th:text="${clicksUntilReward}">100</span> more valid clicks until your next reward.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments/footer}"></div>
+    </div>
+</div>
+<a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up" aria-hidden="true"></i></a>
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+<script>
+    const affiliateCode = document.getElementById('affiliateEmbedCode');
+    const affiliateCopyStatus = document.getElementById('affiliateCopyStatus');
+    document.getElementById('copyAffiliateCode').addEventListener('click', async () => {
+        try {
+            if (!navigator.clipboard) throw new Error('Clipboard unavailable');
+            await navigator.clipboard.writeText(affiliateCode.value);
+            affiliateCopyStatus.textContent = 'Embed code copied.';
+        } catch (error) {
+            affiliateCode.focus();
+            affiliateCode.select();
+            affiliateCopyStatus.textContent = 'Copy unavailable. The code is selected; copy it manually.';
+        }
+    });
+</script>
+</body>
+</html>

@@ -321,7 +321,7 @@
                             <div class="academy-section-kicker">Technical guide</div>
                             <h2 class="h5 font-weight-bold text-gray-800 mb-0" id="academyLessonsTitle">Bitcoin building blocks</h2>
                         </div>
-                        <small class="academy-refresh-note mt-2">Drag cards to arrange your reading path</small>
+                        <small class="academy-refresh-note mt-2" id="academyReorderHint" hidden>Drag cards to arrange your reading path</small>
                     </div>
 
                     <div class="row" id="lessons">
@@ -634,12 +634,13 @@
     refreshAcademyData();
     window.setInterval(refreshAcademyData, 300000);
 
-    if (window.Sortable) {
+    if (window.Sortable && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
         new Sortable(document.getElementById('lessons'), {
             animation: 150,
             ghostClass: 'sortable-ghost',
             draggable: '.academy-lesson-item'
         });
+        document.getElementById('academyReorderHint').hidden = false;
     }
 </script>
 </body>

@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import com.soa.spiriponzi.config.SecurityConfig;
 import com.soa.spiriponzi.config.CaptchaSettings;
+import com.soa.spiriponzi.service.AffiliateService;
+import com.soa.spiriponzi.controller.AffiliateController;
 import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.model.WithdrawRequest;
@@ -48,7 +50,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({AdminController.class, AuthController.class, AdController.class, WihdrawController.class})
+@WebMvcTest({AdminController.class, AuthController.class, AdController.class, WihdrawController.class,
+        AffiliateController.class})
 @Import(SecurityConfig.class)
 class AdminWithdrawalWebTest {
     @Autowired private MockMvc mvc;
@@ -64,6 +67,7 @@ class AdminWithdrawalWebTest {
     @MockBean private CloudflareAnalyticsService cloudflareAnalyticsService;
     @MockBean private RenderService renderService;
     @MockBean private ADService adService;
+    @MockBean private AffiliateService affiliateService;
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
 
     private MockHttpSession session(String role) {
@@ -206,7 +210,46 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("id=\"sidebarToggle\""));
         assertTrue(html.contains("id=\"sidebarToggleTop\""));
         assertTrue(html.contains("th:action=\"/logout\"") || html.contains("action=\"/logout\""));
+        assertTrue(html.contains("aria-label=\"Esci\""));
+        assertTrue(html.contains("fas fa-sign-out-alt"));
+        assertFalse(html.contains("adminUserDropdown"));
+        assertFalse(html.contains("fas fa-user-circle"));
         assertTrue(html.indexOf("render-heading") > html.indexOf("Prelievi da approvare"));
+    }
+
+    @Test
+    void affiliatePageShowsBannerCodeAndRewardProgress() throws Exception {
+        User user = User.builder().id(10L).email("affiliate@example.test")
+                .userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("affiliate@example.test")).thenReturn(user);
+        when(userService.getOrCreateReferralCode(10L)).thenReturn("AFFILIATE10");
+        when(affiliateService.getStats(10L)).thenReturn(new AffiliateService.AffiliateStats(12, 0, 88));
+
+        String html = mvc.perform(get("/affiliate").servletPath("/affiliate")
+                        .session(session("ROLE_USER", "affiliate@example.test")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        assertTrue(html.contains("affiliate-banner.svg"));
+        assertTrue(html.contains("/affiliate/click/AFFILIATE10"));
+        assertTrue(html.contains("id=\"affiliateEmbedCode\""));
+        assertTrue(html.contains("12"));
+        assertTrue(html.contains("88"));
+    }
+
+    @Test
+    void affiliateClickRedirectIsPublicAndCreatesVisitorCookie() throws Exception {
+        String visitorToken = "A".repeat(43);
+        when(affiliateService.trackClick("AFFILIATE10", null, null))
+                .thenReturn(new AffiliateService.ClickResult(visitorToken, true, true, 1, 0));
+
+        MvcResult result = mvc.perform(get("/affiliate/click/AFFILIATE10")
+                        .servletPath("/affiliate/click/AFFILIATE10"))
+                .andExpect(status().isFound())
+                .andReturn();
+
+        assertTrue(result.getResponse().getHeader("Location").contains("/register?ref=AFFILIATE10"));
+        assertTrue(result.getResponse().getHeader("Set-Cookie").contains("HttpOnly"));
+        verify(affiliateService).trackClick("AFFILIATE10", null, null);
     }
 
     @Test

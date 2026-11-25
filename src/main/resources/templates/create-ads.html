@@ -31,8 +31,15 @@
 	<style>
 		.ad-container {
             display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
 		    gap: 12px;
             padding: 20px;
+        }
+        #adFormContainer {
+            grid-column: 1 / -1;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         .ad-card {
             border: 1px solid #ddd;
@@ -49,6 +56,21 @@
         }
         .ad-card {
             padding-top: 36px;
+        }
+        .ad-card.row > .col-10 {
+            flex: 1 1 0;
+            max-width: none;
+            min-width: 0;
+        }
+        .ad-card.row > .col-1 {
+            flex: 0 0 32px;
+            max-width: 32px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .ad-card.row > .col-1:last-child {
+            flex-basis: 40px;
+            max-width: 40px;
         }
         .ad-empty-state {
             grid-column: 1 / -1;
@@ -97,17 +119,17 @@
         }
         @media (max-width: 1200px) {
             .ad-container {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
         @media (max-width: 992px) {
             .ad-container {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
         @media (max-width: 576px) {
             .ad-container {
-                grid-template-columns: repeat(1, 1fr);
+                grid-template-columns: minmax(0, 1fr);
             }
         }
 

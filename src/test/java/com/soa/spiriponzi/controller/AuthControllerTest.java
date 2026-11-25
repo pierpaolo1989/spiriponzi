@@ -234,9 +234,10 @@ class AuthControllerTest {
         assertEquals(true, model.get("showSidebarAd"));
         assertEquals("surf-ads", controller.surfAds(model));
         assertEquals(ads, model.get("ads"));
+        ReflectionTestUtils.setField(controller, "primeEarnAppId", "prime-app-123");
         assertEquals("survey", controller.survey(model));
-        assertEquals("10", model.get("bitlabsUid"));
-        assertEquals("", model.get("bitlabsToken"));
+        assertEquals("prime-app-123", model.get("primeEarnAppId"));
+        assertEquals("10", model.get("primeEarnUid"));
         assertEquals(23067, model.get("cpxAppId"));
         assertEquals("10", model.get("cpxExtUserId"));
         assertEquals(ControllerTestSupport.EMAIL, model.get("cpxEmail"));
