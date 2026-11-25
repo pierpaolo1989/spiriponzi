@@ -195,12 +195,24 @@
         }
 
         .academy-ad-slot {
-            max-width: 100%;
-            overflow: hidden;
+            display: flow-root;
+            width: 100%;
+            min-height: 100px;
+            margin: 0 auto 2rem;
+            clear: both;
         }
 
         .academy-ad-slot .adsbygoogle {
+            display: block;
             max-width: 100%;
+            min-height: 90px;
+        }
+
+        @media (max-width: 767.98px) {
+            .academy-ad-slot,
+            .academy-ad-slot .adsbygoogle {
+                min-height: 280px;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -457,18 +469,16 @@
                     </div>
                 </section>
 
-                <div class="row">
-                    <div class="col-12 mb-4 text-center academy-ad-slot">
-                        <ins class="adsbygoogle"
-                             style="display:block"
-                             data-ad-client="ca-pub-3177939731250769"
-                             data-ad-slot="6698101758"
-                             data-ad-format="auto"
-                             data-full-width-responsive="true"></ins>
-                        <script>
-                            (adsbygoogle = window.adsbygoogle || []).push({});
-                        </script>
-                    </div>
+                <div class="academy-ad-slot text-center" aria-label="Advertisement">
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-3177939731250769"
+                         data-ad-slot="6698101758"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
                 </div>
             </div>
             <!-- /.container-fluid -->

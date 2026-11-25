@@ -113,6 +113,34 @@ class AdminWithdrawalWebTest {
     }
 
     @Test
+    void surveyAdvertisementRemainsInDocumentFlowBeforeFooter() throws Exception {
+        User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+
+        String survey = mvc.perform(get("/survey").servletPath("/survey")
+                        .session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        int advertisement = survey.indexOf("class=\"survey-ad-container text-center\"");
+        int footer = survey.indexOf("<footer class=\"sticky-footer");
+        assertTrue(advertisement >= 0 && footer > advertisement);
+        assertTrue(survey.contains("display: flow-root;"));
+    }
+
+    @Test
+    void academyAdvertisementRemainsInDocumentFlowBeforeFooter() throws Exception {
+        User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+
+        String academy = mvc.perform(get("/academy").servletPath("/academy")
+                        .session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        int advertisement = academy.indexOf("class=\"academy-ad-slot text-center\"");
+        int footer = academy.indexOf("<footer class=\"sticky-footer");
+        assertTrue(advertisement >= 0 && footer > advertisement);
+        assertTrue(academy.contains("display: flow-root;"));
+    }
+
+    @Test
     void surfAndCreateAdsPagesRenderAadsAdvertisement() throws Exception {
         User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
         when(userService.findByEmail("test")).thenReturn(user);

@@ -43,8 +43,26 @@ iframe {
 }
 
 .survey-ad-container {
-	margin: 0 auto;
-	max-width: 100%;
+	display: flow-root;
+	width: 100%;
+	min-height: 100px;
+	margin: 0 auto 2rem;
+	clear: both;
+}
+
+.survey-ad-container .adsbygoogle {
+	display: block;
+	min-height: 90px;
+}
+
+@media (max-width: 767.98px) {
+	.survey-ad-container {
+			min-height: 280px;
+	}
+
+	.survey-ad-container .adsbygoogle {
+			min-height: 280px;
+	}
 }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
@@ -125,8 +143,7 @@ iframe {
 						</div>
 						
 					</div>
-					<div class="row">
-						<div class="col-12 mb-4 text-center survey-ad-container">
+					<div class="survey-ad-container text-center" aria-label="Advertisement">
 							<ins class="adsbygoogle"
 								 style="display:block"
 								 data-ad-client="ca-pub-3177939731250769"
@@ -136,7 +153,6 @@ iframe {
 							<script>
 								(adsbygoogle = window.adsbygoogle || []).push({});
 							</script>
-						</div>
 					</div>
 
 				</div>
