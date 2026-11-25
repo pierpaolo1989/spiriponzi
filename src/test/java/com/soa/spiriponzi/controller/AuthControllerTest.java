@@ -6,7 +6,7 @@ import com.soa.spiriponzi.dto.ResetPasswordFormDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
-import com.soa.spiriponzi.service.CherriesCallbackService;
+import com.soa.spiriponzi.service.TheoremReachCallbackService;
 import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.WithdrawService;
 import com.soa.spiriponzi.service.OfferwallService;
@@ -30,7 +30,7 @@ class AuthControllerTest {
 
     private UserService userService;
     private OfferwallService offerwallService;
-    private CherriesCallbackService cherriesCallbackService;
+    private TheoremReachCallbackService theoremReachCallbackService;
     private AuthController controller;
     private final User user = User.builder()
             .id(10L)
@@ -45,9 +45,9 @@ class AuthControllerTest {
         ControllerTestSupport.authenticate();
         userService = mock(UserService.class);
         offerwallService = mock(OfferwallService.class);
-        cherriesCallbackService = mock(CherriesCallbackService.class);
+        theoremReachCallbackService = mock(TheoremReachCallbackService.class);
         controller = new AuthController(
-                userService, mock(WithdrawService.class), offerwallService, cherriesCallbackService);
+                userService, mock(WithdrawService.class), offerwallService, theoremReachCallbackService);
         when(userService.findByEmail(ControllerTestSupport.EMAIL)).thenReturn(user);
     }
 
@@ -238,12 +238,15 @@ class AuthControllerTest {
         assertEquals(true, model.get("showSidebarAd"));
         assertEquals("surf-ads", controller.surfAds(model));
         assertEquals(ads, model.get("ads"));
-        when(cherriesCallbackService.isConfigured()).thenReturn(true);
-        when(cherriesCallbackService.createIframeUrl("10"))
-                .thenReturn("https://grabcherries.com/wall?pid=10&sid=supplier-123");
+        when(theoremReachCallbackService.isConfigured()).thenReturn(true);
+        when(theoremReachCallbackService.createIframeUrl("10"))
+                .thenReturn("https://theoremreach.com/respondent_entry/direct?api_key=api-key&user_id=10"
+                        + "&transaction_id=transaction-id");
         assertEquals("survey", controller.survey(model));
-        assertEquals(true, model.get("cherriesEnabled"));
-        assertEquals("https://grabcherries.com/wall?pid=10&sid=supplier-123", model.get("cherriesUrl"));
+        assertEquals(true, model.get("theoremReachEnabled"));
+        assertEquals("https://theoremreach.com/respondent_entry/direct?api_key=api-key&user_id=10"
+                        + "&transaction_id=transaction-id",
+                model.get("theoremReachUrl"));
         assertEquals(23067, model.get("cpxAppId"));
         assertEquals("10", model.get("cpxExtUserId"));
         assertEquals(ControllerTestSupport.EMAIL, model.get("cpxEmail"));

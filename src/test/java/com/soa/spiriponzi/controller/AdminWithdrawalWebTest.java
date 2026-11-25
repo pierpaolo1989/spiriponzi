@@ -22,7 +22,7 @@ import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
-import com.soa.spiriponzi.service.CherriesCallbackService;
+import com.soa.spiriponzi.service.TheoremReachCallbackService;
 import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ class AdminWithdrawalWebTest {
     @MockBean private RenderService renderService;
     @MockBean private ADService adService;
     @MockBean private AffiliateService affiliateService;
-    @MockBean private CherriesCallbackService cherriesCallbackService;
+    @MockBean private TheoremReachCallbackService theoremReachCallbackService;
     @MockBean(name = "captchaSettings") private CaptchaSettings captchaSettings;
 
     private MockHttpSession session(String role) {

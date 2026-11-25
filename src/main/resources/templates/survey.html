@@ -93,17 +93,17 @@ iframe {
 							<div class="card shadow mb-4 survey-provider-card">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Cherries Surveys</h6>
+									<h6 class="m-0 font-weight-bold text-primary">TheoremReach Surveys</h6>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body">
 									<iframe
-										title="Cherries surveys"
+										title="TheoremReach surveys"
 										loading="lazy"
-										th:if="${cherriesEnabled}"
-										th:src="${cherriesUrl}">
+										th:if="${theoremReachEnabled}"
+										th:src="${theoremReachUrl}">
 									</iframe>
-									<p th:unless="${cherriesEnabled}">
+									<p th:unless="${theoremReachEnabled}">
 										Surveys are not available right now.
 									</p>
 								</div>

@@ -23,7 +23,7 @@ import com.soa.spiriponzi.dto.ResetPasswordFormDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
-import com.soa.spiriponzi.service.CherriesCallbackService;
+import com.soa.spiriponzi.service.TheoremReachCallbackService;
 import com.soa.spiriponzi.service.OfferwallService;
 import com.soa.spiriponzi.service.UserService;
 
@@ -41,7 +41,7 @@ public class AuthController {
 	private final UserService userService;
 	private final WithdrawService withdrawService;
 	private final OfferwallService offerwallService;
-	private final CherriesCallbackService cherriesCallbackService;
+	private final TheoremReachCallbackService theoremReachCallbackService;
 
 	@Value("${app.public-base-url:https://www.spiriponzi.cloud}")
 	private String publicBaseUrl = "";
@@ -204,10 +204,11 @@ public class AuthController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		final User user = userService.findByEmail(authentication.getName());
 		model.addAttribute("user", user);
-		boolean cherriesEnabled = cherriesCallbackService.isConfigured();
-		model.addAttribute("cherriesEnabled", cherriesEnabled);
-		if (cherriesEnabled) {
-			model.addAttribute("cherriesUrl", cherriesCallbackService.createIframeUrl(user.getId().toString()));
+		boolean theoremReachEnabled = theoremReachCallbackService.isConfigured();
+		model.addAttribute("theoremReachEnabled", theoremReachEnabled);
+		if (theoremReachEnabled) {
+			model.addAttribute("theoremReachUrl",
+					theoremReachCallbackService.createIframeUrl(user.getId().toString()));
 		}
 		model.addAttribute("cpxAppId", CPX_APP_ID);
 		model.addAttribute("cpxExtUserId", user.getId().toString());
