@@ -21,6 +21,15 @@
         .affiliate-story-preview {
             max-height: 28rem;
         }
+
+        .affiliate-ad-slot {
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .affiliate-ad-slot .adsbygoogle {
+            max-width: 100%;
+        }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
         crossorigin="anonymous"></script>
@@ -82,56 +91,49 @@
                                 <p class="h4 font-weight-bold text-primary" th:text="${affiliateCoinsEarned}">0</p>
                                 <p class="small text-muted mb-0">
                                     <span th:text="${clicksUntilReward}">100</span> more valid clicks until your next reward.
-                                </p>
-                            </div>
-                    </div>
-                </div>
-                <section class="mb-4" aria-labelledby="affiliateSocialTitle">
-                    <div class="mb-3">
-                        <h2 class="h5 font-weight-bold text-gray-800 mb-1" id="affiliateSocialTitle">Social media banners</h2>
-                        <p class="text-muted mb-0">Download a PNG and add your tracked referral link to your post or story.</p>
-                    </div>
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <label for="affiliateSocialLink">Your tracked referral link</label>
-                            <div class="input-group">
-                                <input id="affiliateSocialLink" class="form-control" type="text"
-                                    th:value="${affiliateClickUrl}" readonly>
-                                <div class="input-group-append">
-                                    <button id="copyAffiliateLink" class="btn btn-primary" type="button">Copy link</button>
-                                </div>
-                            </div>
-                            <p id="affiliateLinkCopyStatus" class="small mt-2 mb-0" role="status" aria-live="polite"></p>
+                            </p>
                         </div>
                     </div>
+                    </div>
+                </div>
+                <section class="card shadow mb-4" aria-labelledby="affiliateSocialTitle">
+                    <div class="card-header py-3">
+                    <h2 class="h6 m-0 font-weight-bold text-primary" id="affiliateSocialTitle">Social media banners</h2>
+                    </div>
+                    <div class="card-body">
+                    <p class="text-muted mb-3">Download a banner to share Spiriponzi on your social profiles.</p>
                     <div class="row align-items-stretch">
-                        <div class="col-lg-6 mb-4">
-                            <div class="card shadow h-100">
-                                <div class="card-header py-3">
-                                    <h3 class="h6 m-0 font-weight-bold text-primary">Instagram Story / Reel</h3>
-                                </div>
-                                <div class="card-body text-center">
-                                    <img class="affiliate-social-preview affiliate-story-preview"
-                                        th:src="@{/img/affiliate-instagram-story.svg}"
-                                        width="270" height="480" alt="Vertical Spiriponzi banner for Instagram Stories">
+                        <div class="col-lg-6 mb-3">
+                            <div class="border rounded p-3 h-100 d-flex flex-column text-center">
+                                <h3 class="h6 font-weight-bold text-gray-800">Instagram Story / Reel</h3>
+                                <img class="affiliate-social-preview affiliate-story-preview"
+                                    th:src="@{/img/affiliate-instagram-story.svg}"
+                                    width="270" height="480" alt="Vertical Spiriponzi banner for Instagram Stories">
+                                <div class="mt-auto">
+                                    <label for="affiliateSocialLink" class="small mb-1">Tracked link for your Instagram link sticker</label>
+                                    <div class="input-group mb-2">
+                                        <input id="affiliateSocialLink" class="form-control" type="text"
+                                            th:value="${affiliateClickUrl}" readonly>
+                                        <div class="input-group-append">
+                                            <button id="copyAffiliateLink" class="btn btn-outline-primary" type="button">Copy</button>
+                                        </div>
+                                    </div>
+                                    <p id="affiliateLinkCopyStatus" class="small mb-2" role="status" aria-live="polite"></p>
                                     <button class="btn btn-primary" type="button" data-banner-download
                                         th:data-image-url="@{/img/affiliate-instagram-story.svg}"
                                         data-width="1080" data-height="1920" data-filename="spiriponzi-instagram-story.png">
                                         <i class="fas fa-download mr-1" aria-hidden="true"></i>Download PNG
                                     </button>
-                                    <p class="small text-muted mt-2 mb-0">Add the copied link using Instagram's link sticker.</p>
+                                </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-lg-6 mb-4">
-                            <div class="card shadow h-100">
-                                <div class="card-header py-3">
-                                    <h3 class="h6 m-0 font-weight-bold text-primary">Facebook Post</h3>
-                                </div>
-                                <div class="card-body text-center">
+                        <div class="col-lg-6 mb-3">
+                            <div class="border rounded p-3 h-100 d-flex flex-column text-center">
+                                <h3 class="h6 font-weight-bold text-gray-800">Facebook Post</h3>
                                     <img class="affiliate-social-preview"
                                         th:src="@{/img/affiliate-facebook-banner.svg}"
                                         width="600" height="315" alt="Landscape Spiriponzi banner for Facebook">
+                                <div class="mt-auto">
                                     <button class="btn btn-outline-primary mr-2" type="button" data-banner-download
                                         th:data-image-url="@{/img/affiliate-facebook-banner.svg}"
                                         data-width="1200" data-height="630" data-filename="spiriponzi-facebook.png">
@@ -141,24 +143,26 @@
                                         rel="noopener noreferrer">
                                         <i class="fab fa-facebook-f mr-1" aria-hidden="true"></i>Share on Facebook
                                     </a>
-                                    <p class="small text-muted mt-2 mb-0">The share button uses your tracked referral link.</p>
+                                </div>
                                 </div>
                             </div>
                         </div>
+                    <p id="socialBannerStatus" class="small mb-0" role="status" aria-live="polite"></p>
                     </div>
-                    <p id="socialBannerStatus" class="small" role="status" aria-live="polite"></p>
                 </section>
-                <!-- BEGIN AADS AD UNIT 2462874 -->
                 <div class="row">
                     <div class="col-12 mb-4 text-center affiliate-ad-slot">
-                        <div id="frame" style="width:100%;margin:auto;position:relative;z-index:99998;">
-                            <iframe title="Advertisement" data-aa="2462874" loading="lazy"
-                                src="https://acceptable.a-ads.com/2462874/?size=Adaptive"
-                                style="border:0;padding:0;width:70%;max-width:100%;height:auto;overflow:hidden;display:block;margin:auto"></iframe>
-                        </div>
+                    <ins class="adsbygoogle"
+                        style="display:block"
+                        data-ad-client="ca-pub-3177939731250769"
+                        data-ad-slot="6698101758"
+                        data-ad-format="auto"
+                        data-full-width-responsive="true"></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
                     </div>
                 </div>
-                <!-- END AADS AD UNIT 2462874 -->
             </div>
         </div>
         <div th:replace="~{fragments/footer}"></div>

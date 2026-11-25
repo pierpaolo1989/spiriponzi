@@ -251,7 +251,9 @@ class AdminWithdrawalWebTest {
         assertTrue(html.contains("affiliate-instagram-story.svg"));
         assertTrue(html.contains("affiliate-facebook-banner.svg"));
         assertTrue(html.contains("facebook.com/sharer/sharer.php"));
-        assertTrue(html.indexOf("id=\"socialBannerStatus\"") < html.indexOf("data-aa=\"2462874\""));
+        assertTrue(html.contains("Tracked link for your Instagram link sticker"));
+        assertTrue(html.indexOf("id=\"socialBannerStatus\"") < html.indexOf("data-ad-slot=\"6698101758\""));
+        assertTrue(html.indexOf("data-ad-slot=\"6698101758\"") > html.indexOf("affiliate-facebook-banner.svg"));
         assertTrue(html.contains("12"));
         assertTrue(html.contains("88"));
     }
