@@ -93,19 +93,18 @@ iframe {
 							<div class="card shadow mb-4 survey-provider-card">
 								<div
 									class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-									<h6 class="m-0 font-weight-bold text-primary">Prime Earn</h6>
+									<h6 class="m-0 font-weight-bold text-primary">Cherries Surveys</h6>
 								</div>
 								<!-- Card Body -->
 								<div class="card-body">
 									<iframe
-										title="Prime Earn surveys"
+										title="Cherries surveys"
 										loading="lazy"
-										allow="clipboard-write"
-										th:if="${!#strings.isEmpty(primeEarnAppId)}"
-										th:src="@{https://monetize.primeearn.com/(app=${primeEarnAppId},uuid=${primeEarnUid},locale='en')}">
+										th:if="${cherriesEnabled}"
+										th:src="${cherriesUrl}">
 									</iframe>
-									<p th:if="${#strings.isEmpty(primeEarnAppId)}">
-										No ads available
+									<p th:unless="${cherriesEnabled}">
+										Surveys are not available right now.
 									</p>
 								</div>
 							</div>

@@ -342,7 +342,9 @@
                                     <p>Transactions are grouped into blocks. Each block commits to its contents and its parent, forming a chain that is expensive to rewrite.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>Miners vary a nonce and hash a block header with double SHA-256 until the result is below the network's difficulty target. Nodes independently validate the proof and every consensus rule.</p>
+                                        <p><strong>How mining works:</strong> A block header includes the previous block hash, a Merkle root, a timestamp, a difficulty target and a nonce. Miners repeatedly hash the header with double SHA-256 until the result is below the target. When the nonce space is exhausted, miners can change other header inputs, such as extra data in the coinbase transaction.</p>
+                                        <p><strong>How transactions are committed:</strong> The Merkle root summarizes the block's transactions in a hash tree. A Merkle proof can demonstrate that a transaction belongs to a block without sending every other transaction in that block.</p>
+                                        <p><strong>Why it matters:</strong> Changing a transaction changes its hash and the Merkle root, so the block header must be mined again. Nodes still check that the block and its transactions follow every consensus rule; proof of work alone cannot make an invalid block valid.</p>
                                     </details>
                                 </div>
                             </article>
@@ -355,7 +357,9 @@
                                     <p>Bitcoin does not keep a simple account balance. Wallets track unspent transaction outputs (UTXOs) that can be used as inputs to a new transaction.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>An output is identified by its transaction ID and output index (outpoint). Inputs spend previous outputs; new outputs assign value to spending conditions. The difference between inputs and outputs is the fee.</p>
+                                        <p><strong>The data model:</strong> An output is identified by its transaction ID and output index (an outpoint). An input references an existing outpoint and provides the data needed to satisfy its spending conditions. A full node rejects attempts to spend an output that does not exist or has already been spent.</p>
+                                        <p><strong>Example:</strong> If a wallet spends one 0.8 BTC output to pay 0.3 BTC, it might create a 0.3 BTC payment output and a 0.499 BTC change output. The remaining 0.001 BTC is the transaction fee. Change is a new output controlled by the wallet, not an automatic refund.</p>
+                                        <p><strong>Wallet choices:</strong> Wallet software selects which outputs to spend and whether to create change. That choice affects transaction size and can reveal links between addresses, so a displayed balance is a useful summary rather than a single balance stored on-chain.</p>
                                     </details>
                                 </div>
                             </article>
@@ -368,7 +372,9 @@
                                     <p>Unconfirmed transactions wait in node mempools. Miners generally prioritize transactions by fee rate, measured in satoshis per virtual byte (sat/vB).</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>A fee estimator is a snapshot, not a promise: demand changes, nodes can have different mempools, and confirmation time is uncertain. A block confirmation means the transaction is included in that block.</p>
+                                        <p><strong>Fee calculation:</strong> The fee is the total input value minus the total output value. The fee rate compares that amount with transaction virtual size: for example, a 200 vB transaction paying 15 sat/vB pays 3,000 satoshis. A larger transaction can therefore cost more at the same rate.</p>
+                                        <p><strong>Getting into a block:</strong> Mempools are local node policies, not one global waiting room. Miners often prefer transactions with higher fee rates when block space is scarce, but estimates are snapshots and cannot promise a confirmation time. Wallets may support fee bumping, such as a replaceable transaction or child-pays-for-parent, subject to wallet and node policy.</p>
+                                        <p><strong>Confirmations:</strong> The first confirmation means a block included the transaction. Each later block adds work on top of it and generally makes a reorganization less likely, but no fixed confirmation count is an absolute guarantee.</p>
                                     </details>
                                 </div>
                             </article>
@@ -381,7 +387,9 @@
                                     <p>Full nodes download and verify blocks and transactions against Bitcoin's rules. Mining proposes blocks; node validation decides whether those blocks are acceptable.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>Nodes follow the valid chain with the most accumulated proof of work. They do not blindly trust a miner: invalid transactions or blocks are rejected, even if they contain substantial work.</p>
+                                        <p><strong>Validation before preference:</strong> A full node checks signatures and scripts, input availability, transaction values, block structure, subsidy limits and proof of work. A block that breaks a consensus rule is rejected, regardless of how much work a miner put into it.</p>
+                                        <p><strong>Choosing a chain:</strong> If two valid chains compete, nodes generally follow the one with the greatest accumulated proof of work—not simply the one with the most blocks. Temporary reorganizations can happen while nodes learn about competing valid blocks.</p>
+                                        <p><strong>Consensus vs. policy:</strong> Consensus rules determine what is valid. Node policy also determines which unconfirmed transactions a node relays or keeps in its mempool, so mempool contents can differ without the nodes disagreeing about the blockchain.</p>
                                     </details>
                                 </div>
                             </article>
@@ -394,7 +402,9 @@
                                     <p>The block subsidy decreases by half every 210,000 blocks. This changes new issuance; it does not guarantee a particular market price or outcome.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>Subsidy is determined by block height using integer satoshis. Transaction fees are separate and are also collected by the miner. The subsidy eventually rounds down to zero.</p>
+                                        <p><strong>Height-based schedule:</strong> The subsidy changes at each 210,000-block boundary. At an average target of about ten minutes per block, an interval is roughly four years, but block times vary, so a halving is not scheduled for an exact calendar date.</p>
+                                        <p><strong>Block reward:</strong> A miner's permitted coinbase output is limited by the current subsidy plus the fees from transactions in that block. Fees do not halve automatically, so the total reward can change by a different amount than the subsidy.</p>
+                                        <p><strong>What it does not say:</strong> The schedule defines new issuance, not demand or market value. Subsidy is represented in integer satoshis and keeps decreasing until it rounds down to zero.</p>
                                     </details>
                                 </div>
                             </article>
@@ -407,7 +417,9 @@
                                     <p>A private key authorizes spending. Bitcoin outputs use locking conditions (scripts); a wallet manages keys and helps create transactions that satisfy those conditions.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>A seed phrase can regenerate wallet keys and must be kept offline and private. A public address is not a password; sharing a seed phrase or signing an unknown transaction can put funds at risk.</p>
+                                        <p><strong>From key to spend:</strong> A wallet derives keys and addresses from its backup material. An address represents a receiving condition; the funds remain recorded as UTXOs on the blockchain. To spend one, a transaction must provide data that satisfies the output's locking script.</p>
+                                        <p><strong>More than one key type:</strong> Spending conditions can require a single signature, multiple signatures, a time delay or other script rules. The wallet must understand the particular output type to construct a valid spend.</p>
+                                        <p><strong>Protecting recovery:</strong> Anyone with a wallet's recovery phrase may be able to recreate its keys. Keep it private, verify addresses and transaction details on a trusted device, and never share recovery words with support staff or enter them into an unfamiliar website.</p>
                                     </details>
                                 </div>
                             </article>
@@ -420,7 +432,9 @@
                                     <p>Bitcoin has its own consensus network and a maximum issuance of 21 million BTC. Other tokens can use different chains, contracts, governance and supply rules.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>"Memecoin" describes a broad category, not one shared token design. Supply, upgrade controls, liquidity and security depend on the specific project; check its contract and chain rather than assuming a common rule.</p>
+                                        <p><strong>Native asset vs. token:</strong> BTC is the native asset of the Bitcoin network. Many tokens are entries managed by a smart contract on another network, and their transfers depend on that network and the contract's rules.</p>
+                                        <p><strong>Read the controls:</strong> A token may have administrator permissions to mint, pause transfers or change parts of its behavior. Whether those controls exist—and who holds them—depends on the specific contract. A ticker or display name alone does not identify an asset.</p>
+                                        <p><strong>Check before interacting:</strong> Verify the network and full contract address using reliable project documentation. Wrapped or bridged representations of BTC are not the same thing as native BTC and introduce additional systems and risks.</p>
                                     </details>
                                 </div>
                             </article>
@@ -433,7 +447,9 @@
                                     <p>Ethereum is a programmable blockchain whose execution layer runs smart contracts. Ether pays for computation and helps secure the network through proof of stake.</p>
                                     <details>
                                         <summary>Technical deep dive</summary>
-                                        <p>Bitcoin Script is intentionally limited, while Ethereum's virtual machine executes general-purpose smart-contract bytecode. Both systems have tradeoffs in design, trust assumptions and application scope.</p>
+                                        <p><strong>Execution model:</strong> Ethereum transactions can update contract code and shared application state. The Ethereum Virtual Machine executes this bytecode, while validators participate in proof of stake to propose and attest to blocks.</p>
+                                        <p><strong>Gas and fees:</strong> Gas measures the computational work a transaction requests. The transaction fee depends on gas used and the effective gas price, and is paid in ETH. Complex contract calls generally use more gas than simple transfers.</p>
+                                        <p><strong>Compare by use case:</strong> Bitcoin Script is intentionally constrained, while Ethereum supports general-purpose smart contracts. That flexibility enables more application patterns but also makes contract permissions, code review and operational risks important. Neither design is suitable for every use case.</p>
                                     </details>
                                 </div>
                             </article>

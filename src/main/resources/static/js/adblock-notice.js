@@ -2,7 +2,7 @@
     const modal = $("#adblockNoticeModal");
     let blockingNotice = false;
 
-    function hasAdBlocker() {
+    function hasBlockedAdBait() {
         const bait = document.createElement("div");
         bait.className = "adsbox ad-banner ad-unit advertisement";
         bait.setAttribute("aria-hidden", "true");
@@ -19,6 +19,10 @@
         return blocked;
     }
 
+    function hasAdBlocker() {
+        return window.adsbygoogleScriptLoadFailed || hasBlockedAdBait();
+    }
+
     function showNoticeIfNeeded(adBlockDetected) {
         if (adBlockDetected) {
             blockingNotice = true;
@@ -28,8 +32,14 @@
 
     function retryAfterDisablingBlocker() {
         const status = $("#adblockNoticeStatus");
-        if (hasAdBlocker()) {
+        if (hasBlockedAdBait()) {
             status.text("An ad blocker is still active. Disable it for this site, then try again.");
+            return;
+        }
+
+        if (window.adsbygoogleScriptLoadFailed) {
+            status.text("Retrying the ad service...");
+            window.location.reload();
             return;
         }
 
@@ -49,6 +59,9 @@
             }
         });
         $("#adblockNoticeRetry").on("click", retryAfterDisablingBlocker);
+        window.addEventListener("adsbygoogle-script-error", function () {
+            showNoticeIfNeeded(true);
+        });
 
         showNoticeIfNeeded(hasAdBlocker());
     });

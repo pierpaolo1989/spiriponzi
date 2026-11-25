@@ -90,7 +90,7 @@ public class CloudflareAnalyticsService {
             response = request(variables, "clientCountryName");
         }
         if (hasGraphQlErrors(response)) {
-            log.warn("Cloudflare Analytics returned GraphQL errors");
+            log.warn("Cloudflare Analytics returned GraphQL errors: {}", graphQlErrorSummary(response));
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Risposta Cloudflare Analytics non valida");
         }
 
@@ -151,6 +151,23 @@ public class CloudflareAnalyticsService {
     private boolean hasGraphQlErrors(JsonNode response) {
         JsonNode errors = response.path("errors");
         return errors.isArray() && !errors.isEmpty();
+    }
+
+    private String graphQlErrorSummary(JsonNode response) {
+        JsonNode errors = response.path("errors");
+        List<String> messages = new ArrayList<>();
+        for (JsonNode error : errors) {
+            String message = error.path("message").asText("").replaceAll("\\s+", " ").trim();
+            if (!message.isEmpty()) {
+                messages.add(message.length() > 500 ? message.substring(0, 500) : message);
+            }
+        }
+        if (messages.isEmpty()) {
+            return "Cloudflare response contained errors without messages";
+        }
+        int displayedCount = Math.min(messages.size(), 5);
+        String summary = String.join(" | ", messages.subList(0, displayedCount));
+        return messages.size() > displayedCount ? summary + " | additional errors omitted" : summary;
     }
 
     private boolean hasCountryFieldError(JsonNode response) {

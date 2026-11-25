@@ -64,6 +64,76 @@
 		margin: 0.15rem 0 0;
 	}
 
+	.earning-options {
+		display: grid;
+		gap: 0.7rem;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.earning-option {
+		align-items: flex-start;
+		background: linear-gradient(145deg, #fff, #f8f9fc);
+		border: 1px solid #e8ebf3;
+		border-radius: 0.65rem;
+		color: #3a3b45;
+		display: flex;
+		gap: 0.65rem;
+		min-height: 88px;
+		padding: 0.75rem;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+	}
+
+	.earning-option:hover, .earning-option:focus {
+		border-color: #9aabed;
+		box-shadow: 0 0.25rem 0.8rem rgba(78, 115, 223, 0.12);
+		color: #3a3b45;
+		text-decoration: none;
+		transform: translateY(-1px);
+	}
+
+	.earning-option-icon {
+		align-items: center;
+		background: #eef1ff;
+		border-radius: 0.55rem;
+		color: #4e73df;
+		display: inline-flex;
+		flex: 0 0 2rem;
+		height: 2rem;
+		justify-content: center;
+	}
+
+	.earning-option-title {
+		display: block;
+		font-size: 0.82rem;
+		font-weight: 800;
+		margin-bottom: 0.2rem;
+	}
+
+	.earning-option-copy {
+		color: #6e707e;
+		display: block;
+		font-size: 0.72rem;
+		line-height: 1.45;
+	}
+
+	.earning-option-arrow {
+		color: #4e73df;
+		font-size: 0.7rem;
+		margin-left: auto;
+		padding-top: 0.1rem;
+	}
+
+	.earning-subtitle {
+		color: #858796;
+		font-size: 0.72rem;
+	}
+
+	@media (max-width: 576px) {
+		.earning-options {
+			grid-template-columns: 1fr;
+		}
+	}
+
 	.sidebar.toggled .sidebar-ad {
 		display: none !important;
 	}
@@ -527,6 +597,17 @@
 		}
 	}
 </style>
+<script>
+	window.adsbygoogleScriptLoadFailed = false;
+	window.addEventListener("error", function (event) {
+		const failedScript = event.target;
+		if (failedScript instanceof HTMLScriptElement
+			&& failedScript.src.startsWith("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js")) {
+			window.adsbygoogleScriptLoadFailed = true;
+			window.dispatchEvent(new Event("adsbygoogle-script-error"));
+		}
+	}, true);
+</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3177939731250769"
 	crossorigin="anonymous"></script>
 
@@ -728,24 +809,55 @@
 						</div>
 
 						<!-- Colonna con quotazioni di BTC ed ETH -->
-						<div class="col-lg-6 mb-4">
+						<div class="col-lg-6 mb-4 d-flex flex-column">
 							<div class="card shadow mb-4">
-								<div class="card-header py-3">
-									<h6 class="m-0 font-weight-bold text-primary">How to earn
-										money with Spiriponzi?</h6>
+								<div class="card-header py-3 d-flex align-items-center justify-content-between">
+									<div>
+										<h6 class="m-0 font-weight-bold text-primary">How to earn Spiriponzi</h6>
+										<span class="earning-subtitle">Four ways to collect points</span>
+									</div>
+									<span class="badge badge-primary">4 options</span>
 								</div>
 								<div class="card-body">
-									<p class="justified">You can earn money in the following
-										ways:</p>
-									<p class="justified">
-									<ul>
-										<li>Claiming free points every hour</li>
-										<li>Playing games <a target="_blank" th:href="@{/games}">here</a></li>
-									    <li>Surfing ads <a target="_blank" th:href="@{/surf-ads}">here</a></li>
-									</ul>
+									<p class="text-muted small mb-3">Pick an activity and your points will appear in your account when its reward is confirmed.</p>
+									<div class="earning-options">
+										<a class="earning-option" href="#claimForm">
+											<span class="earning-option-icon"><i class="fas fa-faucet" aria-hidden="true"></i></span>
+											<span>
+												<span class="earning-option-title">Hourly claim</span>
+												<span class="earning-option-copy">Complete the check and claim available points once every hour.</span>
+											</span>
+											<i class="fas fa-arrow-right earning-option-arrow" aria-hidden="true"></i>
+										</a>
+										<a class="earning-option" th:href="@{/survey}">
+											<span class="earning-option-icon"><i class="fas fa-clipboard-list" aria-hidden="true"></i></span>
+											<span>
+												<span class="earning-option-title">Surveys</span>
+												<span class="earning-option-copy">Answer partner surveys; availability and eligibility may vary.</span>
+											</span>
+											<i class="fas fa-arrow-right earning-option-arrow" aria-hidden="true"></i>
+										</a>
+										<a class="earning-option" th:href="@{/games}">
+											<span class="earning-option-icon"><i class="fas fa-gamepad" aria-hidden="true"></i></span>
+											<span>
+												<span class="earning-option-title">Games</span>
+												<span class="earning-option-copy">Explore games and complete their listed reward requirements.</span>
+											</span>
+											<i class="fas fa-arrow-right earning-option-arrow" aria-hidden="true"></i>
+										</a>
+										<a class="earning-option" th:href="@{/surf-ads}">
+											<span class="earning-option-icon"><i class="fas fa-ad" aria-hidden="true"></i></span>
+											<span>
+												<span class="earning-option-title">Surf ads</span>
+												<span class="earning-option-copy">View sponsored ads and follow the on-screen instructions.</span>
+											</span>
+											<i class="fas fa-arrow-right earning-option-arrow" aria-hidden="true"></i>
+										</a>
+									</div>
+									<p class="small text-muted mt-3 mb-0">Survey and offer rewards depend on provider availability and approval.</p>
 								</div>
 							</div>
-							<div class="card shadow mb-4">
+							<div class="card shadow mb-4 flex-grow-1">
 								<div class="card-header py-3 d-flex align-items-center justify-content-between">
 									<h6 class="m-0 font-weight-bold text-primary">Crypto market</h6>
 									<span class="crypto-market-status" id="cryptoUpdated">Loading market data...</span>
@@ -808,7 +920,8 @@
 						Spiriponzi is supported by advertising. To use your account, turn off your ad blocker
 						for this site or disable Brave Shields for Spiriponzi.
 					</p>
-					<p class="mb-0">Once ads are allowed, select the button below to check again.</p>
+					<p class="mb-0">If protections are already disabled, the ad service may be unavailable.
+						Check your connection and use the button below to retry.</p>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-primary" id="adblockNoticeRetry">

@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login
                         .requestMatchers("/", "/register/**", "/activate", "/resend-activation", "/index", "/faq", "/terms", "/recover-password/**", "/reset-password/**", "/menu/**",
-                                "/callbacks/primeearn",
+                                "/callbacks/cherries",
                                 "/callbacks/cpx",
                                 "/callbacks/offerwall",
                                 "/affiliate/click/**",
