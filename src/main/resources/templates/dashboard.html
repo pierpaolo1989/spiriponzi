@@ -64,6 +64,43 @@
 		margin: 0.15rem 0 0;
 	}
 
+	.red-flag-checklist {
+		background: #f8f9fc;
+		border: 1px solid #e8ebf3;
+		border-radius: 0.55rem;
+		margin-top: 1rem;
+		padding: 0.8rem;
+	}
+
+	.red-flag-checklist h6 {
+		color: #3a3b45;
+		font-size: 0.82rem;
+		font-weight: 800;
+		margin-bottom: 0.55rem;
+	}
+
+	.red-flag-checklist ol {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.red-flag-checklist li {
+		align-items: flex-start;
+		color: #6c757d;
+		display: flex;
+		font-size: 0.78rem;
+		gap: 0.55rem;
+		line-height: 1.45;
+		margin-top: 0.45rem;
+	}
+
+	.red-flag-checklist li i {
+		color: #4e73df;
+		flex: 0 0 auto;
+		margin-top: 0.15rem;
+	}
+
 	.earning-options {
 		display: grid;
 		gap: 0.7rem;
@@ -802,7 +839,19 @@
 									</div>
 									<div class="alert alert-warning small mt-3 mb-0" role="note">
 										<i class="fas fa-lightbulb mr-1" aria-hidden="true"></i>
-										Pause, verify claims using independent sources, and never share your keys.
+										Pause and verify every claim using independent sources.
+									</div>
+									<div class="red-flag-checklist">
+										<h6><i class="fas fa-clipboard-check text-primary mr-1" aria-hidden="true"></i>30-second safety check</h6>
+										<ol>
+											<li><i class="fas fa-check-circle" aria-hidden="true"></i><span>Verify the company and any claimed licence through the regulator's official website.</span></li>
+											<li><i class="fas fa-check-circle" aria-hidden="true"></i><span>Check the exact domain and contact details independently; don't rely on links in the pitch.</span></li>
+											<li><i class="fas fa-check-circle" aria-hidden="true"></i><span>Understand fees and withdrawal terms before sending money or connecting a wallet.</span></li>
+											<li><i class="fas fa-check-circle" aria-hidden="true"></i><span>Never share a recovery phrase or sign a transaction you cannot explain.</span></li>
+										</ol>
+									</div>
+									<div class="alert alert-info small mt-3 mb-0" role="note">
+										<strong>Already sent money?</strong> Don't pay extra “release” fees. Save messages and transaction IDs, then contact your bank or platform through its official channels.
 									</div>
 								</div>
 							</div>

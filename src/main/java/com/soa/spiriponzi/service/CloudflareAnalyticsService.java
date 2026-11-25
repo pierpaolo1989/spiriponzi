@@ -43,7 +43,7 @@ public class CloudflareAnalyticsService {
                     orderBy: [count_DESC]
                   ) {
                     count
-                    dimensions { %s }
+                    dimensions { countryName }
                   }
                 }
               }
@@ -85,10 +85,7 @@ public class CloudflareAnalyticsService {
                 "start", end.minusDays(30).toString(),
                 "end", end.toString());
 
-        JsonNode response = request(variables, "country");
-        if (hasCountryFieldError(response)) {
-            response = request(variables, "clientCountryName");
-        }
+        JsonNode response = request(variables);
         if (hasGraphQlErrors(response)) {
             log.warn("Cloudflare Analytics returned GraphQL errors: {}", graphQlErrorSummary(response));
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Risposta Cloudflare Analytics non valida");
@@ -127,13 +124,13 @@ public class CloudflareAnalyticsService {
         return new AnalyticsSnapshot(pageLoads, List.copyOf(countries));
     }
 
-    private JsonNode request(Map<String, Object> variables, String countryField) {
+    private JsonNode request(Map<String, Object> variables) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiToken);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
         Map<String, Object> body = Map.of(
-                "query", QUERY.formatted(countryField),
+                "query", QUERY,
                 "variables", variables);
         try {
             ResponseEntity<JsonNode> result = client.exchange(
@@ -170,26 +167,8 @@ public class CloudflareAnalyticsService {
         return messages.size() > displayedCount ? summary + " | additional errors omitted" : summary;
     }
 
-    private boolean hasCountryFieldError(JsonNode response) {
-        JsonNode errors = response.path("errors");
-        if (!errors.isArray()) {
-            return false;
-        }
-        for (JsonNode error : errors) {
-            String message = error.path("message").asText("");
-            if (message.contains("country") && message.contains("field")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private String countryFrom(JsonNode dimensions) {
-        JsonNode country = dimensions.path("country");
-        if (country.isTextual()) {
-            return country.asText();
-        }
-        country = dimensions.path("clientCountryName");
+        JsonNode country = dimensions.path("countryName");
         return country.isTextual() ? country.asText() : "XX";
     }
 

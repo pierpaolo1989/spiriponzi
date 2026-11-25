@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -33,9 +35,9 @@ class CloudflareAnalyticsServiceTest {
                 .andExpect(header("Authorization", "Bearer test-api-token"))
                 .andRespond(withSuccess("""
                         {"data":{"viewer":{"accounts":[{"rumPageloadEventsAdaptiveGroups":[
-                          {"count":8,"dimensions":{"country":"IT"}},
-                          {"count":3,"dimensions":{"country":"FR"}},
-                          {"count":4,"dimensions":{"country":"IT"}}
+                          {"count":8,"dimensions":{"countryName":"IT"}},
+                          {"count":3,"dimensions":{"countryName":"FR"}},
+                          {"count":4,"dimensions":{"countryName":"IT"}}
                         ]}]}},"errors":null}
                         """, MediaType.APPLICATION_JSON));
 
@@ -73,15 +75,12 @@ class CloudflareAnalyticsServiceTest {
     }
 
     @Test
-    void retriesWithAlternativeCountryDimensionWhenCloudflareSchemaRejectsCountry() {
+    void queriesTheSupportedCountryNameDimension() {
         server.expect(requestTo("https://api.cloudflare.com/client/v4/graphql"))
-                .andRespond(withSuccess("""
-                        {"data":null,"errors":[{"message":"Cannot query field \\"country\\" on type dimensions"}]}
-                        """, MediaType.APPLICATION_JSON));
-        server.expect(requestTo("https://api.cloudflare.com/client/v4/graphql"))
+                .andExpect(content().string(containsString("dimensions { countryName }")))
                 .andRespond(withSuccess("""
                         {"data":{"viewer":{"accounts":[{"rumPageloadEventsAdaptiveGroups":[
-                          {"count":6,"dimensions":{"clientCountryName":"IT"}}
+                          {"count":6,"dimensions":{"countryName":"IT"}}
                         ]}]}},"errors":null}
                         """, MediaType.APPLICATION_JSON));
 
