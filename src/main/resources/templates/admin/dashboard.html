@@ -186,28 +186,7 @@
 </head>
 <body id="page-top">
 <div id="wrapper">
-	<nav class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion admin-sidebar" id="accordionSidebar">
-		<a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
-			<div class="sidebar-brand-icon"><img th:src="@{/img/spiriponzi-mark.svg}" alt="Spiriponzi"></div>
-			<div class="sidebar-brand-text mx-3">Spiriponzi<span class="admin-brand-label">ADMIN</span></div>
-		</a>
-		<hr class="sidebar-divider">
-		<div class="sidebar-heading">Amministrazione</div>
-		<div class="nav-item">
-			<a class="nav-link" th:href="@{/admin}">
-				<i class="fas fa-fw fa-tachometer-alt"></i><span>Dashboard</span>
-			</a>
-		</div>
-		<div class="nav-item">
-			<a class="nav-link" th:href="@{/admin/withdrawals}">
-				<i class="fas fa-fw fa-wallet"></i><span>Prelievi</span>
-			</a>
-		</div>
-		<hr class="sidebar-divider d-none d-md-block">
-		<div class="text-center d-none d-md-inline">
-			<button class="rounded-circle border-0" id="sidebarToggle" type="button" aria-label="Riduci o espandi la barra laterale"></button>
-		</div>
-	</nav>
+	<th:block th:replace="~{fragments/admin-sidebar}"></th:block>
 
 	<div id="content-wrapper" class="d-flex flex-column">
 		<div id="content">
@@ -356,6 +335,41 @@
 
 					</div>
 				</div>
+
+				<section class="card shadow mb-4 admin-table-card" aria-labelledby="activation-users-heading">
+					<div class="card-header">
+						<div>
+							<h2 id="activation-users-heading" class="h6 m-0 font-weight-bold text-primary">Utenti da attivare</h2>
+							<p class="small text-muted mb-0 mt-1">Invia di nuovo il link di verifica agli account non ancora attivati.</p>
+						</div>
+						<span class="badge badge-light">ultimi 10</span>
+					</div>
+					<div class="card-body">
+						<div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+						<div th:if="${error}" class="alert alert-warning" role="alert" th:text="${error}"></div>
+						<div class="table-responsive">
+							<table class="table table-sm table-hover admin-table">
+								<thead><tr><th>ID</th><th>Email</th><th class="text-right">Azione</th></tr></thead>
+								<tbody>
+								<tr th:each="user : ${usersAwaitingActivation}">
+									<td th:text="${user.id}">1</td>
+									<td th:text="${user.email}">utente@example.com</td>
+									<td class="text-right">
+										<form th:action="@{/admin/users/{id}/resend-activation(id=${user.id})}" method="post" class="m-0">
+											<button class="btn btn-sm btn-outline-primary" type="submit">
+												<i class="fas fa-envelope mr-1" aria-hidden="true"></i>Reinvia verifica
+											</button>
+										</form>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(usersAwaitingActivation)}">
+									<td colspan="3" class="text-center text-muted py-3">Nessun utente in attesa di attivazione.</td>
+								</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
 
 				<section class="card shadow mb-4 admin-table-card admin-render-card" aria-labelledby="render-heading">
 					<div class="card-header">

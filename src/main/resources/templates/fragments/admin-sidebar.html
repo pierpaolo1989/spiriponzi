@@ -1,0 +1,26 @@
+<nav class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion admin-sidebar" id="accordionSidebar">
+	<a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
+		<div class="sidebar-brand-icon"><img th:src="@{/img/spiriponzi-mark.svg}" alt="Spiriponzi"></div>
+		<div class="sidebar-brand-text mx-3">Spiriponzi<span class="admin-brand-label">ADMIN</span></div>
+	</a>
+	<hr class="sidebar-divider">
+	<div class="nav-item">
+		<a class="nav-link" th:href="@{/admin}">
+			<i class="fas fa-fw fa-tachometer-alt"></i><span>Dashboard</span>
+		</a>
+	</div>
+	<div class="nav-item">
+		<a class="nav-link" th:href="@{/admin/withdrawals}">
+			<i class="fas fa-fw fa-wallet"></i><span>Prelievi</span>
+		</a>
+	</div>
+	<div class="nav-item">
+		<a class="nav-link" th:href="@{/admin/promo-codes}">
+			<i class="fas fa-fw fa-tags"></i><span>Codici promozionali</span>
+		</a>
+	</div>
+	<hr class="sidebar-divider d-none d-md-block">
+	<div class="text-center d-none d-md-inline">
+		<button class="rounded-circle border-0" id="sidebarToggle" type="button" aria-label="Riduci o espandi la barra laterale"></button>
+	</div>
+</nav>

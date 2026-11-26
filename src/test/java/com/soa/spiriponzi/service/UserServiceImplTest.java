@@ -290,6 +290,47 @@ class UserServiceImplTest {
     }
 
     @Test
+    void adminCanResendActivationEmailForAnUnverifiedUser() throws Exception {
+        User user = User.builder().id(31L).email("pending@example.com").enabled(false).build();
+        when(userRepository.findWithLockById(31L)).thenReturn(Optional.of(user));
+        when(emailVerificationTokenRepository.findByUserId(31L)).thenReturn(Optional.empty());
+
+        assertEquals(ActivationEmailResendResult.SENT, userService.resendActivationEmailForAdmin(31L));
+
+        verify(emailVerificationTokenRepository).deleteAllByUserId(31L);
+        verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+        verify(emailService).sendActivationEmail(
+                org.mockito.ArgumentMatchers.eq(user.getEmail()),
+                org.mockito.ArgumentMatchers.contains("/activate?token="));
+    }
+
+    @Test
+    void adminActivationResendHonorsCooldownAndDoesNotSendDuplicateEmail() throws Exception {
+        User user = User.builder().id(32L).email("pending@example.com").enabled(false).build();
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setCreatedAt(java.time.LocalDateTime.now().minusSeconds(30));
+        token.setExpiresAt(java.time.LocalDateTime.now().plusHours(2));
+        when(userRepository.findWithLockById(32L)).thenReturn(Optional.of(user));
+        when(emailVerificationTokenRepository.findByUserId(32L)).thenReturn(Optional.of(token));
+
+        assertEquals(ActivationEmailResendResult.COOLDOWN, userService.resendActivationEmailForAdmin(32L));
+
+        verify(emailService, never()).sendActivationEmail(any(), any());
+    }
+
+    @Test
+    void adminActivationResendDoesNotSendEmailToAnAlreadyActivatedUser() throws Exception {
+        User user = User.builder().id(33L).email("active@example.com").enabled(true).build();
+        when(userRepository.findWithLockById(33L)).thenReturn(Optional.of(user));
+
+        assertEquals(ActivationEmailResendResult.ALREADY_ACTIVATED,
+                userService.resendActivationEmailForAdmin(33L));
+
+        verify(emailVerificationTokenRepository, never()).findByUserId(any());
+        verify(emailService, never()).sendActivationEmail(any(), any());
+    }
+
+    @Test
     void getOrCreateReferralCodePersistsCodeForExistingUsers() {
         User user = User.builder().id(42L).build();
         when(userRepository.findById(42L)).thenReturn(Optional.of(user));

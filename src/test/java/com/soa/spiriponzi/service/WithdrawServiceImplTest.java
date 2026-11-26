@@ -68,6 +68,20 @@ class WithdrawServiceImplTest {
     }
 
     @Test
+    void accepts3036PointsWhenThatIsTheAvailableBalance() {
+        stats.setAnnualPoints(3036);
+        stubBalance();
+
+        service.startRequest(user.getEmail(), request(3036, "PAYPAL", "user@example.com"));
+
+        assertEquals(0, stats.getAnnualPoints());
+        ArgumentCaptor<WithdrawRequest> saved = ArgumentCaptor.forClass(WithdrawRequest.class);
+        verify(withdrawals).save(saved.capture());
+        assertEquals(3036, saved.getValue().getAmount());
+        assertEquals(new BigDecimal("0.50"), saved.getValue().getGrossEur());
+    }
+
+    @Test
     void validatesEthereumChecksumsAndRejectsBurnAddress() {
         stubBalance();
         service.startRequest(user.getEmail(), request(3000, "ETH", "0x5AEDA56215b167893e80B4fE645BA6d5Bab767DE"));
@@ -92,8 +106,9 @@ class WithdrawServiceImplTest {
             assertThrows(ResponseStatusException.class, () -> service.startRequest(user.getEmail(), dto));
         }
         stubBalance();
-        assertThrows(ResponseStatusException.class,
+        ResponseStatusException insufficientPoints = assertThrows(ResponseStatusException.class,
                 () -> service.startRequest(user.getEmail(), request(6101, "PAYPAL", "user@example.com")));
+        assertEquals("Insufficient points: requested 6101, available 6100", insufficientPoints.getReason());
         assertEquals(6100, stats.getAnnualPoints());
         verify(withdrawals, never()).save(any());
     }

@@ -9,11 +9,11 @@
 					<tr>
 						<td>
 							<h1 style="margin:0 0 16px;color:#203866;font-size:24px;">Activate your Spiriponzi account</h1>
-							<p style="line-height:1.6;">Thanks for registering. Activate your account using the button below. This link expires in 24 hours and can only be used once.</p>
+							<p style="line-height:1.6;">We noticed you haven't completed activating your Spiriponzi account yet. Click below to confirm your email and finish setting up your account. This link expires in 24 hours and can only be used once.</p>
 							<p style="margin:28px 0;text-align:center;">
 								<a href="${activationUrl}"
 									style="display:inline-block;padding:13px 22px;border-radius:6px;background:#4e73df;color:#fff;text-decoration:none;font-weight:bold;">
-									Activate account
+									Confirm email and activate account
 								</a>
 							</p>
 							<p style="line-height:1.6;color:#68738a;">If you didn't create this account, you can ignore this email.</p>

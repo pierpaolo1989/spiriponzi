@@ -41,9 +41,15 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <h2 class="h5">Request a withdrawal</h2>
+                        <p class="small text-muted">
+                            Available for withdrawal:
+                            <strong th:text="${user.userStats.annualPoints}">0</strong> points.
+                            The request cannot exceed this balance.
+                        </p>
                         <form id="withdraw-form">
                             <label for="points">Points</label>
-                            <input id="points" class="form-control mb-2" type="number" min="3000" max="2147483647" step="1" required>
+                            <input id="points" class="form-control mb-2" type="number" min="3000"
+                                   th:attr="max=${user.userStats.annualPoints}" step="1" required>
                             <label for="method">Payment method</label>
                             <select id="method" class="form-control mb-2" required>
                                 <option value="">Choose a payment method</option>

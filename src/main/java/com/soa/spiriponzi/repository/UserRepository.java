@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findWithLockById(Long id);
     List<User> findTop5ByOrderByIdDesc();
+    List<User> findTop10ByEnabledFalseOrderByIdDesc();
 
     @Query("select coalesce(sum(stats.annualPoints), 0) from User u left join u.userStats stats")
     long sumAnnualPoints();

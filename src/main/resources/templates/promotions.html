@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Spiriponzi - Codice promozionale</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+	<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+</head>
+<body id="page-top">
+<div id="wrapper">
+	<th:block th:replace="~{fragments/sidebar}"></th:block>
+	<div id="content-wrapper" class="d-flex flex-column">
+		<div id="content">
+			<th:block th:replace="~{fragments/navbar}"></th:block>
+			<main class="container-fluid">
+				<div class="mb-4">
+					<h1 class="h3 mb-1 text-gray-800">Riscatta un codice promozionale</h1>
+					<p class="text-gray-600">Inserisci il codice ricevuto per aggiungere i punti al tuo saldo.</p>
+				</div>
+				<div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+				<div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+				<div class="card shadow mb-4">
+					<div class="card-body">
+						<form th:action="@{/promotions}" method="post">
+							<div class="form-group">
+								<label for="code">Codice</label>
+								<input class="form-control" id="code" name="code" type="text" maxlength="24"
+									autocomplete="off" autocapitalize="characters" required>
+							</div>
+							<button class="btn btn-primary" type="submit">Riscatta codice</button>
+						</form>
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+</div>
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+<th:block th:replace="~{fragments/cloudflare-analytics}"></th:block>
+</body>
+</html>

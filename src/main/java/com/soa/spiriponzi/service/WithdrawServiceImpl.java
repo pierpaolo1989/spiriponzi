@@ -79,7 +79,8 @@ public class WithdrawServiceImpl implements WithdrawService {
         UserStats stats = userStatsRepository.findWithLockByUserEmail(email)
                 .orElseThrow(() -> badRequest("User has no point balance"));
         if (stats.getAnnualPoints() < points) {
-            throw badRequest("Insufficient points");
+            throw badRequest("Insufficient points: requested " + points
+                    + ", available " + stats.getAnnualPoints());
         }
         stats.setAnnualPoints(stats.getAnnualPoints() - points);
         userStatsRepository.save(stats);

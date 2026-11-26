@@ -33,6 +33,8 @@ class CloudflareAnalyticsServiceTest {
         server.expect(requestTo("https://api.cloudflare.com/client/v4/graphql"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", "Bearer test-api-token"))
+                .andExpect(content().string(containsString("$accountTag: String!")))
+                .andExpect(content().string(containsString("$siteTag: String!")))
                 .andExpect(content().string(containsString("dimensions { countryName }")))
                 .andExpect(content().string(containsString("dimensions { requestPath }")))
                 .andExpect(content().string(containsString("dimensions { userAgentBrowser }")))

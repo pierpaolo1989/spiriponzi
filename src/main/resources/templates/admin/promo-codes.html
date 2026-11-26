@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Spiriponzi - Codici promozionali</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+	<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+	<style>
+		.admin-sidebar .sidebar-brand-icon img { height: 2.4rem; width: 2.4rem; }
+		.admin-sidebar .sidebar-brand-text { font-size: 1rem; font-weight: 800; letter-spacing: .02em; }
+		.admin-brand-label { display: block; font-size: .55rem; letter-spacing: .18em; opacity: .75; }
+		.promo-code { font-family: monospace; font-weight: 700; letter-spacing: .04em; }
+	</style>
+</head>
+<body id="page-top">
+<div id="wrapper">
+	<th:block th:replace="~{fragments/admin-sidebar}"></th:block>
+	<div id="content-wrapper" class="d-flex flex-column">
+		<div id="content">
+			<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+				<div class="d-flex align-items-center">
+					<button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" type="button" aria-label="Apri o chiudi il menu">
+						<i class="fa fa-bars" aria-hidden="true"></i>
+					</button>
+					<span class="h5 mb-0 text-gray-800">Codici promozionali</span>
+				</div>
+			</nav>
+			<main class="container-fluid">
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<div>
+						<h1 class="h3 mb-1 text-gray-800">Codici sconto e promozionali</h1>
+						<p class="mb-0 text-gray-600">Crea codici da condividere: ogni riscatto accredita punti all’utente.</p>
+					</div>
+				</div>
+				<div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+				<div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+				<section class="card shadow mb-4">
+					<div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary">Genera un codice</h2></div>
+					<div class="card-body">
+						<form th:action="@{/admin/promo-codes}" method="post" class="row align-items-end">
+							<div class="form-group col-md-4">
+								<label for="points">Punti da accreditare</label>
+								<input class="form-control" id="points" name="points" type="number" min="1" required>
+							</div>
+							<div class="form-group col-md-4">
+								<label for="maxRedemptions">Numero massimo di utenti</label>
+								<input class="form-control" id="maxRedemptions" name="maxRedemptions" type="number" min="1" required>
+							</div>
+							<div class="form-group col-md-4">
+								<label for="expiresOn">Valido fino al</label>
+								<input class="form-control" id="expiresOn" name="expiresOn" type="date" required>
+							</div>
+							<div class="form-group col-12 mb-0">
+								<button class="btn btn-primary" type="submit"><i class="fas fa-plus mr-1" aria-hidden="true"></i>Genera codice</button>
+							</div>
+						</form>
+					</div>
+				</section>
+				<section class="card shadow mb-4">
+					<div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary">Codici creati</h2></div>
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover mb-0">
+								<thead class="thead-light">
+									<tr>
+										<th>Codice</th><th>Punti</th><th>Riscatti</th><th>Scadenza</th><th>Creato</th><th>Azioni</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="promo : ${promoCodes}">
+										<td class="promo-code" th:text="${promo.code}"></td>
+										<td th:text="${promo.points}"></td>
+										<td th:text="|${promo.redemptionsUsed} / ${promo.maxRedemptions}|"></td>
+										<td th:text="${promo.expiresOn}"></td>
+										<td th:text="${promo.createdAt}"></td>
+										<td><button class="btn btn-sm btn-outline-primary" type="button" data-copy-code
+												th:attr="data-code=${promo.code}"><i class="fas fa-copy mr-1" aria-hidden="true"></i>Copia</button></td>
+									</tr>
+									<tr th:if="${#lists.isEmpty(promoCodes)}"><td colspan="6" class="text-center text-muted">Non hai ancora creato codici.</td></tr>
+								</tbody>
+							</table>
+						</div>
+						<p id="copy-status" class="small mt-3 mb-0" role="status" aria-live="polite"></p>
+					</div>
+				</section>
+			</main>
+		</div>
+	</div>
+</div>
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+<script>
+	document.querySelectorAll('[data-copy-code]').forEach(button => {
+		button.addEventListener('click', async () => {
+			const status = document.getElementById('copy-status');
+			try {
+				await navigator.clipboard.writeText(button.dataset.code);
+				status.textContent = 'Codice copiato.';
+				status.className = 'small mt-3 mb-0 text-success';
+			} catch (error) {
+				console.error('Impossibile copiare il codice promozionale:', error);
+				status.textContent = 'Copia non riuscita. Seleziona e copia il codice manualmente.';
+				status.className = 'small mt-3 mb-0 text-danger';
+			}
+		});
+	});
+</script>
+</body>
+</html>

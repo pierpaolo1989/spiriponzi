@@ -34,7 +34,7 @@ public class CloudflareAnalyticsService {
     private static final Logger log = LoggerFactory.getLogger(CloudflareAnalyticsService.class);
     private static final String GRAPHQL_URL = "https://api.cloudflare.com/client/v4/graphql";
     private static final String QUERY = """
-            query WebAnalytics($accountTag: string!, $siteTag: string!, $start: Date!, $end: Date!) {
+            query WebAnalytics($accountTag: String!, $siteTag: String!, $start: Date!, $end: Date!) {
               viewer {
                 accounts(filter: { accountTag: $accountTag }) {
                   daily: rumPageloadEventsAdaptiveGroups(

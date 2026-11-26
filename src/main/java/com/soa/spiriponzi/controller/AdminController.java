@@ -8,6 +8,8 @@ import com.soa.spiriponzi.repository.WithdrawRepository;
 import com.soa.spiriponzi.service.WithdrawServiceImpl;
 import com.soa.spiriponzi.service.RenderService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
+import com.soa.spiriponzi.service.UserService;
+import com.soa.spiriponzi.service.ActivationEmailResendResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,6 +39,7 @@ public class AdminController {
     private final WithdrawServiceImpl withdrawService;
     private final RenderService renderService;
     private final CloudflareAnalyticsService cloudflareAnalyticsService;
+    private final UserService userService;
 
     @GetMapping("/cloudflare/analytics")
     @ResponseBody
@@ -61,9 +64,23 @@ public class AdminController {
         model.addAttribute("pendingWithdrawals",
                 withdrawRepository.countByStatus(WithdrawStatus.PENDING.name()));
         model.addAttribute("recentUsers", userRepository.findTop5ByOrderByIdDesc());
+        model.addAttribute("usersAwaitingActivation", userRepository.findTop10ByEnabledFalseOrderByIdDesc());
         model.addAttribute("pendingWithdrawalRequests", withdrawRepository.findByStatusInOrderByDateRequestAsc(
                 List.of(WithdrawStatus.PENDING.name()), PageRequest.of(0, 5)));
         return "admin/dashboard";
+    }
+
+    @PostMapping("/users/{id}/resend-activation")
+    public String resendActivationEmail(@PathVariable long id, RedirectAttributes flash) {
+        ActivationEmailResendResult result = userService.resendActivationEmailForAdmin(id);
+        switch (result) {
+            case SENT -> flash.addFlashAttribute("message", "Email di attivazione inviata.");
+            case COOLDOWN -> flash.addFlashAttribute("error",
+                    "Un'email è stata inviata da meno di un minuto. Attendi prima di riprovare.");
+            case ALREADY_ACTIVATED -> flash.addFlashAttribute("error",
+                    "Questo account è già stato attivato.");
+        }
+        return "redirect:/admin";
     }
 
     @GetMapping("/withdrawals")

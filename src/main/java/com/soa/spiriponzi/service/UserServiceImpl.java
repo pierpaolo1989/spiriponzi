@@ -96,17 +96,34 @@ public class UserServiceImpl implements UserService {
             return;
         }
         User user = userRepository.findByEmail(email.trim());
-        if (user == null || user.isEnabled()) {
+        if (user == null) {
             return;
         }
+        userRepository.findWithLockById(user.getId()).ifPresent(this::resendActivationEmail);
+    }
+
+    @Override
+    @Transactional
+    public ActivationEmailResendResult resendActivationEmailForAdmin(Long userId) {
+        User user = userRepository.findWithLockById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return resendActivationEmail(user);
+    }
+
+    private ActivationEmailResendResult resendActivationEmail(User user) {
+        if (user.isEnabled()) {
+            return ActivationEmailResendResult.ALREADY_ACTIVATED;
+        }
+        LocalDateTime now = LocalDateTime.now();
         EmailVerificationToken existingToken = emailVerificationTokenRepository.findByUserId(user.getId())
                 .orElse(null);
         if (existingToken != null
-                && existingToken.getCreatedAt().isAfter(LocalDateTime.now().minus(ACTIVATION_EMAIL_COOLDOWN))
-                && existingToken.getExpiresAt().isAfter(LocalDateTime.now())) {
-            return;
+                && existingToken.getCreatedAt().isAfter(now.minus(ACTIVATION_EMAIL_COOLDOWN))
+                && existingToken.getExpiresAt().isAfter(now)) {
+            return ActivationEmailResendResult.COOLDOWN;
         }
         sendActivationEmail(user);
+        return ActivationEmailResendResult.SENT;
     }
 
     @Override

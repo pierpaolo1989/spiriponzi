@@ -8,6 +8,7 @@ import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.WithdrawRepository;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import com.soa.spiriponzi.service.RenderService;
+import com.soa.spiriponzi.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,8 @@ class AdminControllerTest {
     private RenderService renderService;
     @Mock
     private CloudflareAnalyticsService cloudflareAnalyticsService;
+    @Mock
+    private UserService userService;
     @InjectMocks
     private AdminController adminController;
 
@@ -45,6 +48,7 @@ class AdminControllerTest {
     void dashboardLoadsApplicationMetricsAndRecentRecords() {
         ExtendedModelMap model = new ExtendedModelMap();
         List<User> recentUsers = List.of(new User());
+        List<User> usersAwaitingActivation = List.of(User.builder().email("pending@example.com").build());
         var pendingWithdrawals = new PageImpl<>(List.of(new WithdrawRequest()));
         when(userRepository.count()).thenReturn(12L);
         when(userRepository.sumAnnualPoints()).thenReturn(42L);
@@ -53,6 +57,7 @@ class AdminControllerTest {
         when(claimRepository.sumClaimAmounts()).thenReturn(15.75);
         when(withdrawRepository.countByStatus("PENDING")).thenReturn(2L);
         when(userRepository.findTop5ByOrderByIdDesc()).thenReturn(recentUsers);
+        when(userRepository.findTop10ByEnabledFalseOrderByIdDesc()).thenReturn(usersAwaitingActivation);
         when(withdrawRepository.findByStatusInOrderByDateRequestAsc(
                 List.of("PENDING"), PageRequest.of(0, 5))).thenReturn(pendingWithdrawals);
 
@@ -66,6 +71,7 @@ class AdminControllerTest {
         assertEquals(15.75, model.getAttribute("totalClaimAmount"));
         assertEquals(2L, model.getAttribute("pendingWithdrawals"));
         assertEquals(recentUsers, model.getAttribute("recentUsers"));
+        assertEquals(usersAwaitingActivation, model.getAttribute("usersAwaitingActivation"));
         assertEquals(pendingWithdrawals, model.getAttribute("pendingWithdrawalRequests"));
         verify(withdrawRepository).countByStatus("PENDING");
     }
