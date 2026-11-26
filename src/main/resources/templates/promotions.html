@@ -7,6 +7,7 @@
 	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
 	<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
 	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+	<link th:href="@{/css/user-dark-mode.css}" rel="stylesheet">
 	<style>
 		.promo-community-card {
 			background: linear-gradient(120deg, #edf2ff, #f8f3ff);
@@ -68,6 +69,17 @@
 			font-size: 13px;
 			padding: 4px 10px;
 			text-decoration: none;
+		}
+
+		html[data-theme="dark"] .promo-community-card {
+			background: linear-gradient(120deg, #1f2937, #1b263a) !important;
+			border-color: #374151 !important;
+		}
+
+		html[data-theme="dark"] .promo-community-channel {
+			background: rgba(17, 24, 39, .85);
+			border-color: #4b5563;
+			color: #e5e7eb;
 		}
 
 		@media (max-width: 575.98px) {
@@ -133,11 +145,11 @@
 				</section>
 			</main>
 		</div>
+		<div th:replace="~{fragments/footer}"></div>
 	</div>
 </div>
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/sb-admin-2.min.js}"></script>
-<th:block th:replace="~{fragments/cloudflare-analytics}"></th:block>
 </body>
 </html>

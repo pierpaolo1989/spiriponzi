@@ -164,9 +164,11 @@ class AdminLoginWebTest {
         mvc.perform(get("/promotions").servletPath("/promotions").with(user("player").roles("USER")))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("Redeem a promo code")))
+                        .andExpect(content().string(containsString("/css/user-dark-mode.css")))
                         .andExpect(content().string(containsString("data-aa=\"2463408\"")))
                         .andExpect(content().string(containsString("Discord · Coming soon")))
-                        .andExpect(content().string(containsString("Telegram · Coming soon")));
+                        .andExpect(content().string(containsString("Telegram · Coming soon")))
+                        .andExpect(content().string(containsString("Copyright")));
 
         mvc.perform(post("/promotions").servletPath("/promotions")
                                 .with(user("player").roles("USER")).param("code", "SP-TEST"))
