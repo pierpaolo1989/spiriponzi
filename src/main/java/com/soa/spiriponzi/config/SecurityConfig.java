@@ -67,7 +67,8 @@ public class SecurityConfig {
                     return !("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method)
                             || "TRACE".equals(method))
                             && (path.equals("/withdraws") || path.equals("/claims/game") || path.startsWith("/admin/")
-                                || path.equals("/promotions") || path.equals("/auth/google/register"));
+                                || path.equals("/promotions") || path.equals("/support")
+                                || path.equals("/auth/google/register"));
                 }))
                 .authorizeHttpRequests((authorize) -> authorize
                         // Pagine accessibili senza login

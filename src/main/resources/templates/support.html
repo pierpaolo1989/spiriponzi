@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Spiriponzi - Contact support</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+	<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+	<link th:href="@{/css/user-dark-mode.css}" rel="stylesheet">
+</head>
+<body id="page-top">
+<div id="wrapper">
+	<th:block th:replace="~{fragments/sidebar}"></th:block>
+	<div id="content-wrapper" class="d-flex flex-column">
+		<div id="content">
+			<th:block th:replace="~{fragments/navbar}"></th:block>
+			<main class="container-fluid">
+				<div class="d-flex align-items-start justify-content-between mb-4">
+					<div>
+						<h1 class="h3 mb-1 text-gray-800">Contact support</h1>
+						<p class="text-gray-600 mb-0">Tell us what happened and our team will get back to you by email.</p>
+					</div>
+					<a class="btn btn-link text-gray-600" th:href="@{/dashboard}" aria-label="Close and return to dashboard" title="Close">
+						<i class="fas fa-times fa-lg" aria-hidden="true"></i>
+					</a>
+				</div>
+				<div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+				<div th:if="${sendError}" class="alert alert-danger" role="alert" th:text="${sendError}"></div>
+				<section class="card shadow mb-4">
+					<div class="card-body p-4">
+						<p class="mb-4">Your request will be sent to <strong>info@spiriponzi.cloud</strong>. We will reply to the email address linked to your account.</p>
+						<form th:action="@{/support}" th:object="${supportTicket}" method="post">
+							<div class="form-group">
+								<label for="topic">What can we help you with?</label>
+								<select class="form-control" id="topic" th:field="*{topic}" required>
+									<option value="">Choose a topic</option>
+									<option value="MISSING_CREDIT">Missing credit / points not credited</option>
+									<option value="ACCOUNT_ACCESS">Account access or activation</option>
+									<option value="WITHDRAWAL">Withdrawal</option>
+									<option value="TECHNICAL_ISSUE">Technical issue</option>
+									<option value="SUGGESTION">Suggestion</option>
+									<option value="OTHER">Other</option>
+								</select>
+								<div class="text-danger small mt-1" th:if="${#fields.hasErrors('topic')}" th:errors="*{topic}"></div>
+							</div>
+							<div class="form-group">
+								<label for="message">Describe your request</label>
+								<textarea class="form-control" id="message" th:field="*{message}" rows="7"
+									maxlength="5000" placeholder="Include relevant details, such as the activity and approximate date." required></textarea>
+								<div class="text-danger small mt-1" th:if="${#fields.hasErrors('message')}" th:errors="*{message}"></div>
+							</div>
+							<button class="btn btn-primary" type="submit">
+								<i class="fas fa-paper-plane mr-1" aria-hidden="true"></i>Send support request
+							</button>
+						</form>
+					</div>
+				</section>
+			</main>
+		</div>
+		<div th:replace="~{fragments/footer}"></div>
+	</div>
+</div>
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+</body>
+</html>

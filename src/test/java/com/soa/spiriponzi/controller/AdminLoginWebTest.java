@@ -11,6 +11,7 @@ import com.soa.spiriponzi.security.CustomUserDetailsService;
 import com.soa.spiriponzi.controller.AdminMfaController;
 import com.soa.spiriponzi.controller.PromoCodeAdminController;
 import com.soa.spiriponzi.controller.PromoCodeController;
+import com.soa.spiriponzi.controller.SupportController;
 import com.soa.spiriponzi.service.AdminMfaService;
 import com.soa.spiriponzi.service.EmailService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
@@ -50,7 +51,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = {
-        AdminController.class, AdminMfaController.class, PromoCodeAdminController.class, PromoCodeController.class
+        AdminController.class, AdminMfaController.class, PromoCodeAdminController.class, PromoCodeController.class,
+        SupportController.class
 }, properties = {
         "app.admin.username=test-admin",
         "app.admin.password=local-test-password",
@@ -223,6 +225,31 @@ class AdminLoginWebTest {
                         "Email inviata da meno di un minuto; aggiorna tra poco per reinviare")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         containsString("/admin/users/42/resend-activation"))));
+    }
+
+    @Test
+    void authenticatedUserCanSendSupportTicketWithCsrfProtection() throws Exception {
+        mvc.perform(get("/support").servletPath("/support").with(user("player").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Contact support")))
+                .andExpect(content().string(containsString("Missing credit / points not credited")))
+                .andExpect(content().string(containsString("Close and return to dashboard")));
+
+        mvc.perform(post("/support").servletPath("/support")
+                        .with(user("player").roles("USER"))
+                        .param("topic", "MISSING_CREDIT")
+                        .param("message", "My survey reward has not been credited."))
+                .andExpect(status().isForbidden());
+
+        mvc.perform(post("/support").servletPath("/support")
+                        .with(user("player").roles("USER"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("topic", "MISSING_CREDIT")
+                        .param("message", "  My survey reward has not been credited.  "))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/support"));
+        verify(emailService).sendSupportTicket(
+                "player", "Missing credit / points not credited", "My survey reward has not been credited.");
     }
 
     @Test

@@ -15,4 +15,6 @@ public interface EmailService {
 
 	void sendAdminLoginCode(String email, String verificationCode) throws MessagingException;
 
+	void sendSupportTicket(String requesterEmail, String topic, String message) throws MessagingException;
+
 }

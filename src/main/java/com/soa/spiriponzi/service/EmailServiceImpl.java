@@ -26,6 +26,9 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${app.mail.from:info@spiriponzi.cloud}")
 	private String fromAddress;
 
+	@Value("${app.support.email:info@spiriponzi.cloud}")
+	private String supportEmail;
+
 	@Override
 	public void sendPasswordResetEmail(String email, String resetUrl)
 			throws MessagingException, IOException, TemplateException {
@@ -64,6 +67,18 @@ public class EmailServiceImpl implements EmailService {
 		helper.setTo(email);
 		helper.setText("Your Spiriponzi admin verification code is " + verificationCode
 				+ ". It expires in 5 minutes. If you did not try to sign in, you can ignore this email.");
+		javaMailSender.send(mimeMessage);
+	}
+
+	@Override
+	public void sendSupportTicket(String requesterEmail, String topic, String message) throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+		helper.setFrom(fromAddress);
+		helper.setTo(supportEmail);
+		helper.setReplyTo(requesterEmail);
+		helper.setSubject("Spiriponzi support request: " + topic);
+		helper.setText("From: " + requesterEmail + "\nTopic: " + topic + "\n\n" + message, false);
 		javaMailSender.send(mimeMessage);
 	}
 
