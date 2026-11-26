@@ -168,6 +168,8 @@ class AdminLoginWebTest {
                         .andExpect(content().string(containsString("Redeem a promo code")))
                         .andExpect(content().string(containsString("/css/user-dark-mode.css")))
                         .andExpect(content().string(containsString("data-aa=\"2463408\"")))
+                        .andExpect(content().string(containsString("data-ad-slot=\"2465731755\"")))
+                        .andExpect(content().string(containsString("adsbygoogle.js?client=ca-pub-3177939731250769")))
                         .andExpect(content().string(containsString("Discord · Coming soon")))
                         .andExpect(content().string(containsString("Telegram · Coming soon")))
                         .andExpect(content().string(containsString("Copyright")));
@@ -233,7 +235,8 @@ class AdminLoginWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Contact support")))
                 .andExpect(content().string(containsString("Missing credit / points not credited")))
-                .andExpect(content().string(containsString("Close and return to dashboard")));
+                .andExpect(content().string(containsString("Close and return to dashboard")))
+                .andExpect(content().string(containsString("href=\"/support\"")));
 
         mvc.perform(post("/support").servletPath("/support")
                         .with(user("player").roles("USER"))
