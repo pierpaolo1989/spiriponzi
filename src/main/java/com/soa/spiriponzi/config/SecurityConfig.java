@@ -78,6 +78,7 @@ public class SecurityConfig {
                                 "/callbacks/offerwall",
                                 "/affiliate/click/**",
                                 "/auth/google/**", "/oauth2/**", "/login/oauth2/**",
+                                "/sw.js",
                                 "/sitemap.xml",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()

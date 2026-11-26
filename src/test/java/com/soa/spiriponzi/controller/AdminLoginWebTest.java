@@ -256,6 +256,13 @@ class AdminLoginWebTest {
     }
 
     @Test
+    void monetagServiceWorkerIsAvailableWithoutAuthentication() throws Exception {
+        mvc.perform(get("/sw.js").servletPath("/sw.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"zoneId\": 12360642")));
+    }
+
+    @Test
     void homepagePublishesSocialPreviewImageMetadata() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().isOk())
