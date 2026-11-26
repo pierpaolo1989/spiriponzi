@@ -121,6 +121,17 @@ class PromoCodeServiceTest {
         verifyNoInteractions(userRepository, redemptionRepository, userStatsRepository);
     }
 
+    @Test
+    void deletesPromoCodeAndItsRedemptionHistory() {
+        PromoCode promoCode = promoCode(250, 5, 2);
+        when(promoCodeRepository.findByIdForUpdate(3L)).thenReturn(Optional.of(promoCode));
+
+        service.deleteCode(3L);
+
+        verify(redemptionRepository).deleteAllByPromoCodeId(3L);
+        verify(promoCodeRepository).delete(promoCode);
+    }
+
     private PromoCode promoCode(int points, int maxRedemptions, int redemptionsUsed) {
         PromoCode promoCode = new PromoCode();
         promoCode.setId(3L);

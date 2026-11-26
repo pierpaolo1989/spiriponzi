@@ -110,6 +110,15 @@ public class UserServiceImpl implements UserService {
         return resendActivationEmail(user);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isActivationEmailCoolingDown(Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        return emailVerificationTokenRepository.findByUserId(userId)
+                .map(token -> isActivationEmailCoolingDown(token, now))
+                .orElse(false);
+    }
+
     private ActivationEmailResendResult resendActivationEmail(User user) {
         if (user.isEnabled()) {
             return ActivationEmailResendResult.ALREADY_ACTIVATED;
@@ -117,13 +126,17 @@ public class UserServiceImpl implements UserService {
         LocalDateTime now = LocalDateTime.now();
         EmailVerificationToken existingToken = emailVerificationTokenRepository.findByUserId(user.getId())
                 .orElse(null);
-        if (existingToken != null
-                && existingToken.getCreatedAt().isAfter(now.minus(ACTIVATION_EMAIL_COOLDOWN))
-                && existingToken.getExpiresAt().isAfter(now)) {
+        if (isActivationEmailCoolingDown(existingToken, now)) {
             return ActivationEmailResendResult.COOLDOWN;
         }
         sendActivationEmail(user);
         return ActivationEmailResendResult.SENT;
+    }
+
+    private boolean isActivationEmailCoolingDown(EmailVerificationToken token, LocalDateTime now) {
+        return token != null
+                && token.getCreatedAt().isAfter(now.minus(ACTIVATION_EMAIL_COOLDOWN))
+                && token.getExpiresAt().isAfter(now);
     }
 
     @Override

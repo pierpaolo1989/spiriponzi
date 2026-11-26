@@ -67,6 +67,14 @@ public class PromoCodeService {
     }
 
     @Transactional
+    public void deleteCode(Long id) {
+        PromoCode promoCode = promoCodeRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Codice promozionale non trovato."));
+        redemptionRepository.deleteAllByPromoCodeId(promoCode.getId());
+        promoCodeRepository.delete(promoCode);
+    }
+
+    @Transactional
     public int redeemCode(String submittedCode, String email) {
         String code = submittedCode == null ? "" : submittedCode.trim().toUpperCase(Locale.ROOT);
         if (code.isEmpty()) {

@@ -20,12 +20,23 @@
 	<div id="content-wrapper" class="d-flex flex-column">
 		<div id="content">
 			<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-				<div class="d-flex align-items-center">
-					<button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" type="button" aria-label="Apri o chiudi il menu">
+				<div class="admin-topbar-title">
+					<button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"
+						type="button" aria-label="Apri o chiudi il menu">
 						<i class="fa fa-bars" aria-hidden="true"></i>
 					</button>
-					<span class="h5 mb-0 text-gray-800">Codici promozionali</span>
+					<span class="h5 mb-0 text-gray-800">Dashboard amministratore</span>
 				</div>
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item">
+						<form th:action="@{/logout}" method="post" class="m-0">
+							<button class="btn btn-link nav-link admin-logout-button" type="submit"
+								aria-label="Esci" title="Esci">
+								<i class="fas fa-sign-out-alt fa-sm fa-fw text-gray-400" aria-hidden="true"></i>
+							</button>
+						</form>
+					</li>
+				</ul>
 			</nav>
 			<main class="container-fluid">
 				<div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -75,8 +86,17 @@
 										<td th:text="|${promo.redemptionsUsed} / ${promo.maxRedemptions}|"></td>
 										<td th:text="${promo.expiresOn}"></td>
 										<td th:text="${promo.createdAt}"></td>
-										<td><button class="btn btn-sm btn-outline-primary" type="button" data-copy-code
-												th:attr="data-code=${promo.code}"><i class="fas fa-copy mr-1" aria-hidden="true"></i>Copia</button></td>
+										<td class="text-nowrap">
+											<button class="btn btn-sm btn-outline-primary" type="button" data-copy-code
+												th:attr="data-code=${promo.code}"><i class="fas fa-copy mr-1" aria-hidden="true"></i>Copia</button>
+											<form class="d-inline" method="post"
+												th:action="@{/admin/promo-codes/{id}/delete(id=${promo.id})}"
+												onsubmit="return confirm('Eliminare definitivamente questo codice e lo storico dei riscatti? I punti già accreditati resteranno agli utenti.');">
+												<button class="btn btn-sm btn-outline-danger" type="submit">
+													<i class="fas fa-trash-alt mr-1" aria-hidden="true"></i>Elimina
+												</button>
+											</form>
+										</td>
 									</tr>
 									<tr th:if="${#lists.isEmpty(promoCodes)}"><td colspan="6" class="text-center text-muted">Non hai ancora creato codici.</td></tr>
 								</tbody>

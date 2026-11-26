@@ -331,6 +331,26 @@ class UserServiceImplTest {
     }
 
     @Test
+    void reportsActivationCooldownWhileTheCurrentTokenIsFresh() {
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setCreatedAt(java.time.LocalDateTime.now().minusSeconds(30));
+        token.setExpiresAt(java.time.LocalDateTime.now().plusHours(2));
+        when(emailVerificationTokenRepository.findByUserId(34L)).thenReturn(Optional.of(token));
+
+        assertTrue(userService.isActivationEmailCoolingDown(34L));
+    }
+
+    @Test
+    void activationResendCooldownEndsWhenTokenIsExpiredOrOlderThanOneMinute() {
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setCreatedAt(java.time.LocalDateTime.now().minusMinutes(2));
+        token.setExpiresAt(java.time.LocalDateTime.now().plusHours(2));
+        when(emailVerificationTokenRepository.findByUserId(35L)).thenReturn(Optional.of(token));
+
+        assertFalse(userService.isActivationEmailCoolingDown(35L));
+    }
+
+    @Test
     void getOrCreateReferralCodePersistsCodeForExistingUsers() {
         User user = User.builder().id(42L).build();
         when(userRepository.findById(42L)).thenReturn(Optional.of(user));

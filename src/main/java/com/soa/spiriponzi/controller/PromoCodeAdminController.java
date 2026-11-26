@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,6 +36,18 @@ public class PromoCodeAdminController {
         try {
             promoCodeService.createCode(points, maxRedemptions, expiresOn);
             flash.addFlashAttribute("message", "Codice promozionale creato.");
+        } catch (ResponseStatusException ex) {
+            flash.addFlashAttribute("error", ex.getReason());
+        }
+        return "redirect:/admin/promo-codes";
+    }
+
+    @PostMapping("/admin/promo-codes/{id}/delete")
+    public String deleteCode(@PathVariable Long id, RedirectAttributes flash) {
+        try {
+            promoCodeService.deleteCode(id);
+            flash.addFlashAttribute("message",
+                    "Codice e storico dei riscatti eliminati. I punti già accreditati non sono modificati.");
         } catch (ResponseStatusException ex) {
             flash.addFlashAttribute("error", ex.getReason());
         }

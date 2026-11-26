@@ -19,4 +19,8 @@ public interface PromoCodeRepository extends JpaRepository<PromoCode, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select promoCode from PromoCode promoCode where promoCode.code = :code")
     Optional<PromoCode> findByCodeForUpdate(@Param("code") String code);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select promoCode from PromoCode promoCode where promoCode.id = :id")
+    Optional<PromoCode> findByIdForUpdate(@Param("id") Long id);
 }

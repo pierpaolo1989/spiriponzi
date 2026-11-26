@@ -19,6 +19,8 @@ public interface UserService {
 
 	ActivationEmailResendResult resendActivationEmailForAdmin(Long userId);
 
+	boolean isActivationEmailCoolingDown(Long userId);
+
 	User signInWithGoogle(String subject, String email, boolean registering, String referralCode);
 
 	boolean isValidReferralCode(String referralCode);

@@ -163,7 +163,10 @@ class AdminLoginWebTest {
 
         mvc.perform(get("/promotions").servletPath("/promotions").with(user("player").roles("USER")))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("Riscatta un codice promozionale")));
+                        .andExpect(content().string(containsString("Redeem a promo code")))
+                        .andExpect(content().string(containsString("data-aa=\"2463408\"")))
+                        .andExpect(content().string(containsString("Discord · Coming soon")))
+                        .andExpect(content().string(containsString("Telegram · Coming soon")));
 
         mvc.perform(post("/promotions").servletPath("/promotions")
                                 .with(user("player").roles("USER")).param("code", "SP-TEST"))
@@ -203,6 +206,24 @@ class AdminLoginWebTest {
     }
 
     @Test
+    void adminDashboardHidesResendButtonDuringActivationCooldown() throws Exception {
+        when(users.findTop10ByEnabledFalseOrderByIdDesc())
+                .thenReturn(List.of(com.soa.spiriponzi.model.User.builder()
+                        .id(42L).email("recent@example.com").enabled(false).build()));
+        when(userService.isActivationEmailCoolingDown(42L)).thenReturn(true);
+        when(withdrawals.findByStatusInOrderByDateRequestAsc(List.of("PENDING"), PageRequest.of(0, 5)))
+                .thenReturn(new PageImpl<>(List.of()));
+        MockHttpSession session = loginAdmin();
+
+        mvc.perform(get("/admin").servletPath("/admin").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "Email inviata da meno di un minuto; aggiorna tra poco per reinviare")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        containsString("/admin/users/42/resend-activation"))));
+    }
+
+    @Test
     void homepagePublishesSocialPreviewImageMetadata() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().isOk())
@@ -212,6 +233,33 @@ class AdminLoginWebTest {
                         "name=\"twitter:card\" content=\"summary_large_image\"")))
                 .andExpect(content().string(containsString(
                         "name=\"twitter:image\" content=\"https://www.spiriponzi.cloud/img/main_page.jpg\"")));
+    }
+
+    @Test
+    void promoCodeAdminPageHasDashboardLogoutAndDeleteAction() throws Exception {
+        var promo = new com.soa.spiriponzi.model.PromoCode();
+        promo.setId(8L);
+        promo.setCode("SP-TEST-CODE");
+        promo.setPoints(200);
+        promo.setMaxRedemptions(10);
+        promo.setRedemptionsUsed(2);
+        promo.setExpiresOn(java.time.LocalDate.of(2026, 12, 31));
+        promo.setCreatedAt(java.time.LocalDateTime.of(2026, 11, 26, 12, 0));
+        when(promoCodeService.listCodes()).thenReturn(List.of(promo));
+        MockHttpSession session = loginAdmin();
+
+        mvc.perform(get("/admin/promo-codes").servletPath("/admin/promo-codes").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Dashboard amministratore")))
+                .andExpect(content().string(containsString("action=\"/logout\"")))
+                .andExpect(content().string(containsString("/admin/promo-codes/8/delete")))
+                .andExpect(content().string(containsString("Elimina")));
+
+        mvc.perform(post("/admin/promo-codes/8/delete").servletPath("/admin/promo-codes/8/delete")
+                        .session(session).with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/promo-codes"));
+        verify(promoCodeService).deleteCode(8L);
     }
 
     @Test

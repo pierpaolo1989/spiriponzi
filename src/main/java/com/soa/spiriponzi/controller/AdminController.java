@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.controller;
 
 import com.soa.spiriponzi.model.enums.WithdrawStatus;
+import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.repository.AdRepository;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
@@ -24,7 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.PageRequest;
 
 @Controller
@@ -64,7 +67,16 @@ public class AdminController {
         model.addAttribute("pendingWithdrawals",
                 withdrawRepository.countByStatus(WithdrawStatus.PENDING.name()));
         model.addAttribute("recentUsers", userRepository.findTop5ByOrderByIdDesc());
-        model.addAttribute("usersAwaitingActivation", userRepository.findTop10ByEnabledFalseOrderByIdDesc());
+        List<User> usersAwaitingActivation =
+                userRepository.findTop10ByEnabledFalseOrderByIdDesc();
+        model.addAttribute("usersAwaitingActivation", usersAwaitingActivation);
+        Set<Long> activationCooldownUserIds = new HashSet<>();
+        for (User user : usersAwaitingActivation) {
+            if (userService.isActivationEmailCoolingDown(user.getId())) {
+                activationCooldownUserIds.add(user.getId());
+            }
+        }
+        model.addAttribute("activationCooldownUserIds", activationCooldownUserIds);
         model.addAttribute("pendingWithdrawalRequests", withdrawRepository.findByStatusInOrderByDateRequestAsc(
                 List.of(WithdrawStatus.PENDING.name()), PageRequest.of(0, 5)));
         return "admin/dashboard";

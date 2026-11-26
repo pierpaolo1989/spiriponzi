@@ -355,11 +355,16 @@
 									<td th:text="${user.id}">1</td>
 									<td th:text="${user.email}">utente@example.com</td>
 									<td class="text-right">
-										<form th:action="@{/admin/users/{id}/resend-activation(id=${user.id})}" method="post" class="m-0">
+										<form th:if="${!activationCooldownUserIds.contains(user.id)}"
+											th:action="@{/admin/users/{id}/resend-activation(id=${user.id})}" method="post" class="m-0">
 											<button class="btn btn-sm btn-outline-primary" type="submit">
 												<i class="fas fa-envelope mr-1" aria-hidden="true"></i>Reinvia verifica
 											</button>
 										</form>
+										<span th:if="${activationCooldownUserIds.contains(user.id)}"
+											class="badge badge-secondary" role="status">
+											Email inviata da meno di un minuto; aggiorna tra poco per reinviare
+										</span>
 									</td>
 								</tr>
 								<tr th:if="${#lists.isEmpty(usersAwaitingActivation)}">

@@ -1,12 +1,82 @@
 <!DOCTYPE html>
-<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>Spiriponzi - Codice promozionale</title>
+	<title>Spiriponzi - Promo codes</title>
 	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
 	<link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
 	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+	<style>
+		.promo-community-card {
+			background: linear-gradient(120deg, #edf2ff, #f8f3ff);
+			border: 0;
+			overflow: hidden;
+		}
+
+		.promo-community-channels {
+			display: flex;
+			flex-wrap: wrap;
+			gap: .75rem;
+		}
+
+		.promo-community-channel {
+			align-items: center;
+			background: rgba(255, 255, 255, .8);
+			border: 1px solid rgba(78, 115, 223, .18);
+			border-radius: 2rem;
+			color: #3b4d79;
+			display: inline-flex;
+			font-weight: 700;
+			gap: .5rem;
+			padding: .65rem 1rem;
+		}
+
+		.promo-ad-unit {
+			margin: 1.5rem auto;
+			max-width: 100%;
+			position: relative;
+			width: 100%;
+			z-index: 1;
+		}
+
+		.promo-ad-unit iframe {
+			border: 0;
+			display: block;
+			height: auto;
+			margin: auto;
+			max-width: 100%;
+			overflow: hidden;
+			padding: 0;
+			width: 70%;
+		}
+
+		.promo-ad-credit {
+			left: 0;
+			margin: auto;
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 70%;
+		}
+
+		.promo-ad-credit a {
+			background: #f8f8f9;
+			border-radius: 0 0 4px 4px;
+			color: #263238;
+			display: inline-block;
+			font-size: 13px;
+			padding: 4px 10px;
+			text-decoration: none;
+		}
+
+		@media (max-width: 575.98px) {
+			.promo-ad-unit iframe,
+			.promo-ad-credit {
+				width: 100%;
+			}
+		}
+	</style>
 </head>
 <body id="page-top">
 <div id="wrapper">
@@ -16,8 +86,8 @@
 			<th:block th:replace="~{fragments/navbar}"></th:block>
 			<main class="container-fluid">
 				<div class="mb-4">
-					<h1 class="h3 mb-1 text-gray-800">Riscatta un codice promozionale</h1>
-					<p class="text-gray-600">Inserisci il codice ricevuto per aggiungere i punti al tuo saldo.</p>
+					<h1 class="h3 mb-1 text-gray-800">Redeem a promo code</h1>
+					<p class="text-gray-600">Enter your code to add its reward points to your balance.</p>
 				</div>
 				<div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
 				<div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
@@ -25,14 +95,42 @@
 					<div class="card-body">
 						<form th:action="@{/promotions}" method="post">
 							<div class="form-group">
-								<label for="code">Codice</label>
+								<label for="code">Promo code</label>
 								<input class="form-control" id="code" name="code" type="text" maxlength="24"
-									autocomplete="off" autocapitalize="characters" required>
+									autocomplete="off" autocapitalize="characters" aria-describedby="code-help" required>
+								<small id="code-help" class="form-text text-muted">Each code can be redeemed once per account and may have a limited number of uses.</small>
 							</div>
-							<button class="btn btn-primary" type="submit">Riscatta codice</button>
+							<button class="btn btn-primary" type="submit">
+								<i class="fas fa-gift mr-1" aria-hidden="true"></i>Redeem code
+							</button>
 						</form>
 					</div>
 				</div>
+				<div id="frame" class="promo-ad-unit" aria-label="Advertisement">
+					<iframe title="Advertisement" data-aa="2463408"
+						src="https://acceptable.a-ads.com/2463408/?size=Adaptive"
+						loading="lazy"></iframe>
+					<div class="promo-ad-credit">
+						<a id="frame-link" target="_blank" rel="noopener noreferrer"
+							href="https://aads.com/campaigns/new/?source_id=2463408&amp;source_type=ad_unit&amp;partner=2463408">
+							Advertise here
+						</a>
+					</div>
+				</div>
+				<section class="card shadow mb-4 promo-community-card" aria-labelledby="promo-community-heading">
+					<div class="card-body p-4">
+						<span class="badge badge-primary mb-2">Exclusive offers</span>
+						<h2 id="promo-community-heading" class="h4 text-gray-900">Get the next promo first</h2>
+						<p class="text-gray-700 mb-3">
+							Follow us on Discord and Telegram for exclusive discounts, new promo codes, and limited-time offers.
+							Our official community links are coming soon.
+						</p>
+						<div class="promo-community-channels" aria-label="Community channels coming soon">
+							<span class="promo-community-channel"><i class="fab fa-discord" aria-hidden="true"></i>Discord · Coming soon</span>
+							<span class="promo-community-channel"><i class="fab fa-telegram-plane" aria-hidden="true"></i>Telegram · Coming soon</span>
+						</div>
+					</div>
+				</section>
 			</main>
 		</div>
 	</div>
