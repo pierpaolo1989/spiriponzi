@@ -13,4 +13,6 @@ public interface EmailService {
 	void sendActivationEmail(String email, String activationUrl)
 			throws MessagingException, IOException, TemplateException;
 
+	void sendAdminLoginCode(String email, String verificationCode) throws MessagingException;
+
 }

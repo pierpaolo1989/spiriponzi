@@ -1,6 +1,7 @@
 package com.soa.spiriponzi.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,16 +10,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.web.filter.RequestContextFilter;
 
 import com.soa.spiriponzi.controller.GoogleAuthController;
 import com.soa.spiriponzi.security.GoogleOidcUserService;
+import com.soa.spiriponzi.service.AdminMfaService;
+import com.soa.spiriponzi.service.EmailService;
+import jakarta.mail.MessagingException;
+import java.time.Clock;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -35,8 +43,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, ObjectProvider<GoogleOidcUserService> googleUsers) throws Exception {
-        http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
+    public Clock applicationClock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            ObjectProvider<GoogleOidcUserService> googleUsers,
+            ObjectProvider<AdminMfaService> adminMfaServices,
+            ObjectProvider<EmailService> emailServices,
+            SecurityContextRepository securityContextRepository,
+            @Value("${app.admin.mfa.email:pierpaolo.pdd@gmail.com}") String adminMfaEmail) throws Exception {
+        http.securityContext(context -> context.securityContextRepository(securityContextRepository))
+                .csrf(csrf -> csrf.requireCsrfProtectionMatcher(request -> {
                     String method = request.getMethod();
                     String path = request.getServletPath();
                     return !("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method)
@@ -56,6 +81,7 @@ public class SecurityConfig {
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()
 
+                        .requestMatchers("/admin/mfa").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/affiliate").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/**").hasRole("USER")
@@ -70,8 +96,28 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             boolean isAdmin = authentication.getAuthorities()
                                     .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                            String destination = isAdmin ? "/admin" : "/dashboard";
-                            response.sendRedirect(request.getContextPath() + destination);
+                            if (!isAdmin) {
+                                response.sendRedirect(request.getContextPath() + "/dashboard");
+                                return;
+                            }
+
+                            AdminMfaService adminMfaService = adminMfaServices.getObject();
+                            EmailService emailService = emailServices.getObject();
+                            var session = request.getSession(true);
+                            String verificationCode = adminMfaService.createChallenge(
+                                    session, authentication.getName());
+                            securityContextRepository.saveContext(
+                                    SecurityContextHolder.createEmptyContext(), request, response);
+                            SecurityContextHolder.clearContext();
+                            try {
+                                emailService.sendAdminLoginCode(adminMfaEmail, verificationCode);
+                            } catch (MessagingException exception) {
+                                adminMfaService.clearChallenge(session);
+                                log.error("Unable to send the admin sign-in verification email", exception);
+                                response.sendRedirect(request.getContextPath() + "/login?mfaEmailError");
+                                return;
+                            }
+                            response.sendRedirect(request.getContextPath() + "/admin/mfa");
                         })
                         .permitAll()
                 )

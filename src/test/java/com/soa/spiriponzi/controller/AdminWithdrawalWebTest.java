@@ -51,8 +51,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({AdminController.class, AuthController.class, AdController.class, WihdrawController.class,
-        AffiliateController.class})
+@WebMvcTest(value = {AdminController.class, AuthController.class, AdController.class, WihdrawController.class,
+        AffiliateController.class}, properties = "cloudflare.web-analytics.token=test-cloudflare-token")
 @Import(SecurityConfig.class)
 class AdminWithdrawalWebTest {
     @Autowired private MockMvc mvc;
@@ -92,6 +92,8 @@ class AdminWithdrawalWebTest {
             assertTrue(html.contains("data-aa=\"2462874\""));
             assertTrue(html.contains("src=\"https://acceptable.a-ads.com/2462874/?size=Adaptive\""));
             assertTrue(html.contains("Bitcoin (BTC), Ethereum (ETH), or PayPal (EUR)"));
+            assertTrue(html.contains("test-cloudflare-token"));
+            assertFalse(html.contains("c2808f7f420f4a5eb6bda436de9790f7"));
         }
     }
 
@@ -113,17 +115,17 @@ class AdminWithdrawalWebTest {
     }
 
     @Test
-    void surveyAdvertisementRemainsInDocumentFlowBeforeFooter() throws Exception {
+    void surveyFooterHasNoAdSlot() throws Exception {
         User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
         when(userService.findByEmail("test")).thenReturn(user);
 
         String survey = mvc.perform(get("/survey").servletPath("/survey")
                         .session(session("ROLE_USER")))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        int advertisement = survey.indexOf("class=\"survey-ad-container text-center\"");
         int footer = survey.indexOf("<footer class=\"sticky-footer");
-        assertTrue(advertisement >= 0 && footer > advertisement);
-        assertTrue(survey.contains("display: flow-root;"));
+        assertTrue(footer >= 0);
+        assertFalse(survey.contains("survey-ad-container"));
+        assertFalse(survey.contains("data-ad-slot=\"6698101758\""));
     }
 
     @Test

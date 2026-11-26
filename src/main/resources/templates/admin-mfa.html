@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Spiriponzi - Admin verification</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+	<link th:href="@{vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+	<link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
+	<link th:href="@{/css/public-pages.css}" rel="stylesheet">
+</head>
+<body class="bg-gradient-primary">
+<main class="public-page login-page">
+	<div class="row justify-content-center">
+		<div class="col-xl-5 col-lg-6 col-md-8">
+			<div class="card border-0 shadow-lg">
+				<div class="card-body p-5">
+					<div class="text-center">
+						<h1 class="h4 text-gray-900 font-weight-bold mb-3">Admin verification</h1>
+						<p class="text-muted mb-4">Enter the 6-digit code sent to the admin email address. It expires in 5 minutes.</p>
+					</div>
+					<div th:if="${param.error}" class="alert alert-danger" role="alert">
+						That code is not valid. Check it and try again.
+					</div>
+					<form method="post" th:action="@{/admin/mfa}">
+						<div class="form-group">
+							<label for="code">Verification code</label>
+							<input id="code" name="code" class="form-control text-center"
+								type="text" inputmode="numeric" autocomplete="one-time-code"
+								pattern="[0-9]{6}" maxlength="6" required autofocus>
+						</div>
+						<button type="submit" class="btn btn-primary btn-block">Verify and continue</button>
+					</form>
+					<div class="text-center mt-3">
+						<a class="small" th:href="@{/login}">Return to login</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+</body>
+</html>

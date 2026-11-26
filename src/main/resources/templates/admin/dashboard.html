@@ -574,7 +574,9 @@
 				for (const { list, property } of dimensions) {
 					renderDimensionList(list, analytics[property], numberFormat);
 				}
-				status.textContent = `Ultimi 30 giorni · aggiornato alle ${new Date().toLocaleTimeString('it-IT')}.`;
+				status.textContent = analytics.pageLoads === 0
+					? 'Cloudflare non ha restituito visualizzazioni negli ultimi 30 giorni. Se ti aspettavi visite, verifica che CLOUDFLARE_WEB_ANALYTICS_TOKEN corrisponda al site token del beacon attivo.'
+					: `Ultimi 30 giorni · aggiornato alle ${new Date().toLocaleTimeString('it-IT')}.`;
 			} catch (error) {
 				console.error('Impossibile caricare Cloudflare Web Analytics:', error);
 				status.textContent = 'Impossibile caricare i dati. Verifica token API, account ID, site token e permessi Cloudflare.';

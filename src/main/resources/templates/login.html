@@ -70,6 +70,12 @@
 								<div th:if="${param.error}">
 									<div class="alert alert-danger text-center">No user found with such credentials</div>
 								</div>
+								<div th:if="${param.mfaEmailError}" class="alert alert-danger" role="alert">
+									Admin verification email could not be sent. Please check the mail configuration and try again.
+								</div>
+								<div th:if="${param.mfaExpired}" class="alert alert-warning" role="alert">
+									The admin verification code expired or was used too many times. Sign in again to request a new code.
+								</div>
 								<div th:if="${param.unverified}" class="alert alert-warning" role="alert">
 									Activate your account using the link sent to your email before signing in.
 									You can request another activation email below.

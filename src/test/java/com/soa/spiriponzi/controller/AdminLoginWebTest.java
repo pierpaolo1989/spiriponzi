@@ -1,12 +1,16 @@
 package com.soa.spiriponzi.controller;
 
 import jakarta.servlet.RequestDispatcher;
+import jakarta.mail.MessagingException;
 import com.soa.spiriponzi.config.SecurityConfig;
 import com.soa.spiriponzi.repository.AdRepository;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.WithdrawRepository;
 import com.soa.spiriponzi.security.CustomUserDetailsService;
+import com.soa.spiriponzi.controller.AdminMfaController;
+import com.soa.spiriponzi.service.AdminMfaService;
+import com.soa.spiriponzi.service.EmailService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import com.soa.spiriponzi.service.RenderService;
 import com.soa.spiriponzi.service.WithdrawServiceImpl;
@@ -20,6 +24,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -33,12 +44,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(value = AdminController.class, properties = {
+@WebMvcTest(value = {AdminController.class, AdminMfaController.class}, properties = {
         "app.admin.username=test-admin",
         "app.admin.password=local-test-password",
+        "app.admin.mfa.email=admin@example.com",
         "cloudflare.web-analytics.token=test-cloudflare-token"
 })
-@Import({SecurityConfig.class, CustomUserDetailsService.class})
+@Import({SecurityConfig.class, CustomUserDetailsService.class, AdminMfaService.class})
 class AdminLoginWebTest {
     @Autowired private MockMvc mvc;
     @MockBean private UserRepository users;
@@ -48,6 +60,7 @@ class AdminLoginWebTest {
     @MockBean private WithdrawServiceImpl withdrawService;
     @MockBean private RenderService renderService;
     @MockBean private CloudflareAnalyticsService cloudflareAnalyticsService;
+    @MockBean private EmailService emailService;
 
     @Test
     void repeatedLoginsWithSeparateSessionsReachAdminDashboard() throws Exception {
@@ -57,9 +70,23 @@ class AdminLoginWebTest {
             var result = mvc.perform(post("/login").servletPath("/login")
                             .param("username", "test-admin").param("password", "local-test-password"))
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/admin")).andReturn();
+                    .andExpect(redirectedUrl("/admin/mfa")).andReturn();
             MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+            ArgumentCaptor<String> codes = ArgumentCaptor.forClass(String.class);
+            verify(emailService, times(attempt + 1)).sendAdminLoginCode(eq("admin@example.com"), codes.capture());
+            String code = codes.getAllValues().get(attempt);
+
             mvc.perform(get("/admin").servletPath("/admin").session(session))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("http://localhost/login"));
+            var verified = mvc.perform(post("/admin/mfa").servletPath("/admin/mfa")
+                            .session(session)
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+                            .param("code", code))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/admin")).andReturn();
+            mvc.perform(get("/admin").servletPath("/admin")
+                            .session((MockHttpSession) verified.getRequest().getSession(false)))
                     .andExpect(status().isOk());
         }
         mvc.perform(post("/login").servletPath("/login")
@@ -72,11 +99,7 @@ class AdminLoginWebTest {
     void adminDashboardUsesUserStylePostLogoutMenu() throws Exception {
         when(withdrawals.findByStatusInOrderByDateRequestAsc(List.of("PENDING"), PageRequest.of(0, 5)))
                 .thenReturn(new PageImpl<>(List.of()));
-        var login = mvc.perform(post("/login").servletPath("/login")
-                        .param("username", "test-admin").param("password", "local-test-password"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+        MockHttpSession session = loginAdmin();
 
         mvc.perform(get("/admin").servletPath("/admin").session(session))
                 .andExpect(status().isOk())
@@ -100,11 +123,7 @@ class AdminLoginWebTest {
                         List.of(new CloudflareAnalyticsService.AnalyticsDimension("Chrome", 15)),
                         List.of(new CloudflareAnalyticsService.AnalyticsDimension("desktop", 15)),
                         List.of(new CloudflareAnalyticsService.AnalyticsDimension("Direct", 15))));
-        var login = mvc.perform(post("/login").servletPath("/login")
-                        .param("username", "test-admin").param("password", "local-test-password"))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+        MockHttpSession session = loginAdmin();
 
         mvc.perform(get("/admin/cloudflare/analytics").servletPath("/admin/cloudflare/analytics").session(session))
                 .andExpect(status().isOk())
@@ -120,6 +139,65 @@ class AdminLoginWebTest {
                           "referrers":[{"value":"Direct","pageLoads":15}]
                         }
                         """));
+    }
+
+    @Test
+    void incorrectVerificationCodeDoesNotAuthorizeAdminSession() throws Exception {
+        var login = mvc.perform(post("/login").servletPath("/login")
+                        .param("username", "test-admin").param("password", "local-test-password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/mfa"))
+                .andReturn();
+        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+        ArgumentCaptor<String> code = ArgumentCaptor.forClass(String.class);
+        verify(emailService).sendAdminLoginCode(eq("admin@example.com"), code.capture());
+        String incorrectCode = code.getValue().equals("000000") ? "000001" : "000000";
+
+        mvc.perform(post("/admin/mfa").servletPath("/admin/mfa")
+                        .session(session)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("code", incorrectCode))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/mfa?error"));
+        mvc.perform(get("/admin").servletPath("/admin").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://localhost/login"));
+    }
+
+    @Test
+    void emailDeliveryFailureDoesNotAuthorizeAdminSession() throws Exception {
+        doThrow(new MessagingException("SMTP unavailable"))
+                .when(emailService).sendAdminLoginCode(eq("admin@example.com"), anyString());
+
+        var login = mvc.perform(post("/login").servletPath("/login")
+                        .param("username", "test-admin").param("password", "local-test-password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?mfaEmailError"))
+                .andReturn();
+
+        mvc.perform(get("/admin").servletPath("/admin")
+                        .session((MockHttpSession) login.getRequest().getSession(false)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://localhost/login"));
+    }
+
+    private MockHttpSession loginAdmin() throws Exception {
+        var login = mvc.perform(post("/login").servletPath("/login")
+                        .param("username", "test-admin").param("password", "local-test-password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/mfa"))
+                .andReturn();
+        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+        ArgumentCaptor<String> code = ArgumentCaptor.forClass(String.class);
+        verify(emailService).sendAdminLoginCode(eq("admin@example.com"), code.capture());
+        var verified = mvc.perform(post("/admin/mfa").servletPath("/admin/mfa")
+                        .session(session)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("code", code.getValue()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin"))
+                .andReturn();
+        return (MockHttpSession) verified.getRequest().getSession(false);
     }
 
     @Test

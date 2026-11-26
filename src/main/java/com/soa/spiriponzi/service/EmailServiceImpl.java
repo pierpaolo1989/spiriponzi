@@ -55,6 +55,18 @@ public class EmailServiceImpl implements EmailService {
 		javaMailSender.send(mimeMessage);
 	}
 
+	@Override
+	public void sendAdminLoginCode(String email, String verificationCode) throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+		helper.setFrom(fromAddress);
+		helper.setSubject("Spiriponzi admin sign-in verification code");
+		helper.setTo(email);
+		helper.setText("Your Spiriponzi admin verification code is " + verificationCode
+				+ ". It expires in 5 minutes. If you did not try to sign in, you can ignore this email.");
+		javaMailSender.send(mimeMessage);
+	}
+
 	String getEmailContent(String resetUrl) throws IOException, TemplateException {
 		StringWriter stringWriter = new StringWriter();
 		Map<String, Object> model = new HashMap<>();
