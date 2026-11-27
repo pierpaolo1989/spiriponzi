@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.soa.spiriponzi.dto.ClaimDto;
+import com.soa.spiriponzi.dto.DailyClaimPointDto;
 import com.soa.spiriponzi.dto.UserStatsDto;
 import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ClaimService;
@@ -73,6 +74,12 @@ public class ClaimController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<ClaimDto> claims = claimService.findByUser(authentication.getName());
         return ResponseEntity.ok(claims);
+    }
+
+    @GetMapping("/monthly-points")
+    public List<DailyClaimPointDto> getMonthlyPoints() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return claimService.findDailyClaimPointsForCurrentMonth(authentication.getName());
     }
 
 	

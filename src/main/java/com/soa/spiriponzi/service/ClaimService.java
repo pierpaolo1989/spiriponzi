@@ -3,6 +3,7 @@ package com.soa.spiriponzi.service;
 import java.util.List;
 
 import com.soa.spiriponzi.dto.ClaimDto;
+import com.soa.spiriponzi.dto.DailyClaimPointDto;
 import com.soa.spiriponzi.dto.UserStatsDto;
 
 public interface ClaimService {
@@ -12,5 +13,6 @@ public interface ClaimService {
 	long getGameClaimCooldownSeconds(String email);
 	UserStatsDto startGameClaim(String email);
 	List<ClaimDto> findByUser(String email);
+	List<DailyClaimPointDto> findDailyClaimPointsForCurrentMonth(String email);
 
 }

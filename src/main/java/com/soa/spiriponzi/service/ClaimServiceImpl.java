@@ -2,10 +2,15 @@ package com.soa.spiriponzi.service;
 
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.soa.spiriponzi.dto.ClaimDto;
+import com.soa.spiriponzi.dto.DailyClaimPointDto;
 import com.soa.spiriponzi.dto.UserStatsDto;
 import com.soa.spiriponzi.exception.ClaimException;
 import com.soa.spiriponzi.model.Claim;
@@ -206,6 +212,25 @@ public class ClaimServiceImpl implements ClaimService {
 					.id(obj.getId())
 					.build();
 		}).collect(Collectors.toList());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<DailyClaimPointDto> findDailyClaimPointsForCurrentMonth(String email) {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDate today = now.toLocalDate();
+		LocalDateTime monthStart = today.withDayOfMonth(1).atStartOfDay();
+		Map<Integer, BigDecimal> pointsByDay = new HashMap<>();
+		for (Claim claim : claimRepository.findByUserEmailAndDateRequestBetweenOrderByDateRequestAsc(
+				email, monthStart, now)) {
+			int day = claim.getDateRequest().getDayOfMonth();
+			pointsByDay.merge(day, BigDecimal.valueOf(claim.getAmount()), BigDecimal::add);
+		}
+
+		return IntStream.rangeClosed(1, today.getDayOfMonth())
+				.mapToObj(day -> new DailyClaimPointDto(
+						day, pointsByDay.getOrDefault(day, BigDecimal.ZERO).doubleValue()))
+				.toList();
 	}
 
 }

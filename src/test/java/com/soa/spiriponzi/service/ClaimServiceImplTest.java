@@ -13,12 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -76,6 +79,40 @@ class ClaimServiceImplTest {
         when(userStatsRepository.findByUserEmail(email)).thenReturn(Optional.of(stats));
 
         assertEquals(0, claimService.getClaimCooldownSeconds(email));
+    }
+
+    @Test
+    void dailyClaimPointsCoverTheCurrentMonthAndAggregateClaimReversals() {
+        String email = "player@example.com";
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
+        LocalDateTime monthStart = today.withDayOfMonth(1).atStartOfDay();
+        Claim firstClaim = Claim.builder()
+                .dateRequest(monthStart.plusHours(12))
+                .amount(10)
+                .build();
+        Claim reversal = Claim.builder()
+                .dateRequest(monthStart.plusHours(13))
+                .amount(-3)
+                .build();
+        Claim currentDayClaim = Claim.builder()
+                .dateRequest(today.atStartOfDay())
+                .amount(5)
+                .build();
+        when(claimRepository.findByUserEmailAndDateRequestBetweenOrderByDateRequestAsc(
+                eq(email), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(firstClaim, reversal, currentDayClaim));
+
+        var points = claimService.findDailyClaimPointsForCurrentMonth(email);
+
+        assertEquals(today.getDayOfMonth(), points.size());
+        assertEquals(1, points.get(0).day());
+        assertEquals(today.getDayOfMonth() == 1 ? 12.0 : 7.0, points.get(0).points(), 0.001);
+        assertEquals(today.getDayOfMonth() == 1 ? 12.0 : 5.0,
+                points.get(points.size() - 1).points(), 0.001);
+        if (today.getDayOfMonth() > 2) {
+            assertEquals(0.0, points.get(1).points(), 0.001);
+        }
     }
 
     @Test

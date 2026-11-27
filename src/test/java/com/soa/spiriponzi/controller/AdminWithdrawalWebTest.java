@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import com.soa.spiriponzi.config.SecurityConfig;
 import com.soa.spiriponzi.config.CaptchaSettings;
+import com.soa.spiriponzi.dto.DailyClaimPointDto;
 import com.soa.spiriponzi.service.AffiliateService;
 import com.soa.spiriponzi.controller.AffiliateController;
 import com.soa.spiriponzi.model.User;
@@ -23,6 +24,7 @@ import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.ADService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import com.soa.spiriponzi.service.TheoremReachCallbackService;
+import com.soa.spiriponzi.service.ClaimService;
 import com.soa.spiriponzi.service.RenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +54,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = {AdminController.class, AuthController.class, AdController.class, WihdrawController.class,
-        AffiliateController.class, EarnwallPostbackController.class},
+        AffiliateController.class, EarnwallPostbackController.class, ClaimController.class},
         properties = "cloudflare.web-analytics.token=test-cloudflare-token")
 @Import(SecurityConfig.class)
 class AdminWithdrawalWebTest {
@@ -61,6 +63,7 @@ class AdminWithdrawalWebTest {
     @MockBean private UserRepository users;
     @MockBean private AdRepository ads;
     @MockBean private ClaimRepository claims;
+    @MockBean private ClaimService claimService;
     @MockBean private WithdrawRepository withdrawals;
     @MockBean private WithdrawServiceImpl service;
     @MockBean private UserService userService;
@@ -178,8 +181,31 @@ class AdminWithdrawalWebTest {
 
         assertTrue(report.contains("id=\"pointsByPeriodChart\""));
         assertTrue(report.contains("id=\"accountActivityChart\""));
-        assertTrue(report.contains("data-monthly-points=\"40\""));
+        assertTrue(report.contains("Daily claim points"));
+        assertTrue(report.contains("other reward sources may not appear here"));
+        assertTrue(report.contains("report-ad-slot"));
+        assertTrue(report.contains("height: 90px"));
+        int bottomAdStart = report.lastIndexOf("<ins class=\"adsbygoogle report-ad-slot\"");
+        int bottomAdEnd = report.indexOf("</ins>", bottomAdStart);
+        assertTrue(bottomAdStart >= 0 && bottomAdEnd > bottomAdStart);
+        assertFalse(report.substring(bottomAdStart, bottomAdEnd).contains("data-ad-format=\"auto\""));
         assertTrue(report.indexOf("href=\"/report\"") > report.indexOf("href=\"/academy\""));
+    }
+
+    @Test
+    void monthlyPointsEndpointReturnsOnlyTheSignedInUsersData() throws Exception {
+        when(claimService.findDailyClaimPointsForCurrentMonth("test"))
+                .thenReturn(List.of(new DailyClaimPointDto(1, 25.0)));
+
+        mvc.perform(get("/claims/monthly-points").servletPath("/claims/monthly-points")
+                        .session(session("ROLE_USER")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .jsonPath("$[0].day").value(1))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .jsonPath("$[0].points").value(25.0));
+
+        verify(claimService).findDailyClaimPointsForCurrentMonth("test");
     }
 
     @Test
