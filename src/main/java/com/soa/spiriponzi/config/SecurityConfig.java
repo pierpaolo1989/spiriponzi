@@ -146,10 +146,13 @@ public class SecurityConfig {
                         if (request.getSession(false) != null) {
                             request.getSession(false).removeAttribute(GoogleAuthController.REGISTRATION_REFERRAL);
                         }
+                        boolean registrationNeedsActivation = exception instanceof org.springframework.security.oauth2.core.OAuth2AuthenticationException oauthException
+                                && "google_registration_activation_required".equals(oauthException.getError().getErrorCode());
                         boolean needsActivation = exception instanceof org.springframework.security.oauth2.core.OAuth2AuthenticationException oauthException
                                 && "account_not_activated".equals(oauthException.getError().getErrorCode());
                         response.sendRedirect(request.getContextPath()
-                                + (needsActivation ? "/login?unverified" : "/login?googleError"));
+                                + (registrationNeedsActivation ? "/register?googleActivation"
+                                        : needsActivation ? "/login?unverified" : "/login?googleError"));
                     }));
         }
         return http.build();

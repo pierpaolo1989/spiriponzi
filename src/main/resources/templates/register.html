@@ -69,6 +69,10 @@
 								Referral rewards are credited after activation.
 							</div>
 						</div>
+						<div th:if="${param.googleActivation}" class="alert alert-info" role="status">
+							Google registration successful. We sent an activation link to your Google email address.
+							Open that email and confirm your account before signing in.
+						</div>
 						<div th:if="${param.googleTerms}" class="alert alert-danger" role="alert">
 							Please accept the terms before registering with Google.
 						</div>

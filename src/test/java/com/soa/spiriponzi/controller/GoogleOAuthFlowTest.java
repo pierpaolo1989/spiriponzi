@@ -22,6 +22,7 @@ import com.soa.spiriponzi.model.User;
 import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.security.GoogleOidcUserService;
 import com.soa.spiriponzi.service.OfferwallService;
+import com.soa.spiriponzi.service.TheoremReachCallbackService;
 import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.WithdrawService;
 import com.sun.net.httpserver.HttpServer;
@@ -49,6 +50,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -115,6 +117,7 @@ class GoogleOAuthFlowTest {
     @MockBean private UserService users;
     @MockBean private WithdrawService withdrawals;
     @MockBean private OfferwallService offerwall;
+    @MockBean private TheoremReachCallbackService theoremReachCallback;
 
     @AfterAll
     static void stopProvider() {
@@ -146,7 +149,7 @@ class GoogleOAuthFlowTest {
         when(users.isValidReferralCode("REF123")).thenReturn(true);
         Role role = new Role();
         role.setName("ROLE_USER");
-        User signedIn = User.builder().id(1L).email("new@gmail.com").roles(List.of(role))
+        User signedIn = User.builder().id(1L).email("new@gmail.com").enabled(true).roles(List.of(role))
                 .userStats(UserStats.builder().build()).build();
         when(users.signInWithGoogle("google-sub", "new@gmail.com", true, "REF123")).thenReturn(signedIn);
         when(users.findByEmail("new@gmail.com")).thenReturn(signedIn);
@@ -169,6 +172,28 @@ class GoogleOAuthFlowTest {
         assertTrue(profileHtml.contains("src=\"https://lh3.googleusercontent.com/test-photo\""));
         assertTrue(profileHtml.contains("alt=\"Google profile picture\""));
         verify(users).signInWithGoogle("google-sub", "new@gmail.com", true, "REF123");
+    }
+
+    @Test
+    void googleRegistrationShowsActivationMessageBeforeSignIn() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        when(users.isValidReferralCode("")).thenReturn(true);
+        Role role = new Role();
+        role.setName("ROLE_USER");
+        User unverified = User.builder().id(2L).email("new@gmail.com").enabled(false).roles(List.of(role))
+                .userStats(UserStats.builder().build()).build();
+        when(users.signInWithGoogle("google-sub", "new@gmail.com", true, "")).thenReturn(unverified);
+        mvc.perform(post("/auth/google/register").servletPath("/auth/google/register").session(session)
+                .with(csrf()).param("terms", "true"))
+                .andExpect(redirectedUrl("/oauth2/authorization/google"));
+
+        assertEquals("/register?googleActivation", callback(session).getResponse().getRedirectedUrl());
+        assertNull(session.getAttribute("SPRING_SECURITY_CONTEXT"));
+        mvc.perform(get("/register").servletPath("/register").param("googleActivation", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Google registration successful")))
+                .andExpect(content().string(containsString("confirm your account before signing in")));
+        verify(users).signInWithGoogle("google-sub", "new@gmail.com", true, "");
     }
 
     @Test

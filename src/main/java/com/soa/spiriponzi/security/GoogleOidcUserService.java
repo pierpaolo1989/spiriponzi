@@ -52,18 +52,20 @@ public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest,
         HttpServletRequest servletRequest = attributes.getRequest();
         HttpSession session = servletRequest.getSession(false);
         Object pending = session == null ? null : session.getAttribute(GoogleAuthController.REGISTRATION_REFERRAL);
+        boolean registering = pending instanceof String;
         if (session != null) {
             session.removeAttribute(GoogleAuthController.REGISTRATION_REFERRAL);
         }
         User user;
         try {
-            user = users.signInWithGoogle(subject, email, pending instanceof String, pending instanceof String ? (String) pending : null);
+            user = users.signInWithGoogle(subject, email, registering, registering ? (String) pending : null);
         } catch (ResponseStatusException ex) {
             throw new OAuth2AuthenticationException(new OAuth2Error("google_account_error"), ex.getReason(), ex);
         }
         if (!user.isEnabled()) {
+            String errorCode = registering ? "google_registration_activation_required" : "account_not_activated";
             throw new OAuth2AuthenticationException(
-                    new OAuth2Error("account_not_activated"), "Activate your account using the link sent by email");
+                    new OAuth2Error(errorCode), "Activate your account using the link sent by email");
         }
         List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName())).toList();
