@@ -34,6 +34,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,6 +51,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -147,6 +150,25 @@ class AdminWithdrawalWebTest {
 
         verify(offerwallService).processEarnwallCallback(
                 "10", "earnwall-tx", "15.9", "1", "0", "signed-value");
+    }
+
+    @Test
+    void rejectedEarnwallPostbackReturnsErrorWithoutRedirectingToLogin() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "EarnWall signature is invalid"))
+                .when(offerwallService).processEarnwallCallback(
+                        "10", "earnwall-tx", "15.9", "1", "1", "invalid");
+
+        mvc.perform(post("/earnwall/postback").servletPath("/earnwall/postback")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("subId", "10")
+                        .param("transId", "earnwall-tx")
+                        .param("reward", "15.9")
+                        .param("status", "1")
+                        .param("debug", "1")
+                        .param("signature", "invalid"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .content().string("Postback rejected"));
     }
 
     @Test
