@@ -6,6 +6,7 @@ import com.soa.spiriponzi.dto.ResetPasswordFormDto;
 import com.soa.spiriponzi.dto.UpdateUserDto;
 import com.soa.spiriponzi.dto.UserDto;
 import com.soa.spiriponzi.model.User;
+import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.service.TheoremReachCallbackService;
 import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.WithdrawService;
@@ -253,7 +254,15 @@ class AuthControllerTest {
         assertEquals(ControllerTestSupport.EMAIL, model.get("cpxUsername"));
         assertEquals("academy", controller.academy(model));
         assertEquals("withdraw-requests", controller.withdrawRequests(model));
+        UserStats reportStats = UserStats.builder()
+                .monthlyPoints(40)
+                .annualPoints(120)
+                .numberOfClaims(8)
+                .withdrawals(2)
+                .build();
+        when(userService.findStatsByEmail(ControllerTestSupport.EMAIL)).thenReturn(reportStats);
         assertEquals("report", controller.report(model));
+        assertSame(reportStats, model.get("reportStats"));
         assertEquals("games", controller.games(model));
         when(offerwallService.isConfigured()).thenReturn(true);
         when(offerwallService.createSignedWallUrl("10"))

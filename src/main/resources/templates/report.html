@@ -66,6 +66,36 @@
 
 					<div th:replace="~{fragments/summary}"></div>
 
+					<div class="row mb-4" id="reportStatistics" th:if="${reportStats != null}"
+						 th:attr="data-monthly-points=${reportStats.monthlyPoints},data-annual-points=${reportStats.annualPoints},data-claims=${reportStats.numberOfClaims},data-withdrawals=${reportStats.withdrawals}">
+						<div class="col-lg-7 mb-4 mb-lg-0">
+							<div class="card shadow h-100">
+								<div class="card-header py-3">
+									<h6 class="m-0 font-weight-bold text-primary">Points by period</h6>
+								</div>
+								<div class="card-body">
+									<div style="height: 280px; position: relative;">
+										<canvas id="pointsByPeriodChart" role="img"
+											aria-label="Bar chart comparing points earned this month and this year"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-5">
+							<div class="card shadow h-100">
+								<div class="card-header py-3">
+									<h6 class="m-0 font-weight-bold text-primary">Account activity</h6>
+								</div>
+								<div class="card-body">
+									<div style="height: 280px; position: relative;">
+										<canvas id="accountActivityChart" role="img"
+											aria-label="Pie chart comparing claims and approved withdrawals"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div class="row">
 					<div class="col-lg-10 mb-4 offset-lg-1">
 
@@ -165,9 +195,58 @@
 		<!-- Custom scripts for all pages-->
 		<script th:src="@{/js/sb-admin-2.min.js}"></script>
 
+		<script th:src="@{/vendor/chart.js/Chart.min.js}"></script>
 		<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 		<script>
 			$(function () {
+				const reportStatistics = document.getElementById('reportStatistics');
+				if (reportStatistics) {
+					const monthlyPoints = Number(reportStatistics.dataset.monthlyPoints);
+					const annualPoints = Number(reportStatistics.dataset.annualPoints);
+					const claims = Number(reportStatistics.dataset.claims);
+					const withdrawals = Number(reportStatistics.dataset.withdrawals);
+
+					new Chart(document.getElementById('pointsByPeriodChart'), {
+						type: 'bar',
+						data: {
+							labels: ['This month', 'This year'],
+							datasets: [{
+								label: 'Points',
+								data: [monthlyPoints, annualPoints],
+								backgroundColor: ['rgba(78, 115, 223, 0.75)', 'rgba(28, 200, 138, 0.75)'],
+								borderColor: ['#4e73df', '#1cc88a'],
+								borderWidth: 1
+							}]
+						},
+						options: {
+							responsive: true,
+							maintainAspectRatio: false,
+							legend: { display: false },
+							scales: {
+								yAxes: [{ ticks: { beginAtZero: true, precision: 0 } }]
+							}
+						}
+					});
+
+					new Chart(document.getElementById('accountActivityChart'), {
+						type: 'pie',
+						data: {
+							labels: ['Claims', 'Approved withdrawals'],
+							datasets: [{
+								data: [claims, withdrawals],
+								backgroundColor: ['#4e73df', '#f6c23e'],
+								borderColor: '#ffffff',
+								borderWidth: 2
+							}]
+						},
+						options: {
+							responsive: true,
+							maintainAspectRatio: false,
+							legend: { position: 'bottom' }
+						}
+					});
+				}
+
 				function updateArrowIcon($collapse, isShown) {
 					const $icon = $collapse.prev('.card-header').find('i');
 					$icon.removeClass('fa-chevron-down fa-chevron-up');

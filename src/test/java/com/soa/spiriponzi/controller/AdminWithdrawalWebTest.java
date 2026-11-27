@@ -161,6 +161,28 @@ class AdminWithdrawalWebTest {
     }
 
     @Test
+    void reportDisplaysChartsAndFollowsAcademyInSidebar() throws Exception {
+        UserStats stats = UserStats.builder()
+                .monthlyPoints(40)
+                .annualPoints(120)
+                .numberOfClaims(8)
+                .withdrawals(2)
+                .build();
+        User user = User.builder().id(1L).email("test").userStats(stats).build();
+        when(userService.findByEmail("test")).thenReturn(user);
+        when(userService.findStatsByEmail("test")).thenReturn(stats);
+
+        String report = mvc.perform(get("/report").servletPath("/report")
+                        .session(session("ROLE_USER")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        assertTrue(report.contains("id=\"pointsByPeriodChart\""));
+        assertTrue(report.contains("id=\"accountActivityChart\""));
+        assertTrue(report.contains("data-monthly-points=\"40\""));
+        assertTrue(report.indexOf("href=\"/report\"") > report.indexOf("href=\"/academy\""));
+    }
+
+    @Test
     void academyAdvertisementRemainsInDocumentFlowBeforeFooter() throws Exception {
         User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
         when(userService.findByEmail("test")).thenReturn(user);
