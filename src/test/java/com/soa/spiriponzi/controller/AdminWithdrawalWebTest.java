@@ -108,6 +108,10 @@ class AdminWithdrawalWebTest {
 
         User user = User.builder().id(1L).email("test").userStats(UserStats.builder().build()).build();
         when(userService.findByEmail("test")).thenReturn(user);
+        when(offerwallService.isEarnwallConfigured()).thenReturn(true);
+        when(offerwallService.getEarnwallPlacementKey()).thenReturn("placement-key");
+        when(offerwallService.createEarnwallWallUrl("1"))
+                .thenReturn("https://earnwall.net/offerwall/placement-key/1");
         String offerwall = mvc.perform(get("/offerwall").servletPath("/offerwall")
                         .session(session("ROLE_USER")))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
@@ -115,6 +119,10 @@ class AdminWithdrawalWebTest {
         assertTrue(offerwall.contains("loading=\"lazy\" width=\"720\" height=\"150\""));
         assertTrue(offerwall.contains("<h2 class=\"h5 text-gray-800\">Offerwall.GG</h2>"));
         assertTrue(offerwall.contains("<strong>Complete offers to earn points."));
+        assertTrue(offerwall.contains("<earnwall-offers"));
+        assertTrue(offerwall.contains("placement=\"placement-key\""));
+        assertTrue(offerwall.contains("user-id=\"1\""));
+        assertTrue(offerwall.contains("https://earnwall.net/assets/js/earnwall-widget.js?v=3"));
         assertFalse(offerwall.contains("Postback URL to configure in EarnWall"));
         int promoCodeLink = offerwall.indexOf("href=\"/promotions\"");
         int supportLink = offerwall.indexOf("href=\"/support\"");

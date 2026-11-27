@@ -70,19 +70,18 @@
 							<h2 class="h5 text-gray-800">EarnWall</h2>
 							<p class="mb-3">Complete EarnWall offers to earn points. Rewards are credited after EarnWall confirms a conversion.</p>
 							<div th:if="${earnwallEnabled}">
-								<iframe class="offerwall-frame"
-									title="EarnWall"
-									width="100%"
-									height="800"
-									loading="lazy"
-									referrerpolicy="strict-origin-when-cross-origin"
-									th:src="${earnwallUrl}"
-									allowfullscreen>
-								</iframe>
+								<earnwall-offers
+									th:attr="placement=${earnwallPlacementKey},user-id=${user.id}"
+									layout="rail"
+									theme="light"
+									size="regular"
+									accent="#5040bd"
+									limit="12">
+								</earnwall-offers>
 								<p class="small text-muted mt-2 mb-0">
 									<a target="_blank" rel="noopener noreferrer"
 										th:href="${earnwallUrl}">
-										Open EarnWall in a new tab
+										Open full EarnWall (including surveys, PPC and videos) in a new tab
 									</a>
 								</p>
 							</div>
@@ -108,5 +107,7 @@
 	<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 	<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
 	<script th:src="@{/js/sb-admin-2.min.js}"></script>
+	<script th:if="${earnwallEnabled}" defer
+		src="https://earnwall.net/assets/js/earnwall-widget.js?v=3"></script>
 </body>
 </html>

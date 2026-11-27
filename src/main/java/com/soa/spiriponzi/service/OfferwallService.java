@@ -85,6 +85,14 @@ public class OfferwallService {
                 && earnwallSecretKey != null && !earnwallSecretKey.isBlank();
     }
 
+    public String getEarnwallPlacementKey() {
+        if (earnwallPlacementKey == null || earnwallPlacementKey.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE, "EarnWall placement key is not configured");
+        }
+        return earnwallPlacementKey;
+    }
+
     public String createEarnwallWallUrl(String userId) {
         if (!isEarnwallConfigured()) {
             throw new ResponseStatusException(

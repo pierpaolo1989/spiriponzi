@@ -232,6 +232,7 @@ public class AuthController {
 		boolean earnwallEnabled = offerwallService.isEarnwallConfigured();
 		model.addAttribute("earnwallEnabled", earnwallEnabled);
 		if (earnwallEnabled) {
+			model.addAttribute("earnwallPlacementKey", offerwallService.getEarnwallPlacementKey());
 			model.addAttribute("earnwallUrl",
 					offerwallService.createEarnwallWallUrl(user.getId().toString()));
 		}
