@@ -45,7 +45,8 @@
 					<div th:replace="~{fragments/summary}"></div>
 					<div class="card shadow mb-4">
 						<div class="card-body">
-							<p class="mb-3">Complete partner offers to earn points. Rewards are credited after Offerwall.GG confirms a conversion.</p>
+							<h2 class="h5 text-gray-800">Offerwall.GG</h2>
+							<p class="mb-3"><strong>Complete offers to earn points. Rewards are credited after Offerwall.GG confirms a conversion.</strong></p>
 							<p class="small text-muted">Fractional rewards are rounded down to whole points. Reversed offers deduct the same number of points that was originally credited.</p>
 							<div th:if="${offerwallEnabled}">
 								<iframe class="offerwall-frame"
@@ -87,11 +88,7 @@
 							</div>
 							<div class="alert alert-info mb-0" role="status" th:unless="${earnwallEnabled}">
 								<p>EarnWall is not configured yet. Set <code>EARNWALL_PLACEMENT_KEY</code> and <code>EARNWALL_SECRET_KEY</code> in the deployment.</p>
-								<p class="mb-0">In the EarnWall placement settings, set the postback URL to <code th:text="${earnwallCallbackUrl}"></code>. EarnWall sends a signed form POST to this endpoint.</p>
 							</div>
-							<p class="small text-muted mt-2 mb-0" th:if="${earnwallEnabled}">
-								Postback URL to configure in EarnWall: <code th:text="${earnwallCallbackUrl}"></code>
-							</p>
 						</div>
 						<div class="text-center my-4" aria-label="Advertisement">
 							<iframe title="Advertisement" data-aa="2462874" loading="lazy" width="720" height="150"

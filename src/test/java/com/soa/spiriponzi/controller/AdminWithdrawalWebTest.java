@@ -113,6 +113,9 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertTrue(offerwall.contains("data-aa=\"2462874\""));
         assertTrue(offerwall.contains("loading=\"lazy\" width=\"720\" height=\"150\""));
+        assertTrue(offerwall.contains("<h2 class=\"h5 text-gray-800\">Offerwall.GG</h2>"));
+        assertTrue(offerwall.contains("<strong>Complete offers to earn points."));
+        assertFalse(offerwall.contains("Postback URL to configure in EarnWall"));
         int promoCodeLink = offerwall.indexOf("href=\"/promotions\"");
         int supportLink = offerwall.indexOf("href=\"/support\"");
         assertTrue(promoCodeLink >= 0 && promoCodeLink < supportLink);
