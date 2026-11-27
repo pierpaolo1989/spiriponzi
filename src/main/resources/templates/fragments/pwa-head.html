@@ -1,0 +1,13 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="pwaHead">
+	<meta name="theme-color" content="#182a52">
+	<meta name="application-name" content="Spiriponzi">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-title" content="Spiriponzi">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="manifest" th:href="@{/manifest.webmanifest}">
+	<link rel="apple-touch-icon" sizes="180x180" th:href="@{/img/icons/apple-touch-icon.png}">
+	<link rel="icon" type="image/png" sizes="192x192" th:href="@{/img/icons/icon-192.png}">
+	<script defer th:src="@{/js/pwa-register.js}"></script>
+</th:block>

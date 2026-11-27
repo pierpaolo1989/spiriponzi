@@ -89,9 +89,9 @@
 										<td class="text-nowrap">
 											<button class="btn btn-sm btn-outline-primary" type="button" data-copy-code
 												th:attr="data-code=${promo.code}"><i class="fas fa-copy mr-1" aria-hidden="true"></i>Copia</button>
-											<form class="d-inline" method="post"
-												th:action="@{/admin/promo-codes/{id}/delete(id=${promo.id})}"
-												onsubmit="return confirm('Eliminare definitivamente questo codice e lo storico dei riscatti? I punti già accreditati resteranno agli utenti.');">
+											<form class="d-inline" method="post" data-confirm-delete
+												th:attr="data-code=${promo.code}"
+												th:action="@{/admin/promo-codes/{id}/delete(id=${promo.id})}">
 												<button class="btn btn-sm btn-outline-danger" type="submit">
 													<i class="fas fa-trash-alt mr-1" aria-hidden="true"></i>Elimina
 												</button>
@@ -106,6 +106,27 @@
 					</div>
 				</section>
 			</main>
+			<div class="modal fade" id="deletePromoModal" tabindex="-1" role="dialog"
+				aria-labelledby="deletePromoModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header bg-danger text-white">
+							<h5 class="modal-title" id="deletePromoModalLabel">Conferma eliminazione</h5>
+							<button type="button" class="close text-white" data-dismiss="modal" aria-label="Chiudi">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							Eliminare definitivamente il codice <strong id="deletePromoCode"></strong> e lo storico dei riscatti?
+							I punti già accreditati resteranno agli utenti.
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+							<button type="button" class="btn btn-danger" id="confirmDeletePromo">Elimina codice</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -113,6 +134,33 @@
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/sb-admin-2.min.js}"></script>
 <script>
+	let pendingDeleteForm = null;
+	const deletePromoModal = $('#deletePromoModal');
+
+	document.querySelectorAll('form[data-confirm-delete]').forEach(form => {
+		form.addEventListener('submit', event => {
+			event.preventDefault();
+			pendingDeleteForm = form;
+			document.getElementById('deletePromoCode').textContent = form.dataset.code;
+			deletePromoModal.modal('show');
+		});
+	});
+
+	document.getElementById('confirmDeletePromo').addEventListener('click', () => {
+		if (!pendingDeleteForm) {
+			console.error('Nessun codice promozionale selezionato per l’eliminazione.');
+			return;
+		}
+
+		const form = pendingDeleteForm;
+		pendingDeleteForm = null;
+		form.submit();
+	});
+
+	deletePromoModal.on('hidden.bs.modal', () => {
+		pendingDeleteForm = null;
+	});
+
 	document.querySelectorAll('[data-copy-code]').forEach(button => {
 		button.addEventListener('click', async () => {
 			const status = document.getElementById('copy-status');

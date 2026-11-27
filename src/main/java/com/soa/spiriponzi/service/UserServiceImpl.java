@@ -5,6 +5,7 @@ import com.soa.spiriponzi.dto.*;
 import com.soa.spiriponzi.exception.ClaimException;
 import com.soa.spiriponzi.model.*;
 import com.soa.spiriponzi.repository.*;
+import com.soa.spiriponzi.model.enums.WithdrawStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,7 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final AdRepository adRepository;
     private final UserAdRepository userAdRepository;
+    private final WithdrawRepository withdrawRepository;
 
     @Value("${app.public-base-url:https://www.spiriponzi.cloud}")
     private String publicBaseUrl;
@@ -282,7 +284,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+        if (user != null && user.getUserStats() != null) {
+            user.getUserStats().setWithdrawals(countApprovedWithdrawals(email));
+        }
+        return user;
     }
 
     @Override
@@ -306,8 +312,18 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserStats findStatsByEmail(String email) {
-		return userStatsRepository.findByUserEmail(email).orElse(null);
+		UserStats stats = userStatsRepository.findByUserEmail(email).orElse(null);
+		if (stats != null) {
+			stats.setWithdrawals(countApprovedWithdrawals(email));
+		}
+		return stats;
 	}
+
+    private int countApprovedWithdrawals(String email) {
+        long count = withdrawRepository.countByUserEmailAndStatusIn(email,
+                List.of(WithdrawStatus.APPROVED.name(), WithdrawStatus.COMPLETED.name()));
+        return Math.toIntExact(count);
+    }
 
 	@Override
 	@Transactional

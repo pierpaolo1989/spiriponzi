@@ -7,6 +7,7 @@ import com.soa.spiriponzi.exception.ClaimException;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
+import com.soa.spiriponzi.repository.WithdrawRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +29,7 @@ class ClaimServiceImplTest {
     private ClaimRepository claimRepository;
     private UserRepository userRepository;
     private UserStatsRepository userStatsRepository;
+    private WithdrawRepository withdrawRepository;
     private ClaimServiceImpl claimService;
 
     @BeforeEach
@@ -35,7 +37,8 @@ class ClaimServiceImplTest {
         claimRepository = mock(ClaimRepository.class);
         userRepository = mock(UserRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
-        claimService = new ClaimServiceImpl(claimRepository, userRepository, userStatsRepository);
+        withdrawRepository = mock(WithdrawRepository.class);
+        claimService = new ClaimServiceImpl(claimRepository, userRepository, userStatsRepository, withdrawRepository);
         org.mockito.Mockito.when(claimRepository.save(any(Claim.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
     }
@@ -129,6 +132,8 @@ class ClaimServiceImplTest {
                 .build();
         when(userStatsRepository.findWithLockByUserEmail(email)).thenReturn(Optional.of(stats));
         when(userRepository.findByEmail(email)).thenReturn(user);
+        when(withdrawRepository.countByUserEmailAndStatusIn(email, java.util.List.of("APPROVED", "COMPLETED")))
+                .thenReturn(1L);
 
         var result = claimService.startGameClaim(email);
 

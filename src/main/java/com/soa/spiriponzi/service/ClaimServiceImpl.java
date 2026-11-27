@@ -21,6 +21,8 @@ import com.soa.spiriponzi.model.UserStats;
 import com.soa.spiriponzi.repository.ClaimRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
+import com.soa.spiriponzi.repository.WithdrawRepository;
+import com.soa.spiriponzi.model.enums.WithdrawStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +36,7 @@ public class ClaimServiceImpl implements ClaimService {
 	private final ClaimRepository claimRepository;
 	private final UserRepository userRepository;
 	private final UserStatsRepository userStatsRepository;
+	private final WithdrawRepository withdrawRepository;
 
 	@Override
 	@Transactional
@@ -145,7 +148,8 @@ public class ClaimServiceImpl implements ClaimService {
 				.annualPoints(userStats.getAnnualPoints())
 				.monthlyPoints(userStats.getMonthlyPoints())
 				.numberOfClaims(userStats.getNumberOfClaims())
-				.withdrawals(userStats.getWithdrawals())
+				.withdrawals(Math.toIntExact(withdrawRepository.countByUserEmailAndStatusIn(email,
+						List.of(WithdrawStatus.APPROVED.name(), WithdrawStatus.COMPLETED.name()))))
 				.lastRequest(userStats.getLastRequest())
 				.build();
 	}

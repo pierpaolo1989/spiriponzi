@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "Spiriponzi",
+  "short_name": "Spiriponzi",
+  "description": "Earn points through hourly claims, games, surveys and other activities.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#182a52",
+  "theme_color": "#182a52",
+  "categories": ["entertainment", "lifestyle"],
+  "icons": [
+    { "src": "/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/img/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Log in", "url": "/login", "icons": [{ "src": "/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Join us", "url": "/register", "icons": [{ "src": "/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}

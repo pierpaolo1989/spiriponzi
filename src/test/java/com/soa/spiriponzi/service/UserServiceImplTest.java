@@ -16,6 +16,7 @@ import com.soa.spiriponzi.repository.RoleRepository;
 import com.soa.spiriponzi.repository.UserAdRepository;
 import com.soa.spiriponzi.repository.UserRepository;
 import com.soa.spiriponzi.repository.UserStatsRepository;
+import com.soa.spiriponzi.repository.WithdrawRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
@@ -42,6 +44,7 @@ class UserServiceImplTest {
 
     private UserRepository userRepository;
     private UserStatsRepository userStatsRepository;
+    private WithdrawRepository withdrawRepository;
     private PasswordResetTokenRepository passwordResetTokenRepository;
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
     private RoleRepository roleRepository;
@@ -55,6 +58,7 @@ class UserServiceImplTest {
     void setUp() {
         userRepository = mock(UserRepository.class);
         userStatsRepository = mock(UserStatsRepository.class);
+        withdrawRepository = mock(WithdrawRepository.class);
         passwordResetTokenRepository = mock(PasswordResetTokenRepository.class);
         emailVerificationTokenRepository = mock(EmailVerificationTokenRepository.class);
         roleRepository = mock(RoleRepository.class);
@@ -71,9 +75,24 @@ class UserServiceImplTest {
                 passwordEncoder,
                 emailService,
                 adRepository,
-                userAdRepository
+                userAdRepository,
+                withdrawRepository
         );
         ReflectionTestUtils.setField(userService, "publicBaseUrl", "https://www.spiriponzi.cloud");
+    }
+
+    @Test
+    void userStatsCountApprovedAndCompletedWithdrawalsFromRequests() {
+        String email = "person@example.com";
+        UserStats stats = UserStats.builder().withdrawals(0).build();
+        when(userStatsRepository.findByUserEmail(email)).thenReturn(java.util.Optional.of(stats));
+        when(userRepository.findByEmail(email))
+                .thenReturn(User.builder().email(email).userStats(stats).build());
+        when(withdrawRepository.countByUserEmailAndStatusIn(email, List.of("APPROVED", "COMPLETED")))
+                .thenReturn(1L);
+
+        assertEquals(1, userService.findStatsByEmail(email).getWithdrawals());
+        assertEquals(1, userService.findByEmail(email).getUserStats().getWithdrawals());
     }
 
     @Test

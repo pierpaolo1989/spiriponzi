@@ -155,7 +155,7 @@ class WithdrawServiceImplTest {
         assertThrows(ResponseStatusException.class, () -> service.complete(1L, "PAY-123", new BigDecimal("0.50")));
         service.complete(1L, "PAY-123", new BigDecimal("0.40"));
         assertEquals("COMPLETED", withdrawal.getStatus());
-        assertEquals(1, stats.getWithdrawals());
+        assertEquals(0, stats.getWithdrawals());
         assertThrows(ResponseStatusException.class, () -> service.complete(1L, "PAY-123", new BigDecimal("0.40")));
         assertThrows(ResponseStatusException.class, () -> service.reject(1L));
     }

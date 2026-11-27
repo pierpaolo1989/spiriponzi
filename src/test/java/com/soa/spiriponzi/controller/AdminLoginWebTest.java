@@ -13,6 +13,7 @@ import com.soa.spiriponzi.controller.PromoCodeAdminController;
 import com.soa.spiriponzi.controller.PromoCodeController;
 import com.soa.spiriponzi.controller.SupportController;
 import com.soa.spiriponzi.service.AdminMfaService;
+import com.soa.spiriponzi.service.CaptchaService;
 import com.soa.spiriponzi.service.EmailService;
 import com.soa.spiriponzi.service.CloudflareAnalyticsService;
 import com.soa.spiriponzi.service.PromoCodeService;
@@ -20,6 +21,7 @@ import com.soa.spiriponzi.service.UserService;
 import com.soa.spiriponzi.service.ActivationEmailResendResult;
 import com.soa.spiriponzi.service.RenderService;
 import com.soa.spiriponzi.service.WithdrawServiceImpl;
+import com.soa.spiriponzi.exception.ReCaptchaInvalidException;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -72,6 +75,7 @@ class AdminLoginWebTest {
     @MockBean private PromoCodeService promoCodeService;
     @MockBean private UserService userService;
     @MockBean private EmailService emailService;
+    @MockBean private CaptchaService captchaService;
 
     @Test
     void repeatedLoginsWithSeparateSessionsReachAdminDashboard() throws Exception {
@@ -231,12 +235,17 @@ class AdminLoginWebTest {
 
     @Test
     void authenticatedUserCanSendSupportTicketWithCsrfProtection() throws Exception {
+        when(captchaService.getReCaptchaSite()).thenReturn("test-site-key");
+        when(captchaService.getReCaptchaSecret()).thenReturn("test-secret-key");
+
         mvc.perform(get("/support").servletPath("/support").with(user("player").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Contact support")))
                 .andExpect(content().string(containsString("Missing credit / points not credited")))
                 .andExpect(content().string(containsString("Close and return to dashboard")))
-                .andExpect(content().string(containsString("href=\"/support\"")));
+                .andExpect(content().string(containsString("href=\"/support\"")))
+                .andExpect(content().string(containsString("data-sitekey=\"test-site-key\"")))
+                .andExpect(content().string(containsString("data-ad-slot=\"6698101758\"")));
 
         mvc.perform(post("/support").servletPath("/support")
                         .with(user("player").roles("USER"))
@@ -248,18 +257,65 @@ class AdminLoginWebTest {
                         .with(user("player").roles("USER"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("topic", "MISSING_CREDIT")
-                        .param("message", "  My survey reward has not been credited.  "))
+                        .param("message", "  My survey reward has not been credited.  ")
+                        .param("g-recaptcha-response", "valid-captcha-response"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/support"));
+        verify(captchaService).processResponse("valid-captcha-response");
         verify(emailService).sendSupportTicket(
                 "player", "Missing credit / points not credited", "My survey reward has not been credited.");
+    }
+
+    @Test
+    void supportTicketIsNotSentWhenCaptchaIsInvalid() throws Exception {
+        when(captchaService.getReCaptchaSite()).thenReturn("test-site-key");
+        when(captchaService.getReCaptchaSecret()).thenReturn("test-secret-key");
+        doThrow(new ReCaptchaInvalidException("invalid response"))
+                .when(captchaService).processResponse("invalid-captcha-response");
+
+        mvc.perform(post("/support").servletPath("/support")
+                        .with(user("player").roles("USER"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("topic", "MISSING_CREDIT")
+                        .param("message", "My survey reward has not been credited.")
+                        .param("g-recaptcha-response", "invalid-captcha-response"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Please complete the CAPTCHA verification")))
+                .andExpect(content().string(containsString("g-recaptcha")));
+
+        verify(emailService, never()).sendSupportTicket(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString());
     }
 
     @Test
     void monetagServiceWorkerIsAvailableWithoutAuthentication() throws Exception {
         mvc.perform(get("/sw.js").servletPath("/sw.js"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"zoneId\": 12360642")));
+                .andExpect(content().string(containsString("\"zoneId\": 12360749")))
+                .andExpect(content().string(containsString("importScripts('/js/pwa-sw.js')")));
+    }
+
+    @Test
+    void pwaAssetsAreAvailableWithoutAuthentication() throws Exception {
+        mvc.perform(get("/manifest.webmanifest").servletPath("/manifest.webmanifest"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"display\": \"standalone\"")));
+        mvc.perform(get("/offline.html").servletPath("/offline.html")).andExpect(status().isOk());
+        mvc.perform(get("/js/pwa-sw.js").servletPath("/js/pwa-sw.js")).andExpect(status().isOk());
+        mvc.perform(get("/img/icons/apple-touch-icon.png").servletPath("/img/icons/apple-touch-icon.png"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void homepageIsInstallableOnIos() throws Exception {
+        mvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("viewport-fit=cover")))
+                .andExpect(content().string(containsString("rel=\"manifest\"")))
+                .andExpect(content().string(containsString("rel=\"apple-touch-icon\"")))
+                .andExpect(content().string(containsString("name=\"apple-mobile-web-app-capable\"")));
     }
 
     @Test

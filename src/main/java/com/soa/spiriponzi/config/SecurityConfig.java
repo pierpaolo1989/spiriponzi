@@ -79,6 +79,8 @@ public class SecurityConfig {
                                 "/affiliate/click/**",
                                 "/auth/google/**", "/oauth2/**", "/login/oauth2/**",
                                 "/sw.js",
+                                "/manifest.webmanifest",
+                                "/offline.html",
                                 "/sitemap.xml",
                                 "/ads.txt",
                                 "/img/**", "/js/**", "/css/**", "/webjars/**", "/vendor/**").permitAll()

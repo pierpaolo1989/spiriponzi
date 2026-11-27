@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface WithdrawRepository extends JpaRepository<WithdrawRequest, Long> {
 	
 	Page<WithdrawRequest> findByUserEmail(String email, Pageable pageable);
+	long countByUserEmailAndStatusIn(String email, List<String> statuses);
 	long countByStatus(String status);
 	List<WithdrawRequest> findTop10ByOrderByDateRequestDesc();
 	Page<WithdrawRequest> findByStatusInOrderByDateRequestAsc(List<String> statuses, Pageable pageable);

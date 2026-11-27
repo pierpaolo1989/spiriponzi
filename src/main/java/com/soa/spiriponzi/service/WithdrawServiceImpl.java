@@ -146,8 +146,6 @@ public class WithdrawServiceImpl implements WithdrawService {
         request.setTransactionId(cleanReference);
         request.setPaidAmount(paidAmount);
         request.setStatus(WithdrawStatus.COMPLETED.name());
-        UserStats stats = lockedStats(request);
-        stats.setWithdrawals(Math.addExact(stats.getWithdrawals(), 1));
     }
 
     private WithdrawRequest lockedRequest(long id, WithdrawStatus... expected) {

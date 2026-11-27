@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
     <meta name="description" content="Discover Spiriponzi: earn points through hourly claims, games, surveys and other activities.">
     <meta name="offerwall-verification" content="ow-060f69a7e061df208ffd">
     <meta property="og:type" content="website">
@@ -23,6 +23,7 @@
     <meta name="twitter:image:alt" content="Spiriponzi: earn points through online activities">
     <title>Spiriponzi - Earn points, have fun</title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+    <th:block th:replace="~{fragments/pwa-head :: pwaHead}"></th:block>
     <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link th:href="@{/css/sb-admin-2.css}" rel="stylesheet">
