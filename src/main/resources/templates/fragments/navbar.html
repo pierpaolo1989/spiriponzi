@@ -68,10 +68,12 @@
 				class="mr-2 d-none d-lg-inline text-gray-600 small"> <span
 					sec:authentication="username"></span>
 			</span>
-			<img th:if="${googleProfilePicture != null}" class="img-profile rounded-circle"
-				th:src="${googleProfilePicture}" alt="Google profile picture" referrerpolicy="no-referrer">
-			<img th:unless="${googleProfilePicture != null}" class="img-profile rounded-circle"
-				src="img/undraw_profile.svg" alt="">
+			<span class="seasonal-avatar" data-seasonal-avatar>
+				<img th:if="${googleProfilePicture != null}" class="img-profile rounded-circle"
+					th:src="${googleProfilePicture}" alt="Google profile picture" referrerpolicy="no-referrer">
+				<img th:unless="${googleProfilePicture != null}" class="img-profile rounded-circle"
+					th:src="@{/img/undraw_profile.svg}" alt="">
+			</span>
 		</a> <!-- Dropdown - User Information -->
 			<div
 				class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -126,3 +128,4 @@
 		});
 	})();
 </script>
+<script defer th:src="@{/js/seasonal-avatar.js}"></script>

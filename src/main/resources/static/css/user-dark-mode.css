@@ -12,6 +12,24 @@ html[data-theme="dark"] {
 	max-width: 100%;
 }
 
+.seasonal-avatar {
+	display: inline-flex;
+	flex: 0 0 auto;
+	line-height: 0;
+	position: relative;
+}
+
+.seasonal-avatar-badge {
+	height: 24px;
+	pointer-events: none;
+	position: absolute;
+	right: -7px;
+	top: -7px;
+	transform: rotate(12deg);
+	width: 24px;
+	z-index: 1;
+}
+
 html[data-theme="dark"] body,
 html[data-theme="dark"] #content-wrapper,
 html[data-theme="dark"] #content {
