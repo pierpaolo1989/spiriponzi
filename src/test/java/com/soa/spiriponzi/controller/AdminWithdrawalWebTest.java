@@ -52,7 +52,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = {AdminController.class, AuthController.class, AdController.class, WihdrawController.class,
-        AffiliateController.class}, properties = "cloudflare.web-analytics.token=test-cloudflare-token")
+        AffiliateController.class, EarnwallPostbackController.class},
+        properties = "cloudflare.web-analytics.token=test-cloudflare-token")
 @Import(SecurityConfig.class)
 class AdminWithdrawalWebTest {
     @Autowired private MockMvc mvc;
@@ -112,6 +113,26 @@ class AdminWithdrawalWebTest {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertTrue(offerwall.contains("data-aa=\"2462874\""));
         assertTrue(offerwall.contains("loading=\"lazy\" width=\"720\" height=\"150\""));
+        int promoCodeLink = offerwall.indexOf("href=\"/promotions\"");
+        int supportLink = offerwall.indexOf("href=\"/support\"");
+        assertTrue(promoCodeLink >= 0 && promoCodeLink < supportLink);
+        assertTrue(promoCodeLink == offerwall.lastIndexOf("href=\"/promotions\""));
+    }
+
+    @Test
+    void earnwallPostbackIsPublicAndDoesNotRequireCsrf() throws Exception {
+        mvc.perform(post("/earnwall/postback").servletPath("/earnwall/postback")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("subId", "10")
+                        .param("transId", "earnwall-tx")
+                        .param("reward", "15.9")
+                        .param("status", "1")
+                        .param("debug", "0")
+                        .param("signature", "signed-value"))
+                .andExpect(status().isOk());
+
+        verify(offerwallService).processEarnwallCallback(
+                "10", "earnwall-tx", "15.9", "1", "0", "signed-value");
     }
 
     @Test

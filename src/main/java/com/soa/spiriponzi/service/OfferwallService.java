@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.Locale;
+import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,8 @@ public class OfferwallService {
 
     private static final String TRANSACTION_PREFIX = "offerwall:";
     private static final String REVERSAL_PREFIX = "offerwall:reversal:";
+    private static final String EARNWALL_TRANSACTION_PREFIX = "earnwall:";
+    private static final String EARNWALL_REVERSAL_PREFIX = "earnwall:reversal:";
 
     private final ClaimRepository claimRepository;
     private final UserRepository userRepository;
@@ -42,6 +45,12 @@ public class OfferwallService {
 
     @Value("${offerwall.require-signature:false}")
     private boolean requireSignature;
+
+    @Value("${earnwall.placement-key:}")
+    private String earnwallPlacementKey;
+
+    @Value("${earnwall.secret-key:}")
+    private String earnwallSecretKey;
 
     public OfferwallService(
             ClaimRepository claimRepository,
@@ -62,11 +71,31 @@ public class OfferwallService {
         requireWallConfiguration();
         long parsedUserId = parseUserId(userId);
         String normalizedUserId = Long.toString(parsedUserId);
-        String signature = hmacSha256("appId=" + publicKey + "&userId=" + normalizedUserId);
+        String signature = hmacSha256("appId=" + publicKey + "&userId=" + normalizedUserId, secretKey);
         return UriComponentsBuilder.fromUriString("https://offerwall.gg/wall/{publicKey}")
                 .queryParam("userId", normalizedUserId)
                 .queryParam("signature", signature)
                 .buildAndExpand(publicKey)
+                .encode()
+                .toUriString();
+    }
+
+    public boolean isEarnwallConfigured() {
+        return earnwallPlacementKey != null && !earnwallPlacementKey.isBlank()
+                && earnwallSecretKey != null && !earnwallSecretKey.isBlank();
+    }
+
+    public String createEarnwallWallUrl(String userId) {
+        if (!isEarnwallConfigured()) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE, "EarnWall integration is not configured");
+        }
+        long parsedUserId = parseUserId(userId);
+        return UriComponentsBuilder.fromUriString(
+                        "https://earnwall.net/offerwall/{placementKey}/{userId}")
+                .buildAndExpand(Map.of(
+                        "placementKey", earnwallPlacementKey,
+                        "userId", Long.toString(parsedUserId)))
                 .encode()
                 .toUriString();
     }
@@ -79,7 +108,7 @@ public class OfferwallService {
             String statusValue,
             String testValue,
             String suppliedSignature) {
-        requireCallbackConfiguration();
+        requireOfferwallCallbackConfiguration();
         requiredValue(userIdValue, "userId");
         requiredValue(transactionId, "transactionId");
         requiredValue(currencyAmount, "currencyAmount");
@@ -87,7 +116,66 @@ public class OfferwallService {
         if (transactionId.length() > 230 || currencyAmount.length() > 32) {
             throw badRequest("Offerwall callback parameter is too long");
         }
-        verifyCallbackSignature(userIdValue, transactionId, currencyAmount, suppliedSignature);
+        verifyCallbackSignature(userIdValue, transactionId, currencyAmount, suppliedSignature, secretKey);
+        processVerifiedCallback(
+                userIdValue, transactionId, currencyAmount, statusValue, testValue,
+                TRANSACTION_PREFIX, REVERSAL_PREFIX);
+    }
+
+    @Transactional
+    public void processEarnwallCallback(
+            String userIdValue,
+            String transactionId,
+            String reward,
+            String statusValue,
+            String debugValue,
+            String suppliedSignature) {
+        requireEarnwallCallbackConfiguration();
+        requiredValue(userIdValue, "userId");
+        requiredValue(transactionId, "transactionId");
+        requiredValue(reward, "reward");
+        requiredValue(statusValue, "status");
+        if (transactionId.length() > 230 || reward.length() > 32) {
+            throw badRequest("EarnWall callback parameter is too long");
+        }
+        verifyEarnwallSignature(userIdValue, transactionId, reward, suppliedSignature);
+
+        String status = switch (statusValue) {
+            case "1" -> "credited";
+            case "2" -> "reversed";
+            default -> throw badRequest("Unsupported EarnWall callback status");
+        };
+        String test = debugValue == null || debugValue.isBlank() ? "0" : debugValue;
+        if (!test.equals("0") && !test.equals("1")) {
+            throw badRequest("Invalid EarnWall debug flag");
+        }
+        String amount = reward;
+        if (status.equals("reversed") && !test.equals("1")) {
+            BigDecimal parsedReward = parseAmount(reward);
+            if (parsedReward.signum() <= 0) {
+                throw badRequest("EarnWall reward must be positive");
+            }
+            amount = parsedReward.negate().toPlainString();
+        }
+
+        processVerifiedCallback(
+                userIdValue,
+                transactionId,
+                amount,
+                status,
+                test,
+                EARNWALL_TRANSACTION_PREFIX,
+                EARNWALL_REVERSAL_PREFIX);
+    }
+
+    private void processVerifiedCallback(
+            String userIdValue,
+            String transactionId,
+            String currencyAmount,
+            String statusValue,
+            String testValue,
+            String transactionPrefix,
+            String reversalPrefix) {
 
         String test = testValue == null || testValue.isBlank() ? "0" : testValue;
         if (test.equals("1")) {
@@ -109,8 +197,8 @@ public class OfferwallService {
             throw badRequest("Offerwall amount does not match callback status");
         }
 
-        String originalTransactionId = TRANSACTION_PREFIX + transactionId;
-        String reversalTransactionId = REVERSAL_PREFIX + transactionId;
+        String originalTransactionId = transactionPrefix + transactionId;
+        String reversalTransactionId = reversalPrefix + transactionId;
         if (status.equals("credited")) {
             creditConversion(userId, originalTransactionId, amount);
         } else {
@@ -205,12 +293,18 @@ public class OfferwallService {
         return stats;
     }
 
-    private void requireCallbackConfiguration() {
-        if (secretKey == null || secretKey.isBlank()
-                || publicKey == null || publicKey.isBlank()
+    private void requireOfferwallCallbackConfiguration() {
+        if (secretKey == null || secretKey.isBlank() || publicKey == null || publicKey.isBlank()
                 || !requireSignature) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE, "Offerwall callback configuration is incomplete");
+        }
+    }
+
+    private void requireEarnwallCallbackConfiguration() {
+        if (earnwallSecretKey == null || earnwallSecretKey.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE, "EarnWall callback secret is not configured");
         }
     }
 
@@ -222,11 +316,11 @@ public class OfferwallService {
     }
 
     private void verifyCallbackSignature(
-            String userId, String transactionId, String amount, String suppliedSignature) {
+            String userId, String transactionId, String amount, String suppliedSignature, String callbackSecret) {
         if (suppliedSignature == null || !suppliedSignature.matches("(?i)[0-9a-f]{64}")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Offerwall signature is missing or invalid");
         }
-        String expected = hmacSha256(userId + ":" + transactionId + ":" + amount);
+        String expected = hmacSha256(userId + ":" + transactionId + ":" + amount, callbackSecret);
         if (!MessageDigest.isEqual(
                 expected.getBytes(StandardCharsets.US_ASCII),
                 suppliedSignature.toLowerCase(Locale.ROOT).getBytes(StandardCharsets.US_ASCII))) {
@@ -234,10 +328,32 @@ public class OfferwallService {
         }
     }
 
-    private String hmacSha256(String value) {
+    private void verifyEarnwallSignature(
+            String userId, String transactionId, String reward, String suppliedSignature) {
+        if (suppliedSignature == null || !suppliedSignature.matches("(?i)[0-9a-f]{32}")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "EarnWall signature is missing or invalid");
+        }
+        String expected = md5(userId + transactionId + reward + earnwallSecretKey);
+        if (!MessageDigest.isEqual(
+                expected.getBytes(StandardCharsets.US_ASCII),
+                suppliedSignature.toLowerCase(Locale.ROOT).getBytes(StandardCharsets.US_ASCII))) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "EarnWall signature is invalid");
+        }
+    }
+
+    private String md5(String value) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("MD5")
+                    .digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("Unable to process EarnWall signature", exception);
+        }
+    }
+
+    private String hmacSha256(String value, String signingKey) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            mac.init(new SecretKeySpec(signingKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
         } catch (NoSuchAlgorithmException | InvalidKeyException exception) {
             throw new IllegalStateException("Unable to process Offerwall HMAC signature", exception);

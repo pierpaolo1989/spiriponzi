@@ -46,6 +46,9 @@ public class AuthController {
 	@Value("${app.public-base-url:https://www.spiriponzi.cloud}")
 	private String publicBaseUrl = "";
 
+	@Value("${earnwall.callback-url:https://spiriponzi.cloud/earnwall/postback}")
+	private String earnwallCallbackUrl = "https://spiriponzi.cloud/earnwall/postback";
+
 	@Value("${app.google.enabled:false}")
 	private boolean googleEnabled;
 
@@ -228,6 +231,13 @@ public class AuthController {
 				publicBaseUrl.replaceAll("/+$", "") + "/callbacks/offerwall");
 		if (enabled) {
 			model.addAttribute("offerwallUrl", offerwallService.createSignedWallUrl(user.getId().toString()));
+		}
+		boolean earnwallEnabled = offerwallService.isEarnwallConfigured();
+		model.addAttribute("earnwallEnabled", earnwallEnabled);
+		model.addAttribute("earnwallCallbackUrl", earnwallCallbackUrl);
+		if (earnwallEnabled) {
+			model.addAttribute("earnwallUrl",
+					offerwallService.createEarnwallWallUrl(user.getId().toString()));
 		}
 		return "offerwall";
 	}

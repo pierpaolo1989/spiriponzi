@@ -65,6 +65,33 @@
 								<p>Offerwall.GG is not configured yet. Add its public and secret keys, enable "Require signature" on the placement, then set <code>OFFERWALL_REQUIRE_SIGNATURE=true</code>.</p>
 								<p class="mb-0">Configure the placement callback as an HTTP POST using form fields at <code th:text="${offerwallCallbackUrl}"></code>.</p>
 							</div>
+							<hr class="my-4">
+							<h2 class="h5 text-gray-800">EarnWall</h2>
+							<p class="mb-3">Complete EarnWall offers to earn points. Rewards are credited after EarnWall confirms a conversion.</p>
+							<div th:if="${earnwallEnabled}">
+								<iframe class="offerwall-frame"
+									title="EarnWall"
+									width="100%"
+									height="800"
+									loading="lazy"
+									referrerpolicy="strict-origin-when-cross-origin"
+									th:src="${earnwallUrl}"
+									allowfullscreen>
+								</iframe>
+								<p class="small text-muted mt-2 mb-0">
+									<a target="_blank" rel="noopener noreferrer"
+										th:href="${earnwallUrl}">
+										Open EarnWall in a new tab
+									</a>
+								</p>
+							</div>
+							<div class="alert alert-info mb-0" role="status" th:unless="${earnwallEnabled}">
+								<p>EarnWall is not configured yet. Set <code>EARNWALL_PLACEMENT_KEY</code> and <code>EARNWALL_SECRET_KEY</code> in the deployment.</p>
+								<p class="mb-0">In the EarnWall placement settings, set the postback URL to <code th:text="${earnwallCallbackUrl}"></code>. EarnWall sends a signed form POST to this endpoint.</p>
+							</div>
+							<p class="small text-muted mt-2 mb-0" th:if="${earnwallEnabled}">
+								Postback URL to configure in EarnWall: <code th:text="${earnwallCallbackUrl}"></code>
+							</p>
 						</div>
 						<div class="text-center my-4" aria-label="Advertisement">
 							<iframe title="Advertisement" data-aa="2462874" loading="lazy" width="720" height="150"

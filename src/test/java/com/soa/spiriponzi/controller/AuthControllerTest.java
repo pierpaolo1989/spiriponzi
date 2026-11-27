@@ -258,12 +258,19 @@ class AuthControllerTest {
         when(offerwallService.isConfigured()).thenReturn(true);
         when(offerwallService.createSignedWallUrl("10"))
                 .thenReturn("https://offerwall.gg/wall/public-key?userId=10&signature=signature");
+        when(offerwallService.isEarnwallConfigured()).thenReturn(true);
+        when(offerwallService.createEarnwallWallUrl("10"))
+                .thenReturn("https://earnwall.net/offerwall/placement-key/10");
         ReflectionTestUtils.setField(controller, "publicBaseUrl", "https://www.spiriponzi.cloud");
+        ReflectionTestUtils.setField(controller, "earnwallCallbackUrl", "https://spiriponzi.cloud/earnwall/postback");
         assertEquals("offerwall", controller.offerwall(model));
         assertEquals(true, model.get("offerwallEnabled"));
         assertEquals("https://offerwall.gg/wall/public-key?userId=10&signature=signature",
                 model.get("offerwallUrl"));
         assertEquals("https://www.spiriponzi.cloud/callbacks/offerwall", model.get("offerwallCallbackUrl"));
+        assertEquals(true, model.get("earnwallEnabled"));
+        assertEquals("https://earnwall.net/offerwall/placement-key/10", model.get("earnwallUrl"));
+        assertEquals("https://spiriponzi.cloud/earnwall/postback", model.get("earnwallCallbackUrl"));
         when(userService.getOrCreateReferralCode(10L)).thenReturn("REFERRAL123");
         assertEquals("profile", controller.profile(model));
         assertSame(user, model.get("user"));

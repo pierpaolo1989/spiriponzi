@@ -76,6 +76,7 @@ public class SecurityConfig {
                                 "/callbacks/theoremreach",
                                 "/callbacks/cpx",
                                 "/callbacks/offerwall",
+                                "/earnwall/postback",
                                 "/affiliate/click/**",
                                 "/auth/google/**", "/oauth2/**", "/login/oauth2/**",
                                 "/sw.js",
