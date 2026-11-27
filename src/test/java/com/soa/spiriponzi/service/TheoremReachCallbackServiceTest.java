@@ -130,6 +130,19 @@ class TheoremReachCallbackServiceTest {
     }
 
     @Test
+    void theoremReachServerTestCallbackIsAcknowledgedWithoutLookingUpTheTestUser() throws Exception {
+        service.process(signedPayload(
+                "user_id=12345&reward=25&currency={currency}&tx_id=test-tx"
+                        + "&debug={debug}&reversal={reversal}&tr_user_id=12345&app_id=26065"
+                        + "&tr_reward=25&status=1&tr_currency=0.01&screenout=2&profiler=2"
+                        + "&tr_tx_id=test-tx&ip=127.0.0.1&offer_id=campaign_test&tr_debug=true"));
+
+        verify(userRepository, never()).findWithLockById(12345L);
+        verify(claimRepository, never()).save(any(Claim.class));
+        verify(userStatsRepository, never()).save(any(UserStats.class));
+    }
+
+    @Test
     void invalidHashIsRejectedBeforeLookingUpTheUser() throws Exception {
         String payload = signedPayload("user_id=10&reward=15&currency=0.25&tx_id=tx-1");
         String invalidPayload = payload.substring(0, payload.length() - 1)

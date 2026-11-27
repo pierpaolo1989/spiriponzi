@@ -84,7 +84,7 @@ public class TheoremReachCallbackService {
         verifyHash(payload);
 
         Map<String, String> parameters = payload.parameters();
-        if ("true".equalsIgnoreCase(parameters.get("debug"))) {
+        if (isDebugCallback(parameters)) {
             return;
         }
 
@@ -286,6 +286,11 @@ public class TheoremReachCallbackService {
 
     private boolean isReversal(String reversal) {
         return "true".equalsIgnoreCase(reversal) || "1".equals(reversal);
+    }
+
+    private boolean isDebugCallback(Map<String, String> parameters) {
+        return "true".equalsIgnoreCase(parameters.get("debug"))
+                || "true".equalsIgnoreCase(parameters.get("tr_debug"));
     }
 
     private long parseUserId(String value) {
